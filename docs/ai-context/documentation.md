@@ -23,6 +23,8 @@ Toda funcionalidad relevante parte de una historia o especificación aprobada y 
 
 El Analista de Requisitos propone la división cuando se autorice su intervención; el agente principal revisa su coherencia y el responsable del proyecto aprueba el alcance. Cada tarea tendrá responsabilidad concreta, objetivo, alcance, dependencias relevantes y resultado verificable. Evitar tareas enormes y fragmentación por archivo, función o import.
 
+Las tareas técnicas no se asignan a Frontend. Frontend diseña e implementa la interfaz de forma autónoma por módulo o página, con las historias y el [producto](product.md) como contexto y contra datos simulados, según la [constitución](constitution.md#11-etapa-actual). Cada tarea de backend que sirva a una interfaz incluye definir el contrato a partir de los supuestos de Frontend, implementar endpoint y reglas, conectar la UI sustituyendo la capa de acceso simulada y la verificación integrada de los criterios. Ningún criterio de aceptación queda sin tarea responsable.
+
 ### Plantilla de historia o especificación
 
 ```markdown
@@ -253,8 +255,8 @@ Los seis perfiles nativos están en `.opencode/agents/`, sin modelo fijo y con p
 | --- | --- |
 | Arquitecto | Proponer decisiones técnicas, mantener coherencia estructural y participar en cambios importantes |
 | Analista de Requisitos | Proponer historias, criterios, atomización y dependencias dentro del alcance aprobado |
-| Frontend | Desarrollar interfaces y componentes, aplicar el sistema de diseño e integrar APIs |
-| Backend | Desarrollar endpoints, reglas de negocio, validaciones y comunicación con MongoDB |
+| Frontend | Diseñar e implementar interfaces y componentes de forma autónoma, sin tareas asignadas, aplicando el sistema de diseño; entrega los supuestos de contrato |
+| Backend | Desarrollar endpoints, reglas de negocio, validaciones y comunicación con MongoDB; definir contratos, conectar la UI y verificar la integración |
 | Base de Datos | Diseñar modelos, colecciones, relaciones, esquemas e índices; revisar cambios de datos |
 | Documentador | Registrar trabajo realizado, actualizar historial relevante y mantener documentación técnica sin inventar pruebas |
 
