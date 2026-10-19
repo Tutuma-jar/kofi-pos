@@ -1,0 +1,474 @@
+.page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0 24px;
+}
+.toolbar {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.toolbar h1 {
+  margin: 0 auto 0 0;
+  font-size: 30px;
+}
+.period {
+  display: flex;
+  padding: 3px;
+  margin: 0;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.period label {
+  position: relative;
+  border-radius: 5px;
+  min-width: 90px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.period input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.period span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  font-weight: 600;
+}
+.period label:has(:focus-visible) {
+  outline: 3px solid var(--action);
+  outline-offset: 4px;
+}
+.period label:hover {
+  background: var(--sidebar);
+  color: var(--ink);
+}
+.period .selected {
+  background: var(--selection);
+  color: var(--selection-text);
+}
+.period .selected:hover {
+  background: var(--selection);
+}
+.demoControl {
+  min-width: 0;
+}
+.demoControl select {
+  max-width: 215px;
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 10px;
+}
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.statusBar > div {
+  min-width: 0;
+}
+.clock {
+  margin-left: auto;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+.warning {
+  color: var(--ink);
+}
+.warning > div {
+  font-weight: 600;
+}
+.retry {
+  min-height: 44px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+.dataArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 16px;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.metric {
+  min-width: 0;
+  min-height: 104px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 17px 16px;
+  background: var(--surface);
+}
+.metric dt {
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.metric dd {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--action);
+  white-space: nowrap;
+}
+.metric .longNumber {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+.panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+.chart,
+.products {
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.panelHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.panelHeading h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.muted {
+  font-size: 13px;
+  color: var(--muted);
+}
+.products .panelHeading {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 10px;
+  min-height: 54px;
+}
+.viewToggle {
+  font-size: 13px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+.hourlyContent {
+  flex: 1;
+  min-height: 0;
+  margin-top: 12px;
+}
+.plot {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 24px;
+  height: 100%;
+  column-gap: 12px;
+  padding-right: 8px;
+}
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  position: relative;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 22px;
+}
+.yAxis span:first-child {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 12px;
+}
+.drawing {
+  position: relative;
+  margin-top: 24px;
+  color: var(--action);
+}
+.drawing svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.gridLines {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.gridLines span {
+  border-top: 1px solid var(--line);
+}
+.xAxis {
+  position: relative;
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.xAxis span {
+  position: absolute;
+  top: 7px;
+  transform: translateX(-50%);
+}
+.chartNote {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 18px;
+  margin: 12px 0 0;
+  flex-shrink: 0;
+}
+.hourValues {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(12, 18px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.hourValues > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hourValues dt {
+  color: var(--muted);
+}
+.hourValues dd {
+  margin: 0;
+}
+.productScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  padding: 0 2px 6px;
+}
+.productScroll:focus-visible {
+  outline-offset: 2px;
+}
+.productTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.productTable thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--muted);
+  z-index: 1;
+  font-weight: 400;
+  font-size: 13px;
+}
+.productTable th,
+.productTable td {
+  text-align: right;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.productTable th:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+.productTable tbody th {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.productTable td {
+  white-space: nowrap;
+  font-size: 14px;
+}
+.unitsColumn {
+  width: 124px;
+}
+.revenueColumn {
+  width: 164px;
+}
+.centralState {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 24px;
+}
+.centralState h2 {
+  font-size: 27px;
+  margin: 0;
+  max-width: 600px;
+}
+.centralState p {
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0;
+}
+.loading {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.skeletonCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  height: 104px;
+  flex-shrink: 0;
+}
+.skeletonCards > div,
+.skeletonBody > div {
+  border-radius: 10px;
+  background: var(--sidebar);
+  opacity: 0.55;
+}
+.skeletonBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: 16px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 1100px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .panels {
+    grid-template-columns: minmax(0, 1fr);
+    flex: none;
+  }
+  .chart {
+    min-height: 352px;
+  }
+  .products {
+    height: 400px;
+  }
+}
+@media (max-width: 560px) {
+  .toolbar h1 {
+    width: 100%;
+  }
+  .demoControl {
+    flex: 1;
+  }
+  .period label {
+    min-width: 70px;
+  }
+  .period span {
+    padding: 0 10px;
+  }
+  .statusBar {
+    flex-wrap: wrap;
+  }
+  .clock {
+    margin-left: 0;
+  }
+  .metric {
+    padding: 14px 10px;
+  }
+  .metric dd {
+    font-size: 22px;
+  }
+  .metric .longNumber {
+    font-size: 14px;
+  }
+  .hourValues {
+    column-gap: 12px;
+    font-size: 12px;
+  }
+  .chart,
+  .products {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .unitsColumn {
+    width: 75px;
+  }
+  .revenueColumn {
+    width: 140px;
+  }
+}
+@media (max-height: 649px) {
+  .panels {
+    flex: none;
+  }
+  .chart {
+    min-height: 352px;
+  }
+  .products {
+    height: 400px;
+  }
+}
