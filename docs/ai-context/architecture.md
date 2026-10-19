@@ -99,6 +99,11 @@ kofi-pos/
 │           ├── LICENSE                  # MIT, original
 │           ├── NOTICE-KOFI.md            # Alcance local de instalación
 │           └── UPSTREAM.json            # Revisión y hashes originales
+├── CLAUDE.md                           # Importa AGENTS.md; equivalencias Claude Code
+├── .claude/
+│   ├── settings.json                   # Permisos compartidos; sin hooks ni allow
+│   ├── agents/                         # Seis puentes a .opencode/agents/
+│   └── skills/                         # Puentes a .opencode/skills/ y controles
 └── docs/
     ├── ai-context/
     │   ├── product.md
@@ -142,13 +147,24 @@ Los [cuatro controles](documentation.md#9-cuatro-controles-y-skills) mantienen t
 - `.opencode/task.local.json` y `.opencode/.cache/kofi-check/` contienen alcance/selección y fingerprints locales ignorados, no estados oficiales ni evidencia permanente. Solo se inspeccionan contenidos Git pendientes y entradas declaradas; se contempla el repositorio sin commits. La base no se reinicia automáticamente. Detalles operativos y limitaciones en [README](../../.opencode/README.md).
 - El script solo registra comprobaciones conocidas de configuración/documentación y pruebas de estos controles con el runner integrado de Node. El arranque técnico de la sección 9 instala un subconjunto de las herramientas elegidas y dispone de scripts externos al control rápido; este sigue sin ejecutar pruebas de aplicación. Las pruebas funcionales futuras requieren selección y ejecución autorizadas antes de completar DoD.
 
+### Compatibilidad con Claude Code
+
+- Autorización: solicitud del responsable del 2026-10-19, limitada a compatibilidad de herramientas. OpenCode sigue siendo la configuración de referencia y no se modifica; no añade funcionalidades, dependencias, plugins, hooks, cambios de Git ni estados del tracker.
+- `CLAUDE.md` importa `AGENTS.md` (si existe `CLAUDE.md`, Claude Code no lee `AGENTS.md` por sí mismo) y solo traduce herramientas.
+- Puentes sin copia: `.claude/agents/<perfil>.md` y `.claude/skills/<skill>/SKILL.md` remiten a sus originales de `.opencode/`, donde permanecen instrucciones, recursos y licencias. No se usan symlinks ni junctions: `core.symlinks` está desactivado en Windows y Git no versiona junctions. Al cambiar el nombre o la descripción de un original, actualizar su puente.
+- Perfiles: `model: inherit`, `permissionMode: default` y herramientas explícitas (lectura y búsqueda; Edit/Write en los que escriben; Skill solo en Frontend). Ninguno recibe shell, `Agent`, MCP ni web, así que no delegan; el principal ejecuta `git status`, `git diff` y `kofi-check`.
+- `/kofi-start`, `/kofi-verify` e `/impeccable` son skills puente. Las de control solo se invocan explícitamente, ejecutan el mismo comando Node y no preaprueban comandos. Taste Skill no puede ser invocada por el modelo.
+- `.claude/settings.json`: `ask` para cualquier `Agent` y para editar la constitución; `deny` para leer `.env*` y `.git/`, también en el principal. Shell y directorios externos conservan el comportamiento nativo de Claude Code: pide aprobación salvo en comandos de solo lectura.
+- Limitaciones sin equivalente nativo: Claude Code no tiene límites de ruta de escritura ni listas de skills por subagente (quedan en el prompt). Las ediciones del subagente piden aprobación solo si la sesión principal está en modo Manual/default, porque en acceptEdits, auto o bypass el subagente hereda ese modo. Tampoco existe «denegar todo excepto», por lo que los agentes integrados piden aprobación pero no quedan prohibidos. Un hook `PreToolUse` por subagente podría imponer rutas, pero requiere aprobación separada.
+
 ## 4. Responsabilidades y límites
 
 | Ubicación | Responsabilidad |
 | --- | --- |
 | `AGENTS.md` | Navegación y aplicación selectiva del contexto |
 | `PRODUCT.md`, `DESIGN.md` | Puentes sin contenido normativo duplicado; remiten al AI Context |
-| `.opencode/skills/impeccable/` | Skill externa local; no configuración de Claude Code ni subagentes nuevos |
+| `.opencode/skills/impeccable/` | Skill externa local; fuente única, también para el puente de Claude Code; sin subagentes nuevos |
+| `CLAUDE.md`, `.claude/` | Compatibilidad con Claude Code mediante puentes a `AGENTS.md` y `.opencode/`; sin reglas propias |
 | `.opencode/commands/impeccable.md` | Invocación en la sesión actual; sin modelo fijo ni delegación automática |
 | `design-lab/` | Prototipos visuales independientes con datos ficticios, conservando cada serie; no comparte lógica con la futura aplicación |
 | `frontend/` | Presentación, interacción y consumo de la API; sin acceso directo a MongoDB |
@@ -204,6 +220,7 @@ La comunicación prevista es **frontend → API backend → MongoDB**. MongoDB e
 
 - Agrupar por responsabilidad funcional y mantener reconocible la relación con las especificaciones del producto.
 - Ubicar interfaces y lógica de presentación en frontend; reglas de negocio y persistencia en backend.
+- Reparto de trabajo: Frontend diseña e implementa la interfaz de forma autónoma, sin tareas, contra datos simulados y con supuestos en `frontend/src/<módulo>/api/contract.provisional.ts`. Las tareas de backend definen el contrato, implementan endpoints y reglas, sustituyen la capa de acceso simulada del módulo por la API real (Backend solo edita `frontend/src/<módulo>/api/`) y verifican la integración. Los ajustes de UI que exija el contrato vuelven a Frontend. La lógica de cliente que depende del transporte o de la sesión vive en `frontend/src/<módulo>/api/` (presencia, identidad de pestaña, suscripción SSE con relectura, referencia opaca y la copia verificada de la regla de importes de TASK-027, que se recalcula con autoridad en el backend) y Frontend entrega su versión simulada. El cliente HTTP común con la autorización de pestaña y el manejo del 401 vive en `frontend/src/auth/api/` y lo importan los demás módulos.
 - No convertir cada módulo en un servicio independiente ni exigir una carpeta por capa.
 - Introducir controladores, servicios, rutas y modelos según la necesidad real; sus nombres siguen [conventions.md](conventions.md).
 - Extraer elementos compartidos cuando exista reutilización concreta, no para anticipar funcionalidades.
@@ -247,7 +264,7 @@ Ese hito fue exclusivamente documental. Posteriormente se autorizó ejecutar sol
 | Pruebas | Vitest, Testing Library, Supertest y Playwright; integración futura con MongoDB real aislado y transacciones. El arranque instala y comprueba solo humo React/Express; no Playwright, MongoDB ni pruebas funcionales del POS. |
 | Calidad | ESLint y Prettier; no sustituyen comprobaciones funcionales. |
 
-En `frontend/src/` y `backend/src/` existe únicamente el arranque técnico. Los módulos `auth`, `menu`, `sales` y `dashboard` siguen previstos y no se crean anticipadamente. Persistencia y modelos futuros permanecen dentro del backend. Solo se extraen compartidos ante reutilización real; no se introduce un paquete compartido, repositorio genérico o carpeta obligatoria por capa. No se incorporan Next.js, Redux, microservicios, Redis, colas ni WebSockets inicialmente.
+En `frontend/src/` y `backend/src/` existe únicamente el arranque técnico. En `frontend/src/` se autorizan los módulos `auth`, `dashboard`, `menu` y `sales` y la carpeta `shared/` para tokens, componentes base y estructura común, contra datos simulados y contratos provisionales, por la [excepción de la constitución](constitution.md#11-etapa-actual) del 2026-10-19, que también autoriza React Router y dependencias de interfaz justificadas; en el backend siguen previstos y no se crean anticipadamente. Persistencia y modelos futuros permanecen dentro del backend. Solo se extraen compartidos ante reutilización real; no se introduce un paquete compartido, repositorio genérico o carpeta obligatoria por capa. No se incorporan Next.js, Redux, microservicios, Redis, colas ni WebSockets inicialmente.
 
 ### API, dinero y tiempo
 
@@ -312,7 +329,7 @@ La aprobación de herramientas no configura comandos de aplicación, hooks o CI.
 | Acceso integrado | Validación de identidad de pestaña y contratos/seguridad descritos en la sección 7; no relajar US-001 silenciosamente. |
 | Catálogo e imágenes | DTO/rutas/errores, versión y transacciones concretos, provisión de replica set, flujo seguro de archivos y unidades exactas de los límites de entrada. Las reglas de estado inicial, campos y formatos ya están decididas en las US. |
 | Revisión y registro | Protección y carreras de confirmación, límites técnicos numéricos/tamaño y conciliación terminal, conservación y limpieza de referencias opacas. No está pendiente volver a decidir la fijación del total o permitir cambios después del pago. |
-| Dashboard | Contratos de lectura/SSE, recuperación de avisos, frecuencia de conciliación y entorno/condiciones reproducibles para el objetivo de latencia aprobado. |
+| Dashboard | Contrato de lectura/SSE aprobado en [US-003](../specs/us-003-consultar-resumen-ventas.md#contrato-de-lectura-y-actualización). Pendientes: autorización del stream, frecuencia de conciliación y latidos, agrupación de avisos, envoltorio de error común y entorno/condiciones reproducibles para el objetivo de latencia aprobado. |
 | Uso operativo | Contratación/configuración de infraestructura, durabilidad, copias y restauración comprobada; no asumir capacidades por elegir un proveedor. |
 | Integración/CI | Primera ejecución remota del workflow inicial de la sección 10 y protección de ramas mediante autorización posterior. Ampliar las pruebas conforme exista comportamiento funcional, sin interpretar el humo técnico como criterios de las US. |
 

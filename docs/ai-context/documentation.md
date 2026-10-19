@@ -23,6 +23,8 @@ Toda funcionalidad relevante parte de una historia o especificación aprobada y 
 
 El Analista de Requisitos propone la división cuando se autorice su intervención; el agente principal revisa su coherencia y el responsable del proyecto aprueba el alcance. Cada tarea tendrá responsabilidad concreta, objetivo, alcance, dependencias relevantes y resultado verificable. Evitar tareas enormes y fragmentación por archivo, función o import.
 
+Las tareas técnicas no se asignan a Frontend. Frontend diseña e implementa la interfaz de forma autónoma por módulo o página, con las historias y el [producto](product.md) como contexto y contra datos simulados, según la [constitución](constitution.md#11-etapa-actual). Cada tarea de backend que sirva a una interfaz incluye definir el contrato a partir de los supuestos de Frontend, implementar endpoint y reglas, conectar la UI sustituyendo la capa de acceso simulada y la verificación integrada de los criterios. Ningún criterio de aceptación queda sin tarea responsable: los criterios de presentación (P) o de comportamiento de cliente construido por Frontend (C) se asignan a la tarea backend que integra la interfaz. La lógica de cliente que Backend sustituirá (presencia, identidad de pestaña, suscripciones, referencias opacas, copias verificadas de reglas de importes) vive en `frontend/src/<módulo>/api/`.
+
 ### Plantilla de historia o especificación
 
 ```markdown
@@ -107,6 +109,23 @@ Vincular historia y tarea con archivos o commits cuando existan y registrar:
 
 Registrar estos datos una vez en la especificación o registro de ejecución y enlazarlos; no crear matrices separadas ni copiar logs o resultados al tracker. Para CI, enlazar la ejecución correspondiente cuando exista.
 
+### Historia: entrega de interfaz
+
+Una historia con interfaz se completa cuando cada página afectada tiene su registro de entrega de interfaz con el cierre visual mínimo y los criterios P y C quedaron acreditados en la verificación integrada de sus tareas responsables. El registro lo redacta el principal a partir de la entrega de Frontend, en la especificación principal de la página (Acceso en US-001, Dashboard en US-003, Administración del menú en US-006 y Gestión de ventas en US-010), y las demás historias enlazan a él. No es un estado ni una tarea:
+
+```markdown
+## Interfaz — <módulo/página>: registro de entrega
+- Historias: US-NNN [enlaces]
+- Rama y commit: [...]
+- Pantallas y estados cubiertos: [...]
+- Supuestos de contrato: `frontend/src/<módulo>/api/contract.provisional.ts` [resumen o «contrato aprobado»]
+- Cierre visual: Impeccable → Emil → React Best Practices [resultado]
+- Comprobaciones ejecutadas: [...]
+- Pendientes y ajustes conocidos: [...]
+```
+
+Las pruebas de componentes de Frontend se registran en la entrega, pero no acreditan criterios de aceptación ni DoD.
+
 ## 4. Registro de tareas completadas
 
 Añadir una sección breve a la especificación. Usar un archivo en `docs/progress/completed/` solo cuando el detalle lo justifique, con nombre `task-NNN-titulo-breve.md`, y enlazarlo desde la especificación. No duplicar el registro ni añadir estados de tarea allí.
@@ -175,7 +194,7 @@ Registrar únicamente historias y tareas aprobadas, con enlaces a sus definicion
 - Mantener la casilla sin marcar mientras esté en progreso o bloqueada.
 - Usar `[x]` y `Completado` solo cuando se cumpla la DoD correspondiente.
 - Cada historia muestra ID, título, enlace a especificación y todas sus tareas con ID y estado; enlazar una tarea separada si excepcionalmente no está definida en esa especificación.
-- Actualizar después de comprobar hitos coherentes, no tras cada edición. No eliminar tareas pendientes sin autorización ni inventar avances.
+- Actualizar después de comprobar hitos coherentes, no tras cada edición. No eliminar tareas pendientes sin autorización ni inventar avances. Una tarea retirada con autorización del responsable conserva su ID, que no se reutiliza: sale de la lista de su historia y se anota en «Antecedentes retirados del trabajo vigente» con fecha, autorización y tarea que asume su cobertura; en la especificación, su definición se sustituye por una línea «TASK-NNN — Retirada el AAAA-MM-DD; cobertura en TASK-MMM». Reasignar la responsabilidad de una tarea sin cambiar su objetivo ni sus criterios conserva el ID. Una tarea backend que llega a la conexión sin interfaz usa `Bloqueado: falta la entrega de interfaz de <módulo>`, y ante un ajuste devuelto, `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Registrar una verificación en su fuente y enlazarla si hace falta; no copiar sus resultados al tracker.
 - No crear un estado paralelo en especificaciones, registros de ejecución o informes permanentes.
 
@@ -247,14 +266,14 @@ Distinguir fallo del cambio, previo/ajeno y problema de entorno, sin atribuirlo 
 
 ## 8. Subagentes
 
-Los seis perfiles nativos están en `.opencode/agents/`, sin modelo fijo y con permisos acotados. Su disponibilidad no autoriza implementar aplicación durante la etapa documental:
+Los seis perfiles nativos están en `.opencode/agents/`, sin modelo fijo y con permisos acotados. Su disponibilidad no autoriza implementar aplicación; solo lo hacen las excepciones de la [constitución](constitution.md#11-etapa-actual), como la del frontend contra datos simulados:
 
 | Perfil | Responsabilidad |
 | --- | --- |
 | Arquitecto | Proponer decisiones técnicas, mantener coherencia estructural y participar en cambios importantes |
 | Analista de Requisitos | Proponer historias, criterios, atomización y dependencias dentro del alcance aprobado |
-| Frontend | Desarrollar interfaces y componentes, aplicar el sistema de diseño e integrar APIs |
-| Backend | Desarrollar endpoints, reglas de negocio, validaciones y comunicación con MongoDB |
+| Frontend | Diseñar e implementar interfaces y componentes de forma autónoma, sin tareas asignadas, aplicando el sistema de diseño; entrega los supuestos de contrato |
+| Backend | Desarrollar endpoints, reglas de negocio, validaciones y comunicación con MongoDB; definir contratos, conectar la UI y verificar la integración |
 | Base de Datos | Diseñar modelos, colecciones, relaciones, esquemas e índices; revisar cambios de datos |
 | Documentador | Registrar trabajo realizado, actualizar historial relevante y mantener documentación técnica sin inventar pruebas |
 

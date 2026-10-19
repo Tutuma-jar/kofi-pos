@@ -53,23 +53,27 @@ Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas e
 
 El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técnica mínima y su registro sin implementación: décimas enteras, validación de rango en multiplicaciones/sumas y límites técnicos de tamaño, sin máximos comerciales arbitrarios. CA-07 y sus verificaciones se incorporan a TASK-027; no se asignan valores técnicos todavía no concretados.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-027 se reescribe como tarea backend de reglas de importes y conserva su ID: la regla de cálculo vive en el backend y una copia verificada con las mismas pruebas, mantenida por Backend, vive en `frontend/src/sales/api/` (opción A); TASK-028 y TASK-030 recalculan con autoridad. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-La siguiente tarea de `requirements-analyst` está aprobada para registro documental. TASK-027 sustituye la etiqueta local P11-A. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
+La siguiente tarea de `requirements-analyst` está aprobada para registro documental. TASK-027 sustituyó la etiqueta local P11-A y desde el 2026-10-19 es de backend. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
 
 ### Condiciones previas
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - La representación en décimas enteras ya está elegida. Concretar el rango entero exacto y límites de cantidades, precios, multiplicaciones, sumas y tamaño de solicitud/documento; justificar valores y rechazos, sin máximos comerciales arbitrarios. La validación autoritativa al registrar corresponde a US-013.
 - Acordar el contrato de selección de US-010 y su intercambio con la revisión de US-012. No se exige implementar US-012 para construir los cálculos contra un contrato acordado; la comprobación conjunta de cambios concurrentes sí requiere su integración.
 - Aplican las condiciones de cierre visual de [US-010](us-010-consultar-seleccionar-productos-venta.md#condiciones-previas-compartidas). Las verificaciones siguientes son futuras, no ejecutadas; no hay pruebas del POS configuradas.
 
-### TASK-027 — Ajustar cantidades y presentar el detalle calculado
+### TASK-027 — Calcular los importes de la venta en curso e integrar su detalle
 
 - Historia relacionada: [US-011](us-011-ajustar-revisar-venta-en-curso.md).
-- Responsabilidad: frontend; opera sobre la selección temporal. La validación del registro no se delega al navegador.
-- Descripción y objetivo: permitir ajustar la selección y conocer sus importes antes del cobro.
-- Alcance y exclusiones: aumentar, disminuir y escribir cantidades válidas, eliminación explícita, subtotales, total, detalle y selección vacía. Sin descuentos, recargos, impuestos adicionales ni escritura del catálogo o ventas.
-- Resultado esperado: detalle e importes coherentes con cada ajuste, sin cambios silenciosos por modificaciones del catálogo.
-- Criterios aplicables: CA-01 a CA-07; el tratamiento concurrente de CA-06 se integra con US-012 y el rechazo de registro de CA-07 con US-013.
-- Verificación prevista: unitarias de cantidades válidas, cero, negativos, decimales y límites acordados; cálculos con resultados conocidos y precios de un decimal. Recorrido de ajuste, eliminación y eliminación del último producto para verificar detalle, mensaje exacto, BOB 0.0 y registro deshabilitado. Integración para comprobar que no se modifica catálogo ni ventas anteriores y que los cambios del catálogo no se aplican silenciosamente.
-- Dependencias: TASK-026 de US-010, contratos y límites de las condiciones previas; TASK-028/TASK-029 de US-012 para la comprobación conjunta de revisión, no para construir las operaciones numéricas.
+- Responsabilidad: backend (reglas de importes). La validación del registro no se delega al navegador.
+- Descripción y objetivo: definir los límites técnicos y el contrato de cantidades e importes, implementar una única regla de cálculo en décimas de BOB, reutilizada por TASK-028 y TASK-030, y proveerla a la interfaz como copia verificada en `frontend/src/sales/api/`, para que subtotales y total sean exactos y se recalculen con cada ajuste.
+- Alcance y exclusiones: justificar y aprobar los valores de CA-07; sustituir el cálculo simulado de Frontend por la copia verificada con las mismas pruebas que la regla del backend; verificación unitaria e integrada. La entrada de cantidades, la eliminación y la selección vacía son interfaz de Frontend. Sin descuentos, recargos, impuestos adicionales ni escritura del catálogo o ventas.
+- Resultado esperado: el detalle integrado coincide con resultados de referencia en cada ajuste, rechaza lo que está fuera de rango y no aplica silenciosamente cambios del catálogo.
+- Criterios aplicables: CA-01 y CA-02 (C), CA-03, CA-04 (P), CA-05 (P), CA-06 (con TASK-028) y CA-07; el rechazo de registro de CA-07 se integra con US-013.
+- Verificación prevista: unitarias de la regla y de su copia con cantidades válidas, cero, negativos, decimales y límites acordados; cálculos con resultados conocidos y precios de un decimal. Recorrido integrado de ajuste, eliminación y eliminación del último producto para verificar detalle, mensaje exacto, BOB 0.0 y registro deshabilitado. Integración para comprobar que no se modifica catálogo ni ventas anteriores y que los cambios del catálogo no se aplican silenciosamente.
+- Dependencias: contratos y límites de las condiciones previas; TASK-024 de US-010; registro de entrega de la venta en curso; TASK-028 de US-012 para CA-06, no para construir las operaciones numéricas.
+

@@ -34,7 +34,7 @@ Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el a
 
 ## Dependencias relevantes
 
-- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard.
+- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard. El gráfico consume la sección `hourlySales`, de 24 horas, del [contrato de lectura y actualización](us-003-consultar-resumen-ventas.md#contrato-de-lectura-y-actualización).
 - [US-013](us-013-registrar-venta-pagada.md): fecha/hora de registro del servidor y venta íntegra. Aplican latencia, dimensiones y carga/error comunes de US-003. Esta historia no introduce pedidos independientes ni estados operativos.
 
 ## Aprobación
@@ -47,28 +47,23 @@ La autorización documental del menú del 2026-10-18 permite adecuar la referenc
 
 Posteriormente, el 2026-10-18, el responsable respondió «ok apruebo las tareas» a las ocho tareas propuestas del Dashboard. Se aprueban TASK-008 a TASK-015 para registro documental; esta historia define TASK-014 y TASK-015. No se cambian criterios ni se autoriza iniciar implementación.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-014 se amplía con la verificación integrada del gráfico; TASK-015 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-014 y TASK-015 sustituyen respectivamente las etiquetas locales HOR-BE y HOR-FE. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación. Aplican las [condiciones previas compartidas de US-003](us-003-consultar-resumen-ventas.md#condiciones-previas-compartidas).
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-014 sustituyó la etiqueta local HOR-BE; la de HOR-FE se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación. Aplican las [condiciones previas compartidas de US-003](us-003-consultar-resumen-ventas.md#condiciones-previas-compartidas), incluida la integración común.
 
-### TASK-014 — Obtener la cantidad de ventas por hora
+### TASK-014 — Obtener e integrar la cantidad de ventas por hora
 
 - Historia relacionada: [US-005](us-005-identificar-horas-mas-ventas.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: obtener la distribución horaria de ventas registradas para el período seleccionado.
-- Alcance y exclusiones: para hoy, contar ventas por hora en Bolivia; para este mes, sumar las ventas de la misma franja horaria de todos sus días. Contar cada venta una vez, independientemente del método y unidades. Excluir promedios, ingresos, series por días y ventas en curso.
+- Alcance y exclusiones: para hoy, contar ventas por hora en Bolivia; para este mes, sumar las ventas de la misma franja horaria de todos sus días. Contar cada venta una vez, independientemente del método y unidades. Excluir promedios, ingresos, series por días y ventas en curso. Aporta la sección `hourlySales` a la lectura común y verifica el gráfico integrado: revisión manual de líneas y ejes y contraste de los puntos con datos conocidos.
 - Resultado esperado: cantidades horarias coincidentes con las ventas registradas del período, sin promediar el mes ni contar productos como ventas.
-- Criterios aplicables: CA-02 a CA-04 y datos para CA-01.
+- Criterios aplicables: CA-01 (P), CA-02 a CA-04 y CA-05 (reutiliza la evidencia de TASK-008 y TASK-010).
 - Verificación prevista: contrastar cálculos e integración con límites horarios y de período, varios días del mes en la misma franja y ventas con distintos métodos y cantidades.
-- Dependencias: definición de períodos de TASK-008 y contratos de US-003; fecha/hora y datos del registro de [US-013](us-013-registrar-venta-pagada.md). No depende de TASK-012 ni de tareas frontend.
+- Dependencias: definición de períodos de TASK-008 y contrato de US-003; fecha/hora y datos del registro de [US-013](us-013-registrar-venta-pagada.md) (TASK-030); registro de entrega del gráfico. No depende de TASK-012.
 
-### TASK-015 — Presentar e integrar el gráfico horario
+### Tareas retiradas
 
-- Historia relacionada: [US-005](us-005-identificar-horas-mas-ventas.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: representar de forma observable la distribución horaria sin alterar su significado.
-- Alcance y exclusiones: gráfico de líneas con horas en el eje horizontal y cantidad de ventas en el vertical; consumir período y actualización comunes e integrarse sin scroll general. Reutilizar el mensaje del período vacío. Excluir biblioteca impuesta, cálculos alternativos, ingresos y comparativas.
-- Resultado esperado: líneas, ejes y puntos coherentes con el período, actualización sin recarga entre sesiones e integración en una pantalla con los demás bloques.
-- Criterios aplicables: CA-01, representación de CA-02 a CA-04 y CA-05.
-- Verificación prevista: inspeccionar líneas y ejes y contrastar puntos con datos conocidos de hoy y del mes; reutilizar el recorrido común de actualización entre sesiones, ausencia de ventas y composición del Dashboard de US-003.
-- Dependencias: TASK-014 de esta historia; TASK-009 y TASK-011 de US-003; dimensiones acordadas para verificar la composición.
+- TASK-015 — Presentar e integrar el gráfico horario — Retirada el 2026-10-19; cobertura en TASK-014. El gráfico lo implementa Frontend sin tareas.

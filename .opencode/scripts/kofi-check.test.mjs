@@ -349,10 +349,14 @@ test('Git de implementadores: origin actualizado, mutaciones con confirmación y
     }
     assert.equal(effect('git fetch origin'), 'allow');
     assert.equal(effect('git rev-parse --verify origin/develop'), 'allow');
-    assert.equal(effect('git switch --no-track --create feat/task-001-example origin/develop'), 'ask');
-    assert.equal(effect('git switch feat/task-001-example'), 'ask');
+    const branch = role === 'frontend' ? 'feat/ui-menu-example' : 'feat/task-001-example';
+    const foreign = role === 'frontend' ? 'feat/task-001-example' : 'feat/ui-menu-example';
+    assert.equal(effect(`git switch --no-track --create ${branch} origin/develop`), 'ask');
+    assert.equal(effect(`git switch ${branch}`), 'ask');
+    assert.equal(effect(`git switch --no-track --create ${foreign} origin/develop`), 'deny');
     assert.equal(effect(`git add -- ${role}/src/example.ts`), 'ask');
     assert.equal(effect('git commit -m "feat: implement approved task" -m "Refs: TASK-001 (US-001)"'), 'ask');
+    if (role === 'backend') assert.equal(effect('git add -- frontend/src/menu/api/client.ts'), 'ask');
     const other = role === 'frontend' ? 'backend' : 'frontend';
     for (const command of ['git fetch origin --prune',
       'git switch --no-track --create feat/task-001-example develop',

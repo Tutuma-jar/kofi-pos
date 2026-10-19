@@ -46,47 +46,33 @@ El responsable respondió «si apruebo todo» en la conversación del 2026-10-18
 
 Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas estas nueve tareas para asignarles IDs y registrarlas como pendientes, sin iniciar implementación?». Queda aprobado su registro documental como TASK-024 a TASK-032 en US-010 a US-013. La aprobación no resuelve las decisiones pendientes de revisión/cobro, ajustes posteriores o comprobación de registros inciertos tras salida ni autoriza implementar.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-024 se amplía con la conexión en `frontend/src/sales/api/` y la verificación integrada del catálogo y de la selección; TASK-025 y TASK-026 se retiran porque su interfaz y la selección en memoria las implementa Frontend. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-024, TASK-025 y TASK-026 sustituyen respectivamente las etiquetas locales P10-A, P10-B y P10-C. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-024 sustituyó la etiqueta local P10-A; TASK-025 (P10-B) y TASK-026 (P10-C) se retiraron el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
 
 ### Condiciones previas compartidas
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Concretar contratos de catálogo/selección sobre Context/reducer y estado en memoria por encima de la navegación, elegidos en la [base técnica](../ai-context/architecture.md#7-base-técnica-mínima-aprobada), sin persistencia ni recuperación de borradores. Coordinar límites numéricos con US-011 y descarte de revisión con US-012; la referencia opaca enviada de US-013 no conserva selección.
 - Disponer del catálogo y acceso protegido de US-001/US-002. Las tareas de Administración del menú proveen sus datos; este registro no las recrea ni autoriza tareas fundacionales.
 - Las dependencias distinguen construcción e integración: se pueden desarrollar las partes contra contratos aprobados, sin exigir una pantalla finalizada para construir la otra parte.
-- Frontend seguirá el [sistema de diseño](../ai-context/design-system.md): Impeccable → Emil → React Best Practices cuando corresponda código React. El cierre se coordina sobre la página integrada de Gestión de ventas, sin repetir revisiones por tarea ni sustituir verificaciones funcionales. Esta condición aplica también a las tareas frontend de US-011 a US-013.
+- Frontend construye la interfaz de Gestión de ventas sin tareas y sigue el [sistema de diseño](../ai-context/design-system.md): Impeccable → Emil → React Best Practices sobre la página, sin sustituir verificaciones funcionales. La selección temporal (Context/reducer en memoria) es comportamiento de cliente (C) de Frontend; la lógica que dependa de transporte o sesión vive en `frontend/src/sales/api/`. Esta condición aplica también a US-011 a US-013.
 - Las verificaciones de las tareas siguientes son futuras, no ejecutadas; el principal concretará comandos y casos según el procedimiento documental de testing. No hay pruebas del POS configuradas.
 
-### TASK-024 — Proveer el catálogo para seleccionar productos
+### TASK-024 — Proveer e integrar el catálogo para vender
 
 - Historia relacionada: [US-010](us-010-consultar-seleccionar-productos-venta.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: proporcionar la consulta autorizada por categoría y los datos para elegir productos activos.
-- Alcance y exclusiones: identidad estable, categoría, nombre, precio, descripción e imagen disponible; sin administrar catálogo, guardar selecciones ni registrar ventas. Reutilizar los datos de Administración del menú, sin duplicar su mantenimiento.
-- Resultado esperado: el frontend obtiene los productos seleccionables y sus datos sin ofrecer inactivos para nuevas selecciones.
-- Criterios aplicables: CA-01 y provisión de datos de CA-02.
+- Alcance y exclusiones: identidad estable, categoría, nombre, precio, descripción e imagen disponible; sin administrar catálogo, guardar selecciones ni registrar ventas. Reutilizar los datos de Administración del menú, sin duplicar su mantenimiento. Conecta el catálogo en `frontend/src/sales/api/` y verifica en navegador real la selección construida por Frontend: selección repetida y distinta, navegación entre módulos, dos pestañas, recarga, cierre de pestaña, cierre de sesión y aviso cuando el navegador lo permita. No implementa la selección.
+- Resultado esperado: el frontend obtiene los productos seleccionables y sus datos sin ofrecer inactivos para nuevas selecciones. Catálogo integrado y selección conservada o descartada según los criterios, sin registrar ventas ni ingresos.
+- Criterios aplicables: CA-01, CA-02 (P) y CA-03 a CA-05 (C). La ausencia de ventas por seleccionar reutiliza la evidencia de US-013 CA-06 (TASK-030).
 - Verificación prevista: integración con categorías, productos activos e inactivos y productos con y sin imagen; contrastar datos y protección de acceso.
-- Dependencias: contrato de consulta, protección de US-001 y catálogo de US-006, US-008 y US-009. No depende de la construcción de TASK-025 ni TASK-026.
+- Dependencias: contrato de consulta, protección de US-001 (TASK-003 y TASK-005) y TASK-006 de US-002 para el descarte por salida; catálogo de US-006, US-008 y US-009 (TASK-016, TASK-020 y TASK-022); registro de entrega de interfaz de Gestión de ventas.
 
-### TASK-025 — Presentar el catálogo para vender
+### Tareas retiradas
 
-- Historia relacionada: [US-010](us-010-consultar-seleccionar-productos-venta.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: permitir consultar por categoría y elegir productos con la información aprobada.
-- Alcance y exclusiones: nombre, precio BOB con un decimal, imagen o marcador neutro y acceso a descripción. Sin editar catálogo ni consultar detalle histórico.
-- Resultado esperado: catálogo navegable conectado a la selección de la pestaña.
-- Criterios aplicables: CA-01, CA-02 e interacción de selección de CA-03.
-- Verificación prevista: recorrido por categorías, productos con y sin imagen, consulta de descripción y selección; comprobar que no se ofrecen inactivos.
-- Dependencias: contratos de TASK-024 y TASK-026; integración final con ambas tareas. TASK-026 no necesita esta presentación para construir su comportamiento.
-
-### TASK-026 — Mantener la selección temporal independiente por pestaña
-
-- Historia relacionada: [US-010](us-010-consultar-seleccionar-productos-venta.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: agregar productos y conservar la selección únicamente durante el recorrido permitido de cada pestaña autenticada.
-- Alcance y exclusiones: varios productos, incremento al repetir selección, conservación entre módulos, independencia por pestaña, descarte y aviso cuando el navegador lo permita. Sin persistencia, recuperación ni sincronización de borradores.
-- Resultado esperado: selección temporal disponible para US-011, sin registrar ventas ni ingresos.
-- Criterios aplicables: CA-03 a CA-05.
-- Verificación prevista: selección repetida y de productos distintos, navegación entre módulos y dos pestañas autenticadas independientemente; navegador real para recarga, cierre de pestaña y cierre de sesión. Comprobar descarte, aviso cuando sea posible y ausencia de recuperación o registro por seleccionar. Contrastar métricas cuando esté disponible el Dashboard.
-- Dependencias: US-001/US-002, contrato de catálogo de TASK-024, mecanismo temporal y límites numéricos acordados con US-011. La comprobación conjunta de métricas requiere el Dashboard, no su construcción inicial.
+- TASK-025 — Presentar el catálogo para vender — Retirada el 2026-10-19; cobertura en TASK-024. La interfaz la implementa Frontend sin tareas.
+- TASK-026 — Mantener la selección temporal independiente por pestaña — Retirada el 2026-10-19; la implementa Frontend sin tareas y su verificación (CA-03 a CA-05) corresponde a TASK-024.

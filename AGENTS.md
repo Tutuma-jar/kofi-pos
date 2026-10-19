@@ -29,7 +29,7 @@ El cierre visual de cada página diseñada con Impeccable se rige por la [revisi
 
 Los seis perfiles nativos de OpenCode V2 y los cuatro controles están descritos en [.opencode/README.md](.opencode/README.md). El principal delega únicamente lo necesario y autorizado, con contexto y entregables acotados; los hijos no delegan. Crear los perfiles no autoriza implementar la aplicación en la etapa actual.
 
-Frontend y Backend siguen el [ciclo Git por tarea](docs/ai-context/conventions.md#ciclo-git-de-frontend-y-backend): rama nueva desde `origin/develop` recién obtenido por fetch y commit local dentro del encargo autorizado, sin push o integración implícitos. El principal comprueba aislamiento de carpetas y coordina evidencia/DoD; no se trasladan esos permisos a los demás perfiles.
+Frontend y Backend siguen el [ciclo Git](docs/ai-context/conventions.md#ciclo-git-de-frontend-y-backend), por TASK en Backend y por módulo o página en Frontend, que no recibe tareas: rama nueva desde `origin/develop` recién obtenido por fetch y commit local dentro del encargo autorizado, sin push o integración implícitos. El principal comprueba aislamiento de carpetas y coordina evidencia/DoD; no se trasladan esos permisos a los demás perfiles.
 
 ## Verificación
 

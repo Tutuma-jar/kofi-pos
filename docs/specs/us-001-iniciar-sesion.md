@@ -75,35 +75,38 @@ Posteriormente, en la revisión del dashboard del 2026-10-18, el responsable res
 
 El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técnica mínima y autorizó documentarlas sin implementación ni instalaciones. Se concretan navegadores, sesiones y frecuencia de presencia; se conservan los 120 segundos y los criterios existentes. La validación y el mecanismo definitivo de identidad de pestaña permanecen pendientes.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-001 y TASK-003 se amplían, TASK-002 se precisa, TASK-005 se reescribe como tarea backend sobre la capa de acceso del cliente conservando su ID y TASK-004 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registro. Sus identificadores oficiales sustituyen las etiquetas locales BE-1, BE-2, BE-3, FE-1 y FE-2, respectivamente. Su estado se consulta únicamente en el [tracker](../progress/tracker.md).
+Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registro. Sus identificadores oficiales sustituyeron las etiquetas locales BE-1, BE-2, BE-3, FE-1 y FE-2; desde el 2026-10-19 todas son de backend. Su estado se consulta únicamente en el [tracker](../progress/tracker.md).
 
 ### Condiciones previas a implementar
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Concretar contrato de credenciales, acceso, identidad de pestaña, presencia, rechazos, protección y cierre dentro de la base técnica elegida. Quedan pendientes endpoints, protección/almacenamiento de autorización, hash y parámetros y procedimiento externo de provisión; no almacenar secretos en documentación.
 - Disponer de las estructuras de backend y frontend y del destino Dashboard para la integración correspondiente. Estas dependencias no autorizan tareas fundacionales ni implementar otros módulos.
 - Concretar la distinción entre recarga, duplicación, cierre y restauración del navegador, y comprobar que la comunicación elegida cumple las reglas aprobadas. No se garantiza que los eventos de cierre se ejecuten.
 - Las comprobaciones futuras se asocian a los criterios en la sección de verificación anterior; cada tarea incluye las que le correspondan, sin una tarea genérica adicional de QA.
 
-### TASK-001 — Validar credenciales
+### TASK-001 — Validar credenciales e integrar el inicio de sesión
 
 - Historia relacionada: [US-001](us-001-iniciar-sesion.md).
 - Responsabilidad: backend.
-- Descripción y objetivo: comprobar usuario y contraseña de la cuenta compartida creada externamente y comunicar aceptación o rechazo.
-- Alcance y exclusiones: validación de credenciales; sin provisión interna, administración de cuentas ni recuperación.
-- Resultado esperado: credenciales válidas superan la validación; las incorrectas no conceden acceso. La admisión de sesión corresponde a TASK-002.
-- Criterios aplicables: CA-01 y CA-02, cobertura backend.
-- Dependencias: contrato técnico, estructura backend y representación de la cuenta externa.
+- Descripción y objetivo: comprobar usuario y contraseña de la cuenta compartida creada externamente, comunicar aceptación o rechazo y conectar el formulario de acceso de Frontend: las credenciales válidas llevan al Dashboard y las incorrectas se rechazan con mensaje.
+- Alcance y exclusiones: contrato de acceso y rechazo, validación de credenciales, conexión en `frontend/src/auth/api/` y recorrido integrado de entrada. La emisión de la sesión corresponde a TASK-002. Sin provisión interna, administración de cuentas ni recuperación; no diseña la pantalla.
+- Resultado esperado: entrada integrada hasta el Dashboard, también con otras sesiones activas; las credenciales incorrectas muestran rechazo sin conceder acceso ni afectar las sesiones existentes.
+- Criterios aplicables: CA-01 (entrada y destino, P) y CA-02 (mensaje, P).
+- Dependencias: contrato técnico, estructura backend, representación de la cuenta externa, TASK-002 para la integración (no para construir) y registro de entrega de interfaz de Acceso.
 
 ### TASK-002 — Gestionar sesiones simultáneas y presencia
 
 - Historia relacionada: [US-001](us-001-iniciar-sesion.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: admitir sesiones simultáneas de la cuenta compartida, mantener la autorización de cada pestaña y gestionar su finalización mediante presencia.
-- Alcance y exclusiones: independencia de las sesiones, continuidad al recargar y finalización individual a los 120 segundos desde su última señal válida. No mide actividad del operador, desplaza sesiones ni recupera accesos.
+- Alcance y exclusiones: independencia de las sesiones, continuidad al recargar y finalización individual a los 120 segundos desde su última señal válida. No mide actividad del operador, desplaza sesiones ni recupera accesos. La emisión desde el navegador y la vinculación del cliente corresponden a TASK-005; esta tarea no conecta una interfaz propia.
 - Resultado esperado: un nuevo inicio no bloquea ni afecta sesiones existentes; cada sesión conserva su propia autorización y presencia. Señales tardías no reactivan una sesión finalizada, ni su finalización afecta otras sesiones.
-- Criterios aplicables: CA-01, CA-04, CA-05 y CA-07 a CA-09, cobertura backend; el cierre manual se completa en TASK-006 de US-002.
+- Criterios aplicables: CA-01 (con otras sesiones activas), CA-04, CA-05 y CA-07 a CA-09, cobertura de servidor; el cierre manual se completa en TASK-006 de US-002.
 - Dependencias: TASK-001 y contrato de identidad de pestaña, presencia y ciclo de sesión.
 
 ### TASK-003 — Proteger operaciones
@@ -111,27 +114,21 @@ Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registr
 - Historia relacionada: [US-001](us-001-iniciar-sesion.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: exigir sesión válida y autorización de pestaña para operar, sin roles diferenciados.
-- Alcance y exclusiones: protección de las operaciones disponibles; no implementa el contenido de los demás módulos.
+- Alcance y exclusiones: protección de las operaciones disponibles; no implementa el contenido de los demás módulos. Incluye el error 401 común y su propagación en la capa `api/` de cada módulo integrado, mediante el cliente HTTP común de `frontend/src/auth/api/` que importan los demás módulos; la reacción en pantalla se verifica en TASK-005.
 - Resultado esperado: solicitudes sin autorización válida, de otra pestaña o de una sesión finalizada no operan; la pestaña autorizada accede sin restricciones por perfil.
-- Criterios aplicables: CA-03, CA-04, CA-06 y CA-09.
+- Criterios aplicables: CA-03 (operaciones), CA-04 (operaciones desde otra pestaña), CA-06 y CA-09.
 - Dependencias: TASK-002 y operaciones disponibles para integrar. La cobertura se amplía al incorporar módulos, sin afirmar que los inexistentes estén verificados.
-
-### TASK-004 — Completar el inicio de sesión
-
-- Historia relacionada: [US-001](us-001-iniciar-sesion.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: presentar usuario y contraseña, tramitar el acceso, comunicar rechazo y dirigir al Dashboard cuando se acepta.
-- Alcance y exclusiones: recorrido de entrada; no incluye contenido del Dashboard, registro ni recuperación.
-- Resultado esperado: acceso válido hasta Dashboard incluso con otras sesiones activas; las credenciales incorrectas muestran rechazo sin conceder acceso ni afectar las sesiones existentes.
-- Criterios aplicables: CA-01, CA-02 y CA-04.
-- Dependencias: contrato, TASK-001, TASK-002, estructura frontend y destino Dashboard disponible.
 
 ### TASK-005 — Mantener la pestaña autorizada y proteger pantallas
 
 - Historia relacionada: [US-001](us-001-iniciar-sesion.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: conservar la autorización al recargar, mantener señales de presencia independientes de teclado o ratón y proteger navegación.
-- Alcance y exclusiones: otras pestañas, incluidas las duplicadas, no reutilizan la autorización de una sesión; se admiten otras sesiones autenticadas de forma independiente. Integración del cierre de pestaña como mejor esfuerzo, sin confundirlo con recarga. No diseña toda la navegación ni implementa otros módulos.
-- Resultado esperado: recargar conserva acceso; otras sesiones no desplazan la original; el ciclo de presencia respeta el plazo aprobado para cada sesión. Una autorización finalizada no se adopta o recupera automáticamente y se exige nuevo inicio para operar.
-- Criterios aplicables: CA-03 a CA-09, cobertura frontend; el cierre manual se completa en TASK-007 de US-002.
-- Dependencias: TASK-002, TASK-003, TASK-004 y estructura de pantallas. La cobertura se amplía conforme existan pantallas para integrar.
+- Responsabilidad: backend, sobre la capa de acceso del cliente.
+- Descripción y objetivo: implementar en `frontend/src/auth/api/` la vinculación de la autorización a la pestaña, la presencia cada 30 segundos independiente de teclado y ratón y el aviso de salida de mejor esfuerzo, sustituyendo la sesión simulada que consumen las pantallas protegidas de Frontend. Recargar conserva la sesión; duplicar, cerrar o restaurar no recuperan la autorización; sin sesión válida no se accede a las pantallas.
+- Alcance y exclusiones: incluye la validación técnica previa del mecanismo en Chrome y Edge, que requiere autorización de ejecución acotada, la distinción entre recarga, duplicación, cierre y restauración, y recorridos en navegador real. Otras pestañas, incluidas las duplicadas, no reutilizan la autorización de una sesión; se admiten otras sesiones autenticadas de forma independiente. Excluye el diseño de navegación y guardas (Frontend) y el servidor de sesiones (TASK-002).
+- Resultado esperado: recargar conserva acceso; otras sesiones no desplazan la original; el ciclo de presencia respeta el plazo aprobado para cada sesión. Una autorización finalizada no se adopta ni se recupera automáticamente y se exige nuevo inicio para operar. Comportamiento comprobado en los dos navegadores con sus versiones registradas.
+- Criterios aplicables: CA-03 (pantallas, P), CA-04 (pestañas), CA-05, CA-06 (navegación), CA-07, CA-08 (emisión, suspensión y desconexión) y CA-09 (no adopción); el cierre manual se completa en TASK-006 de US-002.
+- Dependencias: TASK-001, TASK-002, TASK-003, mecanismo de pestaña validado y registro de entrega de interfaz de Acceso y de la estructura de pantallas protegidas. La cobertura se amplía conforme existan pantallas para integrar.
+
+### Tareas retiradas
+
+- TASK-004 — Completar el inicio de sesión — Retirada el 2026-10-19; cobertura en TASK-001 y TASK-002. La pantalla la implementa Frontend sin tareas.
