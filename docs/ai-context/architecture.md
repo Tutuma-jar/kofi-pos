@@ -341,7 +341,7 @@ La aprobación de herramientas no configura comandos de aplicación, hooks o CI.
 
 | Antes de | Pendiente real |
 | --- | --- |
-| Trabajo funcional posterior al bootstrap | Autorización de ejecución de las tareas existentes y condiciones específicas antes del tramo afectado. El arranque técnico, sus versiones y comandos ya están autorizados en la sección 9 y la preparación del backend en la sección 11; no iniciar funcionalidades implícitamente. |
+| Trabajo funcional posterior al bootstrap | La implementación de las 22 TASK está autorizada desde el 2026-10-19 según la [constitución](constitution.md#11-etapa-actual). Siguen pendientes las condiciones específicas de cada tramo de esta tabla, que se aprueban antes de implementarlo. |
 | Acceso integrado | Validación de identidad de pestaña y contratos/seguridad descritos en la sección 7; no relajar US-001 silenciosamente. |
 | Catálogo e imágenes | DTO/rutas/errores, versión y transacciones concretos, flujo seguro de archivos y unidades exactas de los límites de entrada. Las reglas de estado inicial, campos y formatos ya están decididas en las US. |
 | Revisión y registro | Rutas, DTO y códigos de error. Protección y carreras de confirmación, límites técnicos y conciliación terminal y referencias opacas quedaron aprobados el 2026-10-19 en US-011 a US-013. No está pendiente volver a decidir la fijación del total o permitir cambios después del pago. |
