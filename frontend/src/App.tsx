@@ -4,6 +4,8 @@ import { demoClient } from './auth/api/demo-client';
 import type { AuthClient } from './auth/api/contract.provisional';
 import { LoginPage } from './auth/pages/LoginPage';
 import { DashboardPage } from './dashboard/pages/DashboardPage';
+import { MenuPage } from './menu/pages/MenuPage';
+import { CategoriesPage } from './menu/pages/CategoriesPage';
 import { ProtectedRoute } from './auth/components/ProtectedRoute';
 import { AuthenticatedAccess } from './auth/components/AuthenticatedAccess';
 import './shared/styles/fonts.css';
@@ -14,6 +16,26 @@ export function AccessRoutes({ client }: { client: AuthClient }) {
   return (
     <AuthContext value={client}>
       <Routes>
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedAccess title="Administración de Menú">
+                <MenuPage />
+              </AuthenticatedAccess>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/menu/categories"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedAccess title="Categorías">
+                <CategoriesPage />
+              </AuthenticatedAccess>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"

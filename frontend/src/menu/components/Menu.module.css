@@ -1,0 +1,287 @@
+.filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(150px, 1fr) minmax(
+      120px,
+      1fr
+    );
+  gap: 16px;
+  margin: 24px 0 12px;
+}
+.filters label,
+.form label,
+.categoryForm label,
+.imageField > label {
+  display: block;
+  font-weight: 600;
+}
+.filters input,
+.filters select,
+.form input,
+.form textarea,
+.form select,
+.categoryForm input {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 9px 12px;
+  font: inherit;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+.form textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+.tableWrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 15px;
+}
+.table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.table th:first-child {
+  width: 36%;
+}
+.table th:last-child {
+  width: 21%;
+}
+.table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+.table tr:last-child td {
+  border-bottom: 0;
+}
+.product {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.product strong {
+  font-size: 17px;
+  font-weight: 600;
+}
+.product p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.thumbnail,
+.placeholder {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--sidebar);
+  color: var(--muted);
+}
+.price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.active,
+.inactive {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 14px;
+  background: var(--sidebar);
+}
+.active {
+  color: var(--action-pressed);
+  background: #e5ebee;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.actions button {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.state {
+  padding: 28px 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  margin: 12px 0;
+}
+.state p {
+  margin-top: 0;
+}
+.dialog {
+  width: min(720px, calc(100vw - 40px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 20px 70px #26364133;
+}
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.dialog::backdrop {
+  background: #26364180;
+}
+.dialog > h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.formBody {
+  overflow-y: auto;
+  padding: 20px 28px;
+}
+.form fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.formFooter {
+  padding: 16px 28px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.error {
+  display: block;
+  color: var(--error);
+  font-size: 15px;
+  min-height: 8px;
+  margin: 4px 0 14px;
+}
+.imageField {
+  margin-top: 24px;
+}
+.imageField p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.preview {
+  display: block;
+  max-width: 160px;
+  max-height: 120px;
+  object-fit: contain;
+}
+.categoryList {
+  list-style: none;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.categoryList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.categoryForm {
+  max-width: 540px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 1000px) {
+  .table th:first-child {
+    width: 31%;
+  }
+  .table th:last-child {
+    width: 19%;
+  }
+  .table td,
+  .table th {
+    padding: 12px 8px;
+  }
+  .placeholder,
+  .thumbnail {
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (max-width: 650px) {
+  .filters,
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+  .table {
+    font-size: 13px;
+  }
+  .product {
+    display: block;
+  }
+  .product strong {
+    font-size: 15px;
+  }
+  .product p {
+    font-size: 13px;
+  }
+  .price {
+    white-space: normal;
+  }
+  .actions button {
+    font-size: 12px;
+    padding: 5px;
+  }
+  .dialog {
+    max-height: calc(100dvh - 20px);
+  }
+  .formBody {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog,
+  .table {
+    scroll-behavior: auto;
+  }
+}
