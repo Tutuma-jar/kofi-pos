@@ -87,14 +87,16 @@ Para comprobar localmente las reglas de selección:
 node --test .github/scripts/ci-scope.test.mjs
 ```
 
-El workflow se configura sin commits ni push en esta entrega: **su primera ejecución
-real en GitHub queda pendiente**. Después de publicarlo con autorización, revisar
-Actions y, tras una ejecución correcta, configurar por separado la protección de
-`develop` para exigir `technical-checks` del workflow `CI` antes de integrar. No se
-modifican esas reglas automáticamente; CI no impide por sí sola hacer push.
+La base está publicada en GitHub y la primera ejecución completa de CI pasó;
+la [evidencia remota](docs/progress/CHANGELOG.md#2026-10-19) identifica el commit y la ejecución.
+La política de integración autorizada para `develop` exige `technical-checks` de
+GitHub Actions correcto y la rama actualizada antes de integrar, también para administradores.
+Esa protección se configura y verifica en GitHub, no se activa por el YAML.
+Para trabajo nuevo, crea una rama de trabajo y abre una PR hacia `develop`; no
+se exige un revisor humano adicional como parte de esta configuración inicial.
 
 ## Límites y próximos pasos
 
-No hay login, sesiones, Dashboard, catálogo, ventas, modelos, conexión MongoDB, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. React Router, MongoDB, Zod y Playwright están elegidos, pero se instalarán cuando exista trabajo autorizado que los necesite. La CI inicial está configurada, no publicada ni verificada remotamente todavía.
+No hay login, sesiones, Dashboard, catálogo, ventas, modelos, conexión MongoDB, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. React Router, MongoDB, Zod y Playwright están elegidos, pero se instalarán cuando exista trabajo autorizado que los necesite. La primera CI remota verifica exclusivamente el bootstrap, no requisitos de las US ni despliegue.
 
 El control rápido de OpenCode sigue comprobando configuración y documentación. No ejecuta estos scripts ni acredita las US; el principal selecciona y ejecuta las comprobaciones técnicas por separado, conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing). Las funcionalidades requieren autorización posterior.

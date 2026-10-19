@@ -187,7 +187,7 @@ Registrar únicamente historias y tareas aprobadas, con enlaces a sus definicion
 | --- | --- | --- |
 | Agente principal | Seleccionar pruebas por criterios/riesgo, revisar el plan y analizar fallos con apoyo de los responsables cuando haga falta | Procedimiento de esta sección; sin skill `testing`. Comandos de humo técnico en el README; aún no hay pruebas funcionales del POS |
 | Cuatro controles | Comprobaciones mecánicas delimitadas por la sección 9 | Script local compartido, comandos explícitos y pre-commit documental |
-| GitHub Actions | Verificaciones técnicas necesarias antes de integrar cambios; ampliar por comportamiento y riesgo | Workflow inicial configurado localmente; publicación y primera ejecución remota pendientes. No cubre criterios funcionales de las US |
+| GitHub Actions | Verificaciones técnicas necesarias antes de integrar cambios; ampliar por comportamiento y riesgo | Workflow publicado y primera ejecución completa correcta, enlazada en CHANGELOG. No cubre criterios funcionales de las US |
 
 Las rutas y decisiones están en [architecture.md](architecture.md#integración-de-agentes-y-controles-de-desarrollo); el uso está en [README](../../.opencode/README.md). Por decisión posterior del usuario se retiró la skill `testing`: la selección corresponde al principal y la ejecución rápida al hook. La ausencia de una prueba necesaria se informa como pendiente, nunca como éxito.
 
@@ -221,7 +221,7 @@ Priorizar subtotales, totales, cantidades, pedidos, ventas, contratos e integrid
 
 **Nivel 3 — Al completar una historia.** Comprobar todos los criterios obligatorios y la integración; añadir pruebas por riesgo de regresión solo si la evidencia existente no basta. Registrar resultados y actualizar el tracker solo al cumplir la DoD de historia.
 
-**Nivel 4 — Antes de integrar.** La CI inicial verifica instalación reproducible, tipos, lint, formato, pruebas técnicas disponibles y builds cuando corresponda al cambio. El conjunto debe ampliarse con unitarias de negocio, integración necesaria y E2E críticos al implementar comportamiento; el humo no sustituye criterios de las US. Publica resultados y los controles obligatorios deben superarse para integrar. Crear o validar localmente el workflow no acredita una ejecución remota; la primera queda pendiente de publicación autorizada.
+**Nivel 4 — Antes de integrar.** La CI inicial verifica instalación reproducible, tipos, lint, formato, pruebas técnicas disponibles y builds cuando corresponda al cambio. El conjunto debe ampliarse con unitarias de negocio, integración necesaria y E2E críticos al implementar comportamiento; el humo no sustituye criterios de las US. Publica resultados y los controles obligatorios deben superarse para integrar. Crear o validar localmente el workflow no acredita una ejecución remota: enlazar el resultado real y la revisión cubierta; la primera ejecución publicada ya consta en el CHANGELOG.
 
 La política de eventos, selección por cambios y seguridad de la CI pertenece a [arquitectura](architecture.md#10-ci-técnica-inicial-autorizada); el workflow no usa filtros de rutas que dejen checks requeridos pendientes en PR documentales. Conserva un check estable y omite solo los pasos no aplicables. La protección de ramas se configura por separado con autorización, después de conocer el resultado remoto. No se ejecuta despliegue ni se alteran hooks o estados del tracker como efecto de CI.
 

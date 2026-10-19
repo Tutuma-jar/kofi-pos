@@ -50,6 +50,8 @@ Usar `feat`, `fix`, `docs`, `test`, `refactor` o `chore` según el objetivo. Inc
 
 Se conserva la rama existente `develop`. Esta convención no crea ramas ni decide por sí sola una estrategia de releases, una rama principal o reglas de protección.
 
+Por autorización posterior del responsable («hazlo» al publicar la base y CI), la política de integración de `develop` exige el check `technical-checks` del workflow `CI`, emitido por GitHub Actions, y la rama actualizada antes de integrar, también para administradores. El trabajo nuevo se prepara en ramas como las anteriores y se integra mediante PR; no se exige un revisor humano adicional en esta configuración inicial. Las reglas reales se configuran y verifican en GitHub, sin sobrescribir protecciones previas; esta política no define releases ni crea otra rama principal.
+
 ## 4. Commits
 
 Utilizar Conventional Commits: `<tipo>(<scope-opcional>): <resumen>`. Escribir resúmenes claros; para mantener consistencia con los ejemplos, usar inglés en los mensajes de commit.
