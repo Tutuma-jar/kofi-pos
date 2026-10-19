@@ -247,7 +247,7 @@ Distinguir fallo del cambio, previo/ajeno y problema de entorno, sin atribuirlo 
 
 ## 8. Subagentes
 
-Los seis perfiles nativos están en `.opencode/agents/`, sin modelo fijo y con permisos acotados. Su disponibilidad no autoriza implementar aplicación durante la etapa documental:
+Los seis perfiles nativos están en `.opencode/agents/`, sin modelo fijo y con permisos acotados. Su disponibilidad no autoriza implementar aplicación; solo lo hacen las excepciones de la [constitución](constitution.md#11-etapa-actual), como la del frontend contra datos simulados:
 
 | Perfil | Responsabilidad |
 | --- | --- |

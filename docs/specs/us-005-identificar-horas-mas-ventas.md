@@ -34,7 +34,7 @@ Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el a
 
 ## Dependencias relevantes
 
-- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard.
+- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard. El gráfico consume la sección `hourlySales`, de 24 horas, del [contrato de lectura y actualización](us-003-consultar-resumen-ventas.md#contrato-de-lectura-y-actualización).
 - [US-013](us-013-registrar-venta-pagada.md): fecha/hora de registro del servidor y venta íntegra. Aplican latencia, dimensiones y carga/error comunes de US-003. Esta historia no introduce pedidos independientes ni estados operativos.
 
 ## Aprobación

@@ -35,7 +35,7 @@ Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el a
 
 ## Dependencias relevantes
 
-- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard.
+- [US-003 — Consultar el resumen de ventas](us-003-consultar-resumen-ventas.md): períodos y criterios comunes del Dashboard. La lista se entrega en la sección `products` del [contrato de lectura y actualización](us-003-consultar-resumen-ventas.md#contrato-de-lectura-y-actualización).
 - [US-007 — Editar productos](us-007-editar-productos.md) y [US-009 — Desactivar y reactivar productos](us-009-desactivar-reactivar-productos.md): identidad estable, nombre actual en el Dashboard y conservación de ventas anteriores; no existe eliminación definitiva de productos.
 - [US-013](us-013-registrar-venta-pagada.md) y futura especificación de historial: identificación de cada producto, snapshots de nombre/precio/unidades/importes y fecha/hora del servidor. El detalle histórico conserva el nombre original aunque el Dashboard muestre el actual. Se consume la lectura común y actualización elegidas en [arquitectura](../ai-context/architecture.md#7-base-técnica-mínima-aprobada), con latencia, dimensiones y carga/error de US-003; no se implementa una actualización independiente de esta lista.
 
