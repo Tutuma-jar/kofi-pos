@@ -18,16 +18,18 @@ Mostrar cómo se distribuye la cantidad de ventas entre las horas del día, tant
 
 | ID | Comportamiento observable |
 | --- | --- |
-| CA-01 | El Dashboard presenta un gráfico de líneas con las horas del día en el eje horizontal y la cantidad de ventas en el eje vertical. |
+| CA-01 | El Dashboard presenta un gráfico de líneas con las horas del día en el eje horizontal y la cantidad de ventas en el eje vertical. El eje horizontal muestra siempre las 24 horas, de 0 a 23. Para hoy, la línea llega hasta la hora en curso en Bolivia y no se dibuja en horas futuras; para este mes se dibujan las 24. |
 | CA-02 | Para hoy, cada punto horario representa la cantidad de ventas registradas en esa hora del día, según el horario de Bolivia y el período definido en US-003. |
 | CA-03 | Para este mes, cada punto horario suma las ventas de esa franja horaria de todos los días del mes. Por ejemplo, las 10:00 reúne las ventas entre las 10:00 y las 10:59 de sus días; no representa una serie por días ni un promedio. |
 | CA-04 | Cada venta cuenta como una venta en su franja horaria, independientemente del método de pago o de las unidades de productos que contenga. |
 | CA-05 | El gráfico cumple los criterios comunes de US-003 CA-05 a CA-07: actualización en tiempo real, también entre sesiones; mensaje del período sin ventas; y Dashboard sin scroll general. |
+| CA-06 | Las cantidades de cada hora dibujada están disponibles mediante teclado y lector de pantalla con una alternativa textual equivalente de hora y cantidad de ventas, sin depender solo del color o del puntero. |
 
 ### Verificación prevista de los criterios
 
-- CA-01: revisión manual de representación en líneas y ejes; es apropiada para comprobar la presentación visual.
-- CA-02 a CA-04: contrastar la agrupación con ventas de horas y fechas controladas, incluyendo cambios de hora, día y mes en horario de Bolivia, varios días con ventas en la misma franja y ventas con varias unidades y métodos distintos. Usar pruebas de cálculos e integración de datos.
+- CA-01: revisión manual de representación en líneas y ejes, con hora controlada para comprobar que en hoy la línea termina en la hora en curso y avanza al cambiar de hora; es apropiada para comprobar la presentación visual.
+- CA-02 a CA-04: contrastar la agrupación con ventas de horas y fechas controladas, incluyendo cambios de hora, día y mes en horario de Bolivia, varios días con ventas en la misma franja y ventas con varias unidades y métodos distintos. Usar pruebas de cálculos e integración de datos. Comprobar que la suma de `hourlySales[].salesCount` coincide con la cantidad de ventas del resumen.
+- CA-06: recorrido con teclado y lector de pantalla sobre ambos períodos, comprobando hora y cantidad de cada punto dibujado.
 - CA-05: comprobar con el recorrido común de actualización y ausencia de datos previsto en [US-003](us-003-consultar-resumen-ventas.md#verificación-prevista-de-los-criterios), sin duplicar pruebas equivalentes.
 
 Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el agente principal concretará los casos y comandos disponibles según el procedimiento documental de testing; el hook ejecutará las comprobaciones rápidas aplicables. Hoy no hay aplicación ni herramientas de pruebas del POS configuradas.
@@ -49,6 +51,8 @@ Posteriormente, el 2026-10-18, el responsable respondió «ok apruebo las tareas
 
 El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-014 se amplía con la verificación integrada del gráfico; TASK-015 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
 
+El 2026-10-19, tras revisar con `requirements-analyst` las mejoras y preguntas abiertas del Dashboard, el responsable respondió «usa tus sugerencias para cada uno». Se precisa CA-01 con el eje de 24 horas y la línea de hoy hasta la hora en curso, y se añade CA-06 de accesibilidad de los valores del gráfico. El contrato no cambia: `hourlySales` conserva 24 entradas y el cliente omite las horas futuras de hoy. No cambian alcance ni tareas, ni se autoriza implementación.
+
 ## Tareas técnicas asociadas
 
 Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-014 sustituyó la etiqueta local HOR-BE; la de HOR-FE se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación. Aplican las [condiciones previas compartidas de US-003](us-003-consultar-resumen-ventas.md#condiciones-previas-compartidas), incluida la integración común.
@@ -60,7 +64,7 @@ Las siguientes tareas de `requirements-analyst` están aprobadas para registro d
 - Descripción y objetivo: obtener la distribución horaria de ventas registradas para el período seleccionado.
 - Alcance y exclusiones: para hoy, contar ventas por hora en Bolivia; para este mes, sumar las ventas de la misma franja horaria de todos sus días. Contar cada venta una vez, independientemente del método y unidades. Excluir promedios, ingresos, series por días y ventas en curso. Aporta la sección `hourlySales` a la lectura común y verifica el gráfico integrado: revisión manual de líneas y ejes y contraste de los puntos con datos conocidos.
 - Resultado esperado: cantidades horarias coincidentes con las ventas registradas del período, sin promediar el mes ni contar productos como ventas.
-- Criterios aplicables: CA-01 (P), CA-02 a CA-04 y CA-05 (reutiliza la evidencia de TASK-008 y TASK-010).
+- Criterios aplicables: CA-01 (P), CA-02 a CA-04, CA-05 (reutiliza la evidencia de TASK-008 y TASK-010) y CA-06 (P).
 - Verificación prevista: contrastar cálculos e integración con límites horarios y de período, varios días del mes en la misma franja y ventas con distintos métodos y cantidades.
 - Dependencias: definición de períodos de TASK-008 y contrato de US-003; fecha/hora y datos del registro de [US-013](us-013-registrar-venta-pagada.md) (TASK-030); registro de entrega del gráfico. No depende de TASK-012.
 
