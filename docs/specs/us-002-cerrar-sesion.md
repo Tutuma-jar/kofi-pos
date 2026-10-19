@@ -65,3 +65,7 @@ Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registr
 ### Tareas retiradas
 
 - TASK-007 — Integrar cierre en el menú compartido — Retirada el 2026-10-19; cobertura en TASK-006. El menú lo implementa Frontend sin tareas.
+
+## Interfaz — Acceso: referencia de entrega
+
+La entrega de interfaz simulada de US-001 y US-002, incluidos menú compartido, cierre pendiente/confirmado/fallido/incierto, supuestos de contrato, rama/commit, revisiones y verificaciones, se registra una sola vez en [US-001 — Registro de entrega de Acceso](us-001-iniciar-sesion.md#interfaz--acceso-registro-de-entrega). No acredita la invalidación real ni la DoD de US-002: CA-01 a CA-03 se verifican integrados en TASK-006 y su cobertura se amplía al incorporar pantallas.

@@ -1,0 +1,138 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+}
+.header {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 clamp(24px, 4vw, 64px) 48px;
+}
+.toggle {
+  width: 44px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+}
+.sidebar {
+  width: 252px;
+  flex-shrink: 0;
+  padding: 30px 22px;
+  background: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.rail {
+  display: flex;
+}
+.rail[hidden] {
+  display: none;
+}
+.brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 38px;
+  color: var(--action);
+  letter-spacing: -0.035em;
+}
+.link {
+  display: block;
+  padding: 13px 16px;
+  border-radius: 6px;
+  color: var(--selection-text);
+  background: var(--selection);
+  text-decoration: none;
+  font-weight: 600;
+}
+.footer {
+  margin-top: auto;
+}
+.footer p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.logout {
+  text-align: left;
+  width: 100%;
+}
+.skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  transform: translateY(-200%);
+  padding: 12px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.skip:focus {
+  transform: none;
+}
+.dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: min(320px, 88vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  color: var(--ink);
+  background: var(--sidebar);
+}
+.dialog::backdrop {
+  background: rgb(26 41 54 / 0.4);
+}
+.dialog .sidebar {
+  width: 100%;
+  height: 100%;
+}
+.close {
+  align-self: end;
+}
+.modalTitle {
+  margin: 0;
+  font-size: 22px;
+}
+.toggle:active {
+  background: var(--selection);
+  color: var(--selection-text);
+}
+.bounded .main {
+  padding: 0 24px;
+}
+.bounded .content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+@media (min-width: 1101px) and (min-height: 650px) {
+  .bounded {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .bounded .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .bounded .header {
+    height: 84px;
+    flex-shrink: 0;
+  }
+  .bounded main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+}

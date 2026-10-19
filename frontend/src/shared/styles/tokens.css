@@ -1,0 +1,20 @@
+:root {
+  font-family: 'Source Sans 3', sans-serif;
+  color: #263641;
+  background: #f6f3ed;
+  font-synthesis: none;
+  --action: #3e5879;
+  --action-hover: #334a67;
+  --action-pressed: #293d57;
+  --selection: #8999a9;
+  --selection-text: #1a2936;
+  --page: #f6f3ed;
+  --surface: #fcfbf8;
+  --sidebar: #e9e6de;
+  --ink: #263641;
+  --muted: #5b6570;
+  --line: #deddd6;
+  --control-border: #718392;
+  --error: #8d302b;
+  --error-surface: #fff1ed;
+}
