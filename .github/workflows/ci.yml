@@ -1,0 +1,84 @@
+name: CI
+
+# Sin filtros de rutas: el check requerido debe existir también en PR documentales.
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  technical-checks:
+    name: technical-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Seleccionar comprobaciones por cambios
+        id: scope
+        run: node .github/scripts/ci-scope.mjs
+
+      - name: Comprobar la selección de CI
+        run: node --test .github/scripts/ci-scope.test.mjs
+
+      - name: Preparar Node y caché npm
+        if: steps.scope.outputs.application == 'true' || steps.scope.outputs.format == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Fijar npm del proyecto en el runner efímero
+        if: steps.scope.outputs.application == 'true' || steps.scope.outputs.format == 'true'
+        shell: bash
+        run: |
+          package_manager=$(node -p "require('./package.json').packageManager")
+          if [[ ! "$package_manager" =~ ^npm@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo 'packageManager debe fijar una versión exacta de npm.' >&2
+            exit 1
+          fi
+          npm_version="${BASH_REMATCH[1]}"
+          if [[ "$(npm --version)" != "$npm_version" ]]; then
+            npm install --global "npm@$npm_version" --ignore-scripts --no-audit --no-fund
+          fi
+          [[ "$(npm --version)" == "$npm_version" ]]
+          node --version
+          npm --version
+
+      - name: Instalar desde lockfile sin lifecycle de terceros
+        if: steps.scope.outputs.application == 'true' || steps.scope.outputs.format == 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Comprobar tipos
+        if: steps.scope.outputs.application == 'true'
+        run: npm run typecheck
+
+      - name: Comprobar lint
+        if: steps.scope.outputs.application == 'true'
+        run: npm run lint
+
+      - name: Comprobar formato
+        if: steps.scope.outputs.format == 'true'
+        run: npm run format:check
+
+      - name: Ejecutar pruebas disponibles
+        if: steps.scope.outputs.application == 'true'
+        run: npm test
+
+      - name: Compilar frontend y backend
+        if: steps.scope.outputs.application == 'true'
+        run: npm run build

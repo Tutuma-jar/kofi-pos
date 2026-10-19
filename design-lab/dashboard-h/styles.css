@@ -1,0 +1,25 @@
+:root {
+  --wine: #584033;
+  --clay: #3F2E26;
+  --sand: #8999A9;
+  --cream: #F1EADF;
+  --paper: #FCF9F3;
+  --ink: #382C26;
+  --muted: #715B4B;
+  --line: #DED0C0;
+}
+.exploration { --sidebar-bg: #332C28; --sidebar-ink: #F3EADD; --page-bg: #F1EADF; }
+.lab-bar { background: #332C28; }
+.lab-links a:hover { background: #584033; }
+.lab-links a[aria-current="page"] { color: #202F3A; background: #8999A9; }
+.lab-sidebar .nav-list a[aria-current="page"] { background: #8999A9; color: #202F3A; }
+.lab-sidebar .brand span { color: #A7B4C0; opacity: 1; }
+.day-overview { color: #202F3A; background: #8999A9; }
+.day-overview .metric-label, .day-overview .metric-note { color: #202F3A; }
+.day-overview .summary-pair { border-color: #566D7F; }
+.products-panel { background: #E9DCCB; }
+.product-list li { border-color: #C9B9A5; }
+.product-bar { background: #D0C0AD; }
+.product-bar span { background: #584033; }
+.segment { background: #E4E8EB; }
+.segment button[aria-pressed="true"] { color: #202F3A; background: #A6B4C0; box-shadow: none; }

@@ -1,0 +1,32 @@
+/* Solo color: la composición, la tipografía y los breakpoints pertenecen a I. */
+:root {
+  --wine: #4B3429;
+  --clay: #36251F;
+  --sand: #8999A9;
+  --cream: #F2E8D9;
+  --paper: #F8F5EF;
+  --ink: #352E2A;
+  --muted: #69594E;
+  --line: #D9D7CF;
+}
+.casa {
+  --sidebar-bg: #352E2A;
+  --sidebar-ink: #F2E8D9;
+  --page-bg: #F8F5EF;
+  scrollbar-color: #8999A9 var(--paper);
+}
+.lab-bar { background: #DDE3E8; }
+.lab-links a:hover { background: #C5CFD7; }
+.lab-sidebar .brand span { color: #8999A9; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: #1B2933; background: #8999A9; }
+.daily-summary { color: #1B2933; background: #8999A9; }
+.daily-summary .metric-label, .daily-summary .metric-note { color: #1B2933; }
+.support-metric { border-color: #5D7181; }
+.products-panel { background: #E4E9EB; }
+.products-panel .muted, .products-panel .unit-label { color: #4F5D65; }
+.product-bar { background: #C6CFD4; }
+.product-bar span { background: #506575; }
+.payment-pill { border-color: #CDD3D8; }
+.segment { background: #DDE3E8; }
+.segment button[aria-pressed="true"] { color: #1B2933; background: #8999A9; }
+.segment button:hover { background: #C5CFD7; }

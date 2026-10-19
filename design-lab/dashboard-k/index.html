@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bruma de día: dashboard claro de Kofi con #8999A9, azul pálido, blanco suave y avena. Datos ficticios.">
+  <title>Kofi — Bruma de día</title><link rel="icon" href="data:,">
+  <link rel="preload" href="../shared/fonts/fraunces-soft-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="../shared/exploration.css"><link rel="stylesheet" href="../dashboard-i/styles.css"><link rel="stylesheet" href="./styles.css">
+  <script src="../shared/dashboard.js" defer></script>
+</head>
+<body class="exploration casa" data-variant="k" data-navigation="closed">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="lab-bar"><a href="../index.html">← Laboratorio Kofi</a><nav class="lab-links" data-exploration-links aria-label="Comparar propuestas"></nav><span class="demo-label">Bruma de día · datos ficticios</span></div>
+  <div class="prototype-shell">
+    <aside class="lab-sidebar" id="menu-principal" data-sidebar aria-label="Menú principal" hidden>
+      <div class="sidebar-brand-row"><a class="brand" href="../index.html" aria-label="Kofi, laboratorio">kofi<span>.</span></a><button class="menu-toggle sidebar-close" type="button" data-sidebar-toggle aria-controls="menu-principal" aria-expanded="false" aria-label="Cerrar menú principal"><svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg></button></div>
+      <p class="sidebar-caption">Tu cafetería</p>
+      <nav class="nav-list" data-exploration-nav aria-label="Principal"></nav>
+      <div class="sidebar-footer"><div class="operator"><span class="avatar" aria-hidden="true">O</span><div><strong>Operador</strong><small>Sesión de demostración</small></div></div></div>
+    </aside>
+    <div class="prototype-workspace" data-workspace>
+      <header class="prototype-header"><button class="menu-toggle" type="button" data-sidebar-toggle data-sidebar-opener aria-controls="menu-principal" aria-expanded="false" aria-label="Mostrar menú principal"><svg class="icon" aria-hidden="true"><use href="#icon-hamburger"></use></svg></button><div><h1>Dashboard</h1><p class="header-detail" data-period-label>Hoy, 18 de octubre</p></div><div class="toolbar"><label><span class="sr-only">Período del resumen</span><select class="date-select" data-period><option value="today">Hoy</option><option value="week">Esta semana</option></select></label><button class="button" type="button" data-demo="sale"><svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>Nueva venta</button></div></header>
+      <main class="prototype-main" id="contenido">
+        <section class="daily-summary" aria-label="Resumen del negocio">
+          <div class="primary-metric"><p class="metric-label">Ingresos registrados</p><strong class="metric-value" data-income>Bs 1.284,50</strong><p class="metric-note">Bolivianos · efectivo y QR</p></div>
+          <div class="support-metric"><p class="metric-label">Ventas realizadas</p><strong class="metric-value" data-order-count>42</strong></div>
+          <div class="support-metric"><p class="metric-label">Pedidos registrados</p><strong class="metric-value" data-order-count>42</strong></div>
+        </section>
+        <div class="operation-grid">
+          <section class="sales-panel" aria-labelledby="sales-title">
+            <div class="section-head"><h2 id="sales-title">Ventas recientes</h2><label class="search-box"><span class="sr-only">Buscar una venta de muestra</span><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input type="search" data-search placeholder="Buscar una venta…"></label></div>
+            <div class="table-scroll" data-sales-table><table><caption class="sr-only">Últimas seis ventas ficticias, todas pagadas</caption><thead><tr><th scope="col">Venta</th><th scope="col">Hora</th><th scope="col">Pago</th><th scope="col" data-sort-heading aria-sort="none"><button class="sort-button" type="button" data-sort aria-label="Ordenar ventas por importe">Importe<svg class="icon" aria-hidden="true"><use href="#icon-down"></use></svg></button></th></tr></thead><tbody data-sales></tbody></table></div>
+            <div class="empty-state" data-empty hidden><h3>No encontramos esa venta</h3><p>Busca por número, producto o método de pago.</p><button class="button button-secondary" type="button" data-clear>Limpiar búsqueda</button></div><p class="sales-status" data-sales-status aria-live="polite"></p>
+          </section>
+          <div class="business-details">
+            <section class="products-panel" aria-labelledby="products-title"><div class="section-head"><h2 id="products-title">Los favoritos de la casa</h2><span class="unit-label">Unidades</span></div><ol class="product-list" data-products></ol></section>
+            <section class="payments-panel" aria-labelledby="payments-title"><h2 id="payments-title">Métodos de pago</h2><div class="payment-line"><span class="payment-name"><span class="swatch"></span>QR <span class="payment-percent">58 %</span></span><strong data-qr-total>Bs 745,01</strong></div><div class="payment-line"><span class="payment-name"><span class="swatch swatch-sand"></span>Efectivo <span class="payment-percent">42 %</span></span><strong data-cash-total>Bs 539,49</strong></div><div class="payment-bar" aria-hidden="true"><span></span><span></span></div></section>
+          </div>
+        </div>
+        <section class="chart-panel" aria-labelledby="chart-title"><div class="section-head"><div><h2 id="chart-title">Actividad del período</h2><p>Distribución por intervalo</p></div><div class="segment" role="group" aria-label="Datos del gráfico"><button type="button" data-series="income" aria-pressed="true">Ingresos</button><button type="button" data-series="orders" aria-pressed="false">Pedidos</button></div></div><figure class="chart"><div data-chart="bars" data-chart-size="compact"></div><figcaption class="chart-caption" data-chart-caption>Ingresos en bolivianos</figcaption></figure></section>
+        <footer class="page-footer"><span>Bruma de día · propuesta K</span><span>Datos ficticios. No se registran ni procesan pagos.</span></footer>
+      </main>
+    </div>
+  </div>
+  <button class="sidebar-backdrop" type="button" data-sidebar-backdrop aria-label="Cerrar menú" tabindex="-1" hidden></button><div class="toast" data-toast role="status" hidden></div><noscript>Activa JavaScript para explorar el menú y los datos ficticios.</noscript>
+</body>
+</html>

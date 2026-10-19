@@ -1,0 +1,56 @@
+.exploration { --sidebar-width: 226px; --sidebar-bg: var(--wine); --sidebar-ink: var(--cream); }
+.prototype-shell { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: calc(100vh - 42px); background: var(--sidebar-bg); }
+[data-navigation="closed"] .prototype-shell { grid-template-columns: 0 minmax(0, 1fr); }
+.lab-sidebar { grid-column: 1; position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; min-height: calc(100vh - 42px); padding: 26px 16px 22px; background: var(--sidebar-bg); color: var(--sidebar-ink); }
+.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 12px; }
+.lab-sidebar .brand { font-size: 43px; }
+.lab-sidebar .brand span { opacity: .65; }
+.sidebar-close { display: none !important; }
+.lab-sidebar .sidebar-caption { margin: 16px 12px 32px; font-size: 13px; }
+.lab-sidebar .nav-list a, .lab-sidebar .nav-list button { border-radius: 7px; font-size: 14px; gap: 10px; padding: 12px; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: var(--sidebar-bg); background: var(--sidebar-ink); }
+.lab-sidebar .nav-list button:hover { background: color-mix(in srgb, var(--sidebar-ink) 12%, var(--sidebar-bg)); }
+.lab-sidebar :focus-visible { outline-color: var(--sidebar-ink); }
+.sidebar-footer { margin-top: auto; padding: 60px 12px 0; }
+.sidebar-footer > p { margin-bottom: 25px; font-size: 17px; line-height: 1.5; }
+.sidebar-footer .operator { padding-top: 20px; border-top: 1px solid color-mix(in srgb, var(--sidebar-ink) 25%, var(--sidebar-bg)); }
+.sidebar-footer .avatar { color: var(--sidebar-ink); background: transparent; border-color: color-mix(in srgb, var(--sidebar-ink) 65%, var(--sidebar-bg)); }
+.sidebar-footer small { color: var(--sidebar-ink); }
+.prototype-workspace { grid-column: 2; min-width: 0; background: var(--page-bg, var(--paper)); }
+.prototype-header { display: flex; align-items: center; gap: 15px; padding: 23px 32px; border-bottom: 1px solid var(--line); }
+.prototype-header h1 { font-size: 28px; }
+.prototype-header .header-detail { margin-top: 4px; color: var(--muted); font-size: 13px; }
+.prototype-header .toolbar { margin-left: auto; }
+.menu-toggle { display: inline-grid; place-items: center; flex-shrink: 0; min-width: 42px; min-height: 42px; padding: 9px; color: inherit; border: 1px solid var(--line); border-radius: 7px; background: transparent; }
+.menu-toggle:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
+.prototype-main { padding: 28px 32px; max-width: 1640px; margin: 0 auto; }
+.prototype-main h2 { font-size: 21px; }
+.prototype-panel { min-width: 0; padding: 23px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; }
+.prototype-panel .section-head { flex-wrap: wrap; }
+.prototype-panel figure { margin: 0; }
+.prototype-panel .product-list li { padding: 12px 0; }
+.prototype-panel .search-box input { width: 205px; }
+.prototype-main .chart-caption { font-size: 12px; }
+.prototype-main .metric-label { font-size: 14px; }
+.prototype-main .metric-note { font-size: 12px; }
+.sidebar-backdrop { position: fixed; z-index: 40; inset: 0; border: 0; background: #15100D80; cursor: pointer; }
+@media (max-width: 1150px) {
+  .exploration { --sidebar-width: 204px; }
+  .prototype-main { padding: 24px; }
+  .prototype-header { padding: 20px 24px; }
+  .prototype-panel { padding: 20px; }
+  .lab-sidebar .nav-list a, .lab-sidebar .nav-list button { font-size: 13px; }
+}
+@media (max-width: 800px) {
+  .prototype-shell { display: block; }
+  .lab-sidebar { position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(290px, 86vw); min-height: 100dvh; height: 100dvh; overflow-y: auto; }
+  .sidebar-close { display: inline-grid !important; border-color: color-mix(in srgb, var(--sidebar-ink) 40%, var(--sidebar-bg)); }
+  .menu-open { overflow: hidden; }
+  .prototype-header { flex-wrap: wrap; gap: 12px; padding: 20px; }
+  .prototype-header h1 { font-size: 27px; }
+  .prototype-header .toolbar { width: 100%; margin-left: 0; justify-content: space-between; }
+  .prototype-main { padding: 22px 18px; }
+  .prototype-panel { padding: 18px; }
+  .prototype-main .metric-value { font-size: 28px; }
+  .prototype-main .section-head { flex-wrap: wrap; }
+}

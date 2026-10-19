@@ -1,0 +1,33 @@
+/* Paleta clara; geometría y tipografía heredadas de Casa de café I. */
+:root {
+  color-scheme: light;
+  --wine: #314A60;
+  --clay: #253B4D;
+  --sand: #8999A9;
+  --cream: #F5F8FA;
+  --paper: #F7F9FA;
+  --ink: #253748;
+  --muted: #526373;
+  --line: #D4DDE4;
+}
+.casa {
+  --sidebar-bg: #E2E8EE;
+  --sidebar-ink: #253748;
+  --page-bg: #F7F9FA;
+  scrollbar-color: #8999A9 var(--paper);
+}
+.lab-bar { background: #D5DFE8; }
+.lab-links a:hover { background: #C3CFDA; }
+.lab-sidebar .brand span { color: #526B81; }
+.lab-sidebar .sidebar-caption, .sidebar-footer small { color: #4C5F70; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: #1A2936; background: #8999A9; }
+.daily-summary { background: #CDD8E3; }
+.daily-summary .metric-label, .daily-summary .metric-note { color: #354B5E; }
+.support-metric { border-color: #9BACBC; }
+.products-panel { background: #F0EDE7; }
+.product-bar { background: #D4D0C8; }
+.product-bar span { background: #576F83; }
+.payment-pill { border-color: #C8D3DD; }
+.segment { background: #E2E8EE; }
+.segment button[aria-pressed="true"] { color: #1A2936; background: #8999A9; }
+.segment button:hover { background: #D5DFE8; }

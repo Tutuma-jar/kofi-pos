@@ -1,0 +1,76 @@
+body { background: var(--cream); }
+.app-shell { display: grid; grid-template-columns: 222px minmax(0, 1fr); min-height: calc(100vh - 42px); padding: 14px 14px 14px 0; }
+.sidebar { padding: 32px 20px 20px; display: flex; flex-direction: column; }
+.brand { margin-left: 12px; }
+.sidebar-caption { margin: 16px 12px 36px; font-size: 12px; color: var(--muted); }
+.nav-list a, .nav-list button { border-radius: 9px; padding-left: 12px; font-size: 14px; }
+.nav-list a[aria-current="page"] { background: var(--wine); color: var(--cream); }
+.nav-list button:hover { background: var(--sand); }
+.sidebar-bottom { margin-top: auto; padding-top: 80px; }
+.sidebar-message { padding: 10px 12px 36px; }
+.sidebar-message .icon { width: 30px; height: 30px; margin-bottom: 13px; }
+.sidebar-message p { font-size: 16px; line-height: 1.5; }
+.sidebar .operator { padding: 20px 10px 0; border-top: 1px solid color-mix(in srgb, var(--wine) 20%, var(--cream)); }
+.sidebar .avatar { background: var(--paper); }
+.workspace { min-width: 0; border-radius: 22px; background: var(--paper); }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 32px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.topbar-date { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.topbar-date .icon { width: 15px; height: 15px; }
+.main-content { padding: 32px; max-width: 1500px; margin: 0 auto; }
+.period-row { display: flex; align-items: center; justify-content: space-between; margin: 28px 0 18px; font-size: 14px; }
+.metrics { display: grid; grid-template-columns: 1.25fr 1fr 1fr; padding: 22px 0 26px; margin-bottom: 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.metric { padding: 0 24px; border-left: 1px solid var(--line); }
+.metric:first-child { padding-left: 0; border-left: 0; }
+.dashboard-grid { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(250px, 1fr); gap: 22px; }
+.panel { padding: 23px; border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.chart-panel .section-head { flex-wrap: wrap; }
+.chart { margin: 18px 0 0; }
+.chart-panel { align-self: start; }
+.products-panel { background: color-mix(in srgb, var(--cream) 40%, var(--paper)); }
+.products-panel .section-head { margin-bottom: 4px; }
+.product-list li { padding: 12px 0; }
+.sales-panel .section-head { flex-wrap: wrap; }
+.payment-description { margin-top: 13px; color: var(--muted); font-size: 15px; }
+.payments-panel .text-action { margin-top: 30px; }
+@media (min-width: 1600px) { .main-content { padding: 40px; } .panel { padding: 28px; } }
+@media (max-width: 1150px) {
+  .app-shell { grid-template-columns: 188px minmax(0, 1fr); }
+  .sidebar { padding: 28px 12px 16px; }
+  .sidebar .brand { font-size: 34px; }
+  .sidebar-caption { font-size: 12px; }
+  .nav-list a, .nav-list button { font-size: 12px; gap: 9px; padding: 10px; }
+  .main-content { padding: 25px; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1.8fr) minmax(220px, 1fr); gap: 16px; }
+  .panel { padding: 18px; }
+  .metric-value { font-size: 32px; }
+  .metric { padding: 0 16px; }
+}
+@media (max-width: 940px) {
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .products-panel { grid-row: 3; }
+  .topbar-date { font-size: 12px; }
+  .metric-value { font-size: 28px; }
+  .metric-note { max-width: 18ch; }
+}
+@media (max-width: 700px) {
+  .app-shell { display: block; padding: 0; }
+  .sidebar { padding: 20px 18px 14px; }
+  .brand { margin-left: 0; }
+  .sidebar-caption, .sidebar-bottom { display: none; }
+  .nav-list { display: flex; overflow-x: auto; margin-top: 20px; gap: 5px; padding: 3px; }
+  .nav-list a, .nav-list button { width: auto; min-width: max-content; min-height: 40px; padding: 9px 10px; font-size: 12px; }
+  .nav-list .icon { display: none; }
+  .workspace { border-radius: 18px 18px 0 0; }
+  .topbar { padding: 16px 20px; }
+  .topbar-date { max-width: 160px; text-align: right; font-size: 12px; }
+  .topbar-date .icon { display: none; }
+  .main-content { padding: 24px 18px; }
+  .heading-copy p { max-width: 30ch; font-size: 14px; }
+  .heading-row .button { min-height: 40px; padding: 8px 12px; }
+  .metrics { grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr) minmax(0, .8fr); padding: 18px 0; }
+  .metric { padding: 0 10px; }
+  .metric-value { font-size: 24px; white-space: nowrap; letter-spacing: -.04em; }
+  .metric-label { min-height: 36px; font-size: 12px; }
+  .metric-note { display: none; }
+  .panel { padding: 18px; }
+}

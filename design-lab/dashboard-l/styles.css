@@ -1,0 +1,37 @@
+/* Paleta nocturna explícita, no inversión; composición heredada de I. */
+:root {
+  color-scheme: dark;
+  --wine: #8999A9;
+  --clay: #AAB9C7;
+  --sand: #CBBCA7;
+  --cream: #142536;
+  --paper: #1B242E;
+  --ink: #E3EBF2;
+  --muted: #B3C1CE;
+  --line: #46586A;
+}
+.casa {
+  --sidebar-bg: #141C25;
+  --sidebar-ink: #CBD6E0;
+  --page-bg: #1B242E;
+  scrollbar-color: #8999A9 var(--paper);
+}
+.lab-bar { color: #B3C1CE; background: #141C25; }
+.lab-links a:hover { background: #263747; }
+.lab-links a[aria-current="page"] { color: #142536; background: #8999A9; }
+.lab-sidebar .brand span { color: #8999A9; }
+.lab-sidebar .sidebar-caption, .sidebar-footer small { color: #B3C1CE; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: #142536; background: #8999A9; }
+.daily-summary { background: #263747; }
+.daily-summary .metric-label, .daily-summary .metric-note { color: #B3C1CE; }
+.primary-metric .metric-value { color: #C8D4DF; }
+.support-metric { border-color: #4C6072; }
+.products-panel { background: #26313D; }
+.product-bar { background: #3E4E5D; }
+.product-bar span { background: #8999A9; }
+.payment-pill { border-color: #46586A; }
+.sales-panel tbody tr:hover { background: #263747; }
+.segment { background: #141C25; }
+.segment button[aria-pressed="true"] { color: #142536; background: #8999A9; }
+.segment button:hover { background: #364859; }
+.segment button[aria-pressed="true"]:hover { background: #AAB9C7; }

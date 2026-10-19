@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exploración cálida del dashboard de Kofi. Datos ficticios, sin conexión con un negocio real.">
+  <title>Kofi — Dashboard cálido</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="../shared/fonts/fraunces-soft-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../shared/dashboard.js" defer></script>
+</head>
+<body data-variant="a">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="lab-bar">
+    <a href="../index.html">← Laboratorio Kofi</a>
+    <nav class="lab-links" aria-label="Variantes de diseño">
+      <a href="./index.html" aria-current="page">A · Cálida</a>
+      <a href="../dashboard-b/index.html">B · Minimalista</a>
+      <a href="../dashboard-c/index.html">C · Compacta</a>
+    </nav>
+    <span class="demo-label">Exploración visual · datos ficticios</span>
+  </div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación de Kofi">
+      <a class="brand" href="../index.html" aria-label="Kofi, laboratorio de diseño"><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg>kofi<span class="brand-dot">.</span></a>
+      <p class="sidebar-caption">Un buen día empieza aquí.</p>
+      <nav class="nav-list" aria-label="Principal">
+        <a href="./index.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#icon-dashboard"></use></svg>Dashboard</a>
+        <button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>Mi menú</button>
+        <button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-orders"></use></svg>Pedidos y ventas</button>
+        <button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg>Historial y reportes</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-message"><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg><p>Menos pendientes.<br>Más tiempo para tu café.</p></div>
+        <div class="operator"><span class="avatar" aria-hidden="true">O</span><div><strong>Operador</strong><small>Tu cafetería</small></div></div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><span>Dashboard</span><span class="topbar-date"><svg class="icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>Domingo, 18 de octubre de 2026</span></header>
+      <main id="contenido" class="main-content">
+        <div class="heading-row">
+          <div class="heading-copy"><h1>Tu cafetería, al día.</h1><p>Una mirada a lo que está pasando en tu negocio.</p></div>
+          <button class="button" type="button" data-demo="sale"><svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>Nueva venta</button>
+        </div>
+        <div class="period-row"><span data-period-label>Hoy, 18 de octubre</span><label><span class="sr-only">Período del resumen</span><select class="date-select" data-period><option value="today">Hoy</option><option value="week">Esta semana</option></select></label></div>
+        <section class="metrics" aria-label="Resumen del negocio">
+          <div class="metric"><p class="metric-label"><svg class="icon" aria-hidden="true"><use href="#icon-money"></use></svg>Ingresos registrados</p><strong class="metric-value" data-income>Bs 1.284,50</strong><p class="metric-note">Todo lo que ingresó en el período</p></div>
+          <div class="metric"><p class="metric-label"><svg class="icon" aria-hidden="true"><use href="#icon-trend"></use></svg>Ventas realizadas</p><strong class="metric-value" data-order-count>42</strong><p class="metric-note">Pagadas en efectivo o QR</p></div>
+          <div class="metric"><p class="metric-label"><svg class="icon" aria-hidden="true"><use href="#icon-orders"></use></svg>Pedidos registrados</p><strong class="metric-value" data-order-count>42</strong><p class="metric-note">Cada pedido cuenta una historia</p></div>
+        </section>
+        <div class="dashboard-grid">
+          <section class="panel chart-panel" aria-labelledby="chart-title">
+            <div class="section-head"><div><h2 id="chart-title">El ritmo de tus ventas</h2><p>Cómo se distribuye la actividad del período</p></div><div class="segment" role="group" aria-label="Datos del gráfico"><button type="button" data-series="income" aria-pressed="true">Ingresos</button><button type="button" data-series="orders" aria-pressed="false">Pedidos</button></div></div>
+            <figure class="chart"><div data-chart="bars"></div><figcaption class="chart-caption" data-chart-caption>Ingresos en bolivianos</figcaption></figure>
+          </section>
+          <section class="panel products-panel" aria-labelledby="products-title"><div class="section-head"><div><h2 id="products-title">Los favoritos</h2><p>Productos más vendidos · unidades</p></div><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg></div><ol class="product-list" data-products></ol></section>
+          <section class="panel sales-panel" aria-labelledby="sales-title">
+            <div class="section-head"><div><h2 id="sales-title">Ventas recientes</h2><p>El detalle de las últimas atenciones</p></div><label class="search-box"><span class="sr-only">Buscar una venta de muestra</span><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input type="search" data-search placeholder="Buscar una venta…"></label></div>
+            <div class="table-scroll" data-sales-table><table><caption class="sr-only">Últimas seis ventas ficticias</caption><thead><tr><th scope="col">Venta</th><th scope="col">Hora</th><th scope="col">Pago</th><th scope="col" aria-sort="none" data-sort-heading><button class="sort-button" type="button" data-sort aria-label="Ordenar ventas por importe">Importe<svg class="icon" aria-hidden="true"><use href="#icon-down"></use></svg></button></th></tr></thead><tbody data-sales></tbody></table></div>
+            <div class="empty-state" data-empty hidden><h3>No encontramos esa venta</h3><p>Prueba con el número, un producto o el método de pago.</p><button class="button button-secondary" type="button" data-clear>Limpiar búsqueda</button></div>
+            <p class="sales-status" data-sales-status aria-live="polite"></p>
+          </section>
+          <section class="panel payments-panel" aria-labelledby="payments-title"><h2 id="payments-title">Así te pagan</h2><p class="payment-description">Dos formas de cobrar.<br>Todo en un mismo resumen.</p><div class="payment-bar" aria-hidden="true"><span></span><span></span></div><div class="payment-line"><span class="payment-name"><span class="swatch"></span>QR · 58 %</span><strong data-qr-total>Bs 745,01</strong></div><div class="payment-line"><span class="payment-name"><span class="swatch swatch-sand"></span>Efectivo · 42 %</span><strong data-cash-total>Bs 539,49</strong></div><p class="payment-note">Métodos registrados, sin procesamiento de pagos.</p><button class="text-action" type="button" data-demo>Consultar historial<svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button></section>
+        </div>
+        <footer class="page-footer"><span>Hecho para el ritmo de tu cafetería.</span><span>Prototipo A · no conectado a datos reales</span></footer>
+      </main>
+    </div>
+  </div>
+  <div class="toast" data-toast role="status" hidden></div>
+  <noscript>Activa JavaScript para explorar los datos ficticios y los controles de este prototipo.</noscript>
+</body>
+</html>

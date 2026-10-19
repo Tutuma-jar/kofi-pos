@@ -1,0 +1,46 @@
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../shared/fonts/ibm-plex-sans-latin.woff2") format("woff2");
+}
+:root {
+  color-scheme: dark;
+  --wine: #8999A9;
+  --clay: #A9BAC9;
+  --sand: #CBBCA7;
+  --cream: #142536;
+  --paper: #1D252C;
+  --ink: #E6EDF2;
+  --muted: #ACBAC7;
+  --line: #3E4D58;
+}
+.refinement {
+  --interface-font: "IBM Plex Sans", sans-serif;
+  --control-border: #718495;
+  --focus-color: #8999A9;
+  --sidebar-focus: #CBD6DF;
+  --action-pressed: #7F93A6;
+  --segment-hover: #3B4C5B;
+  --data-color: #8999A9;
+  --sidebar-bg: #161E25;
+  --sidebar-ink: #C9D4DC;
+  --page-bg: #1D252C;
+}
+.lab-bar { color: #ACBAC7; background: #161E25; }
+.lab-links a:hover { background: #2B3B47; }
+.lab-links a[aria-current="page"] { color: #142536; background: #8999A9; }
+.lab-sidebar .brand span { color: #8999A9; }
+.lab-sidebar .sidebar-caption, .sidebar-footer small { color: #ACBAC7; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: #1A2936; background: #8999A9; }
+.daily-summary { background: #2B3B47; }
+.daily-summary .metric-label, .daily-summary .metric-note { color: #ACBAC7; }
+.primary-metric .metric-value { color: #D1DCE4; }
+.support-metric { border-color: #536777; }
+.products-panel { background: #27333D; }
+.product-bar { background: #41525F; }
+.product-bar span { background: #8999A9; }
+.payment-pill { border-color: #586C7D; }
+.sales-panel tbody tr:hover { background: #2B3B47; }
+.segment { background: #161E25; }

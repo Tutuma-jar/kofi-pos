@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/emilkowalski/skills",
+  "requested_url": "https://emilkowal.ski/skill",
+  "revision": "2d228630ba1446365f614a108cb8252f1feda202",
+  "license": "MIT",
+  "local_modifications": [],
+  "files": [
+    {
+      "path": "SKILL.md",
+      "source": "skills/emil-design-eng/SKILL.md",
+      "git_blob_sha1": "62ce902af8dd32c590ea7203e9ab2edb1d6ef81a",
+      "bytes": 27123
+    },
+    {
+      "path": "LICENSE",
+      "source": "LICENSE",
+      "git_blob_sha1": "57b46f1fd11dc62351ea548104a88aa3f659c11b",
+      "bytes": 1070
+    }
+  ]
+}

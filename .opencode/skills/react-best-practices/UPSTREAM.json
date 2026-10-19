@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/vercel-labs/agent-skills",
+  "requestedBranch": "react-best-practices",
+  "revision": "6e356b41264f0815d03740b5ae32ca5e1dddcfef",
+  "sourceDirectory": "skills/react-best-practices",
+  "originalFiles": 48,
+  "originalBytes": 108584,
+  "originalTreeFingerprint": "2dbbe422e608dc3235fb1a7d2e5a879578298824efc99928bed787ff12118969",
+  "fingerprintAlgorithm": "sha256(JSON.stringify([{path,blob,size}])) sorted by path.localeCompare(other,'en'); blob=Git SHA1; strip marked KOFI adaptation from SKILL.md",
+  "originalSkillBlob": "08e6f59597acfd08beb94c269d242d242e78f16b",
+  "licenseDeclaration": "MIT",
+  "licenseSource": "README.md at the pinned revision; copied verbatim to LICENSE-SOURCE.md",
+  "licenseSourceBlob": "c0a4f91a111cc73ed7805ae8d67f7b60a56c3441",
+  "licenseFilePresentUpstream": false,
+  "localFiles": ["NOTICE-KOFI.md", "UPSTREAM.json"],
+  "localAdaptation": "Only the marked KOFI-ADAPTATION block in SKILL.md"
+}

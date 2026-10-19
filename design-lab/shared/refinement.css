@@ -1,0 +1,23 @@
+/* Refinamientos de color y tipografía. La distribución sigue perteneciendo a I. */
+.casa.refinement {
+  --font: var(--interface-font);
+  font-family: var(--interface-font);
+  font-variation-settings: normal;
+  scrollbar-color: var(--sand) var(--paper);
+}
+.refinement h1, .refinement h2, .refinement h3, .refinement .brand {
+  font-family: "Fraunces", Georgia, serif;
+}
+.refinement .metric-value { font-variation-settings: normal; letter-spacing: -.01em; }
+.refinement td:last-child strong { font-weight: 600; }
+.refinement .search-box input, .refinement .date-select, .refinement .menu-toggle { border-color: var(--control-border); }
+.refinement :focus-visible { outline-color: var(--focus-color); }
+.refinement .lab-sidebar :focus-visible { outline-color: var(--sidebar-focus); }
+.refinement .button:active { background: var(--action-pressed); }
+.refinement .segment button[aria-pressed="true"] { color: #1A2936; background: #8999A9; }
+.refinement .segment button:hover { background: var(--segment-hover); }
+.refinement .segment button[aria-pressed="true"]:hover { background: #AAB9C7; }
+.refinement [data-chart] rect { fill: var(--data-color); stroke: var(--data-color); }
+.refinement .payment-bar span:first-child, .refinement .swatch { background: var(--data-color); }
+.refinement .swatch-sand { background: var(--sand); }
+.refinement .segment button[aria-pressed="true"], .refinement .toast { box-shadow: none; }

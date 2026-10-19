@@ -1,0 +1,8 @@
+# React Best Practices — integración local
+
+- Fuente solicitada: rama `react-best-practices` de `vercel-labs/agent-skills`, fijada en `6e356b41264f0815d03740b5ae32ca5e1dddcfef` (guía 0.1.0). No se sustituye por `main` ni por otra distribución.
+- Procedencia y fingerprint de los 48 archivos originales en `UPSTREAM.json`: `SKILL.md`, 46 referencias y `LICENSE-SOURCE.md` (copia íntegra del README raíz de esa revisión). Todos son Markdown; no se copian scripts o skills de despliegue ni se ejecutan ejemplos/instaladores.
+- El README upstream declara **MIT**, pero esa revisión no contiene un archivo LICENSE. Se conserva su declaración original en [LICENSE-SOURCE.md](LICENSE-SOURCE.md#license), sin inventar un copyright o presentar un texto de licencia como si fuese un original ausente. Las secciones de instalación y despliegue de ese README son antecedentes de origen, no instrucciones autorizadas en Kofi.
+- Única adaptación: bloque marcado `KOFI-ADAPTATION` en `SKILL.md`, con límites del stack, contexto, secuencia y pruebas. Las referencias y la declaración de licencia se conservan byte a byte. El fingerprint original se comprueba retirando ese bloque en memoria.
+- Uso: [contrato Frontend](../../../docs/ai-context/design-system.md#7-react-best-practices). La skill no reemplaza testing ni aprueba Next.js, dependencias, refactorizaciones extensas, datos o funcionalidades.
+- Mantenimiento: autorizar actualizaciones, fijar revisión, revisar licencia/instrucciones y verificar blobs/fingerprint antes de cambiar archivos; conservar o reconciliar la adaptación. Sin configuración global ni modelos fijos.

@@ -1,0 +1,89 @@
+# US-012 — Revisar cambios del catálogo antes de cobrar
+
+## Descripción
+
+Como operador, quiero conocer los cambios de precio o desactivación que afecten mi selección, para revisar la venta antes de cobrar.
+
+## Objetivo
+
+Evitar cobrar un total modificado sin conocimiento del operador y resolver los cambios concurrentes del catálogo antes del cobro.
+
+## Alcance
+
+- Módulo: Gestión de ventas.
+- Incluye: comprobación al pasar a revisión previa al cobro, aviso, resolución de cambios y confirmación explícita del total.
+- Excluye: edición o bloqueo global del catálogo, procesamiento de pagos, estados de pedidos y seguimiento de preparación.
+- La revisión es parte del recorrido de la venta en curso; no crea una entidad de pedido ni promete persistencia o recuperación de la selección.
+
+## Criterios de aceptación
+
+| ID | Comportamiento observable |
+| --- | --- |
+| CA-01 | Al pasar a la revisión previa al cobro se comprueban cambios de precio y desactivación de los productos seleccionados. |
+| CA-02 | Si cambió un precio, se muestran el anterior y el nuevo. El precio vigente se aplica solo después de que el operador confirme la revisión; no se permite conservar el anterior por elección en esa revisión. |
+| CA-03 | Si se desactivó un producto seleccionado, se avisa y se exige retirarlo antes de continuar al cobro. |
+| CA-04 | Se muestra el total resultante y se exige confirmación explícita de la revisión antes del cobro. Ningún cambio de precio o desactivación modifica silenciosamente el total. Una selección vacía no permite continuar al registro conforme a US-011. |
+| CA-05 | Si el catálogo cambia después de recibir el dinero y antes del registro, se respetan el precio y los productos de la revisión confirmada, incluso si luego se desactivan. No se exige rehacer el cobro por esa edición concurrente. El registro de esa operación corresponde a US-013. |
+| CA-06 | Al confirmar la revisión quedan fijados la selección y el total para cobrar. Los cambios posteriores del catálogo, también entre esa confirmación y recibir el dinero, no modifican esa operación ni bloquean el catálogo. No hay caducidad automática de la revisión durante ese recorrido. |
+| CA-07 | Cambiar productos o cantidades antes del pago invalida la revisión y exige revisarla y confirmarla nuevamente. Después de recibir el dinero se registra exactamente lo confirmado, sin editar esa operación durante el registro. Recargar, cerrar la pestaña o cerrar sesión descarta la revisión, sin recuperación, conforme a US-010. |
+
+### Condiciones previas a implementar
+
+Las reglas del intervalo revisión–pago y ajustes posteriores ya están aprobadas en CA-06/CA-07. Concretar el contrato y la evidencia de revisión protegida por backend, vinculada a operación y contenido, conforme a la [base técnica](../ai-context/architecture.md#7-base-técnica-mínima-aprobada). Debe impedir alteraciones y definir la carrera entre comprobar catálogo y confirmar la revisión: la fijación ocurre al confirmar, no por una lectura previa arbitrariamente antigua. No hay verificación automática del pago ni persistencia recuperable del borrador; los detalles del protocolo siguen pendientes y no se presumen resueltos por el versionado del catálogo.
+
+### Verificación prevista de los criterios
+
+- CA-01 a CA-04: integración con dos sesiones, una preparando la venta y otra editando precios o desactivando productos; comprobar avisos, ambos precios, retiro exigido, confirmación del total y ausencia de cambios silenciosos. Incluir precio y desactivación cambiando conjuntamente y selección que queda vacía.
+- CA-05: recorrido con revisión confirmada y recepción manual del dinero, seguido de edición o desactivación concurrente antes del registro; comprobar que se conserva lo revisado en esa operación sin afectar nuevas selecciones.
+- CA-06: dos sesiones con revisión confirmada y cambio de precio/desactivación antes de recibir el dinero; comprobar conservación de selección/total y continuidad del catálogo para otras operaciones. Simular paso de tiempo sin salida y verificar que no caduca automáticamente.
+- CA-07: cambiar cantidades/productos antes del pago exige nueva revisión; después del pago no se edita la operación. En navegador real, recarga/cierre/salida descarta revisión sin recuperarla; US-013 comprueba por separado el resultado de un envío incierto.
+- Concretar carreras durante comprobación y confirmación junto con el contrato; incluir intentos de alterar contenido o reutilizar la evidencia para una operación distinta. No se considera cubierto por la concurrencia de edición del catálogo.
+
+Estas verificaciones están previstas, no ejecutadas. Hoy no hay aplicación ni comandos de pruebas del POS; antes de implementar, el principal concretará casos y comandos según el [procedimiento de testing](../ai-context/documentation.md#7-procedimiento-de-testing).
+
+## Dependencias relevantes
+
+- [US-007 — Editar productos](us-007-editar-productos.md) y [US-009 — Desactivar y reactivar productos](us-009-desactivar-reactivar-productos.md): cambios concurrentes del catálogo, sin trasladarles el flujo de ventas.
+- [US-010 — Consultar y seleccionar productos para vender](us-010-consultar-seleccionar-productos-venta.md) y [US-011 — Ajustar y revisar la venta en curso](us-011-ajustar-revisar-venta-en-curso.md): selección, cantidades y total.
+- [US-013 — Registrar la venta después del pago](us-013-registrar-venta-pagada.md): conservación de lo revisado tras recibir el dinero y registro íntegro.
+
+## Aprobación
+
+El responsable respondió «si apruebo todo» en la conversación del 2026-10-18 a las cuatro historias propuestas con `requirements-analyst` y las siete recomendaciones del principal. Incluye expresamente la recomendación destacada del punto 4: respetar precio y productos de la revisión confirmada si el catálogo cambia después de cobrar, incluso ante desactivación. Esta precisión sustituye la formulación general pendiente de concretar de producto para ese caso; no permite seleccionar nuevos productos inactivos. La aprobación autoriza el registro documental, no implementar código ni aprobar tareas técnicas todavía no presentadas.
+
+Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas estas nueve tareas para asignarles IDs y registrarlas como pendientes, sin iniciar implementación?». Queda aprobado su registro documental como TASK-024 a TASK-032 en US-010 a US-013. La aprobación no resuelve las decisiones pendientes de revisión/cobro, ajustes posteriores o comprobación de registros inciertos tras salida ni autoriza implementar.
+
+El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técnica mínima y autorizó documentarlas sin implementación. Esta aprobación posterior resuelve la fijación desde confirmar para cobrar, la nueva revisión al ajustar antes del pago, el registro sin edición después del pago y la ausencia de caducidad automática, sin recuperación tras salida. Se añaden CA-06/CA-07 y verificaciones a TASK-028/TASK-029; los contratos técnicos y carreras no concretados siguen pendientes.
+
+## Tareas técnicas asociadas
+
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-028 y TASK-029 sustituyen respectivamente las etiquetas locales P12-A y P12-B. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
+
+### Condiciones previas compartidas
+
+- Aplicar CA-06/CA-07: las reglas de fijación, ajustes y continuidad hasta el registro ya están aprobadas; no se mantienen como decisiones abiertas ni se introduce caducidad.
+- Concretar contrato entre comprobación, resolución, confirmación y registro, y protección de la evidencia backend. Faltan DTO/rutas y mecanismo de protección/confirmación concurrente; la concurrencia de edición del catálogo no sustituye este contrato.
+- Las tareas pueden construirse contra contratos aprobados. El recorrido completo de conservación tras el cobro requiere US-013; no obliga a implementar primero su interfaz para construir la comprobación de catálogo.
+- Aplican las condiciones de cierre visual de [US-010](us-010-consultar-seleccionar-productos-venta.md#condiciones-previas-compartidas). Las verificaciones siguientes son futuras, no ejecutadas; no hay pruebas del POS configuradas.
+
+### TASK-028 — Comprobar y proteger la revisión frente al catálogo concurrente
+
+- Historia relacionada: [US-012](us-012-revisar-cambios-catalogo-antes-cobro.md).
+- Responsabilidad: backend.
+- Descripción y objetivo: contrastar la selección con el catálogo y sustentar una revisión confirmada utilizable en el registro.
+- Alcance y exclusiones: detectar cambios de precio y desactivación, proporcionar información para resolverlos y proteger lo revisado según el contrato aprobado. Sin bloqueo global del catálogo, procesamiento de pagos ni persistencia de borradores.
+- Resultado esperado: diferencias comprobables y base fiable para respetar precios y productos revisados ante cambios posteriores al cobro.
+- Criterios aplicables: CA-01 a CA-07, parte de reglas y datos, protección de fijación y contenido y rechazo de registros no correspondientes a la revisión confirmada.
+- Verificación prevista: integración con dos sesiones, cambios conjuntos de precio/desactivación y carreras definidas por el contrato aprobado. Comprobar retiro exigido, aplicación del precio vigente tras confirmar y conservación de lo revisado tras cambios posteriores al cobro, integrada con US-013.
+- Dependencias: US-007/US-009, contratos de selección e importes de US-010/US-011 y resolución de las condiciones previas. La construcción no depende de TASK-029; la verificación completa de CA-05 requiere TASK-030 de US-013.
+
+### TASK-029 — Guiar la resolución y confirmación explícita de la revisión
+
+- Historia relacionada: [US-012](us-012-revisar-cambios-catalogo-antes-cobro.md).
+- Responsabilidad: frontend.
+- Descripción y objetivo: mostrar los cambios y permitir continuar únicamente con la revisión resuelta y confirmada.
+- Alcance y exclusiones: precio anterior/nuevo, aviso de desactivación, retiro obligatorio, total resultante y confirmación explícita. Sin elegir conservar un precio anterior ni verificar automáticamente el pago.
+- Resultado esperado: ningún cambio se aplica silenciosamente ni se continúa al cobro con productos desactivados pendientes de retirar o selección vacía.
+- Criterios aplicables: CA-01 a CA-04, CA-06/CA-07 en interacción y descarte, y continuidad de CA-05 hacia US-013.
+- Verificación prevista: recorrido con edición desde otra sesión; comprobar ambos precios, aplicación tras confirmar, retiro obligatorio, total y selección que queda vacía. Cubrir los recorridos de CA-06/CA-07 ya aprobados y las carreras técnicas cuando se concrete su contrato.
+- Dependencias: TASK-026 de US-010, TASK-027 de US-011 y contrato de TASK-028; integración final con TASK-028 y resolución de las decisiones previas de revisión y cobro.

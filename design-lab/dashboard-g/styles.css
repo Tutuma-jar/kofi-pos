@@ -1,0 +1,20 @@
+:root {
+  --wine: #334756;
+  --clay: #253544;
+  --sand: #8999A9;
+  --cream: #EEE7DA;
+  --paper: #FAF8F3;
+  --ink: #253544;
+  --muted: #52616C;
+  --line: #D4DADD;
+}
+.exploration { --sidebar-bg: #8999A9; --sidebar-ink: #1E2D38; --page-bg: #E8ECEE; }
+.lab-sidebar .nav-list a[aria-current="page"] { background: #263A4A; color: #FAF8F3; }
+.lab-sidebar .avatar { background: #A8B5C0; }
+.day-overview .summary-pair { border-color: #EEE7DA47; }
+.products-panel { background: #E7DDCD; }
+.product-list li { border-color: #C4B8A7; }
+.product-bar { background: #CFC7BC; }
+.product-bar span { background: #334756; }
+.segment { background: #E0E5E9; }
+.segment button[aria-pressed="true"] { background: #FAF8F3; box-shadow: none; }

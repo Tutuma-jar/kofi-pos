@@ -1,0 +1,3 @@
+#!/bin/sh
+# Solo documentación del índice. No pruebas, ediciones, commits o delegación.
+exec node .opencode/scripts/kofi-check.mjs docs

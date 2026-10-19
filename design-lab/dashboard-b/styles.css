@@ -1,0 +1,79 @@
+:root { --paper: color-mix(in srgb, var(--cream) 12%, white); }
+.lab-bar { background: var(--clay); }
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: 30px; max-width: 1440px; margin: 0 auto; padding: 0 54px; height: 92px; border-bottom: 1px solid var(--line); }
+.brand { font-size: 40px; }
+.nav-list { display: flex; gap: 20px; height: 100%; align-items: stretch; }
+.nav-list a, .nav-list button { position: relative; min-height: 44px; padding: 10px 2px; font-size: 14px; white-space: nowrap; }
+.nav-list a[aria-current="page"]::after { content: ""; position: absolute; height: 2px; bottom: 0; left: 0; right: 0; background: var(--wine); }
+.nav-list button:hover { color: var(--clay); text-decoration: underline; text-underline-offset: 8px; }
+.operator small { font-size: 12px; }
+.avatar { width: 34px; height: 34px; background: transparent; border-color: var(--sand); }
+.main-content { max-width: 1440px; margin: 0 auto; padding: 38px 54px 25px; }
+h1 { font-size: 34px; }
+.heading-copy p { font-size: 14px; }
+.button, .date-select { border-radius: 4px; }
+.period-caption { color: var(--muted); margin-top: 32px; font-size: 12px; }
+.metrics { display: grid; grid-template-columns: 1.55fr 1fr 1fr; padding: 20px 0 28px; border-bottom: 1px solid var(--line); }
+.metric { border-left: 1px solid var(--line); padding-left: 34px; }
+.metric:first-child { padding-left: 0; border: 0; }
+.metric-value { font-size: 42px; }
+.metric:first-child .metric-value { font-size: 46px; }
+.metric-note { margin-top: 9px; }
+.analysis-grid { display: grid; grid-template-columns: minmax(0, 2.75fr) minmax(250px, 1fr); border-bottom: 1px solid var(--line); }
+.chart-panel { padding: 27px 35px 25px 0; border-right: 1px solid var(--line); min-width: 0; }
+.chart-panel .section-head { margin-bottom: 8px; }
+.chart { margin: 12px 0 0; }
+.chart text { font-size: 12px; }
+.payments-panel { padding: 28px 0 24px 30px; }
+.payment-total { font-size: 28px; line-height: 1.2; margin-top: 20px; letter-spacing: -.025em; }
+.payment-bar { margin: 18px 0; height: 9px; gap: 2px; }
+.payment-bar span { border-radius: 1px !important; }
+.payment-line { font-size: 13px; }
+.payment-name { gap: 7px; }
+.payment-note { font-size: 12px; }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 2.75fr) minmax(250px, 1fr); }
+.sales-panel { padding: 28px 35px 0 0; border-right: 1px solid var(--line); min-width: 0; }
+.sales-panel .section-head { align-items: flex-start; }
+.products-panel { padding: 28px 0 0 30px; }
+.products-panel .section-head { margin-bottom: 2px; }
+.products-panel .text-action { margin-top: 20px; }
+.product-list li { padding: 12px 0; }
+.product-bar { height: 3px; border-radius: 0; }
+.search-box input { border-radius: 4px; }
+.segment, .segment button { border-radius: 3px; }
+.page-footer { border-top: 1px solid var(--line); margin-top: 28px; }
+@media (max-width: 1120px) {
+  .site-header { padding: 0 30px; gap: 25px; }
+  .nav-list { gap: 16px; }
+  .nav-list a, .nav-list button { font-size: 12px; }
+  .main-content { padding: 30px; }
+  .analysis-grid, .detail-grid { grid-template-columns: minmax(0, 2.3fr) minmax(230px, 1fr); }
+  .chart-panel, .sales-panel { padding-right: 24px; }
+  .payments-panel, .products-panel { padding-left: 24px; }
+  .chart-panel .section-head, .sales-panel .section-head { flex-wrap: wrap; }
+}
+@media (max-width: 800px) {
+  .site-header { height: auto; padding: 22px 24px 0; flex-wrap: wrap; gap: 20px; }
+  .site-header > .operator { margin-left: auto; }
+  .nav-list { order: 3; width: 100%; justify-content: space-between; gap: 14px; padding-bottom: 0; overflow-x: auto; }
+  .nav-list a, .nav-list button { padding: 14px 0; font-size: 12px; }
+  .analysis-grid, .detail-grid { grid-template-columns: minmax(0, 1fr); }
+  .chart-panel, .sales-panel { border: 0; padding-right: 0; }
+  .payments-panel { padding: 25px 0; border-top: 1px solid var(--line); }
+  .products-panel { padding: 25px 0 0; border-top: 1px solid var(--line); margin-top: 25px; }
+  .payments-panel .section-head { margin-bottom: 5px; }
+  .payment-total { margin-top: 12px; }
+}
+@media (max-width: 520px) {
+  .main-content { padding: 27px 20px 22px; }
+  .site-header { padding-left: 20px; padding-right: 20px; }
+  .heading-row { gap: 19px; }
+  .toolbar { width: 100%; justify-content: space-between; }
+  .metrics { grid-template-columns: 1.35fr .8fr .8fr; padding: 20px 0; }
+  .metric { padding-left: 12px; }
+  .metric-value, .metric:first-child .metric-value { font-size: 25px; white-space: nowrap; }
+  .metric-label { min-height: 36px; font-size: 12px; }
+  .metric-note { display: none; }
+  .period-caption { margin-top: 25px; }
+  .chart-panel .section-head { flex-wrap: wrap; }
+}

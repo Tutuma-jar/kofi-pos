@@ -1,0 +1,37 @@
+# Dependencias y motor local generado; la skill y sus lanzadores sí se versionan.
+node_modules/
+.opencode/skills/impeccable/scripts/bin/
+
+# Artefactos del arranque técnico y configuración local; ejemplos sí versionados.
+frontend/dist/
+backend/dist/
+**/coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Contexto y resultados locales de controles; no son otro tracker.
+.opencode/task.local.json
+.opencode/.cache/kofi-check/
+
+# impeccable-ignore-start
+# Cachés, capturas y estado por desarrollador; no excluir decisiones compartidas.
+**/.impeccable/config.local.json
+**/.impeccable/hook.cache.json
+**/.impeccable/hook.pending.json
+**/.impeccable/*.png
+**/.impeccable/review/
+**/.impeccable/questions/
+**/.impeccable/live/server.json
+**/.impeccable/live/sessions/
+**/.impeccable/live/previews/
+**/.impeccable/live/annotations/
+**/.impeccable/live/cache/
+**/.impeccable/live/manual-edit-apply-transaction.json
+**/.impeccable/live/manual-edit-events.jsonl
+**/.impeccable/live/manual-edit-evidence/
+**/.impeccable/live/pending-manual-edits.json
+**/.impeccable/live/deferred-svelte-component-accepts.json
+**/.impeccable/live/*.png
+# impeccable-ignore-end

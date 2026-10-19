@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light;
+  --wine: #8C4E36;
+  --clay: #713B29;
+  --sand: #8999A9;
+  --cream: #FCF8F1;
+  --paper: #FCF8F1;
+  --ink: #45352E;
+  --muted: #6D5D50;
+  --line: #DDCFBD;
+}
+.refinement {
+  --interface-font: "Fraunces", Georgia, serif;
+  --control-border: #907B68;
+  --focus-color: #8C4E36;
+  --sidebar-focus: #C8D3DC;
+  --action-pressed: #623321;
+  --segment-hover: #DCE1E3;
+  --data-color: #765B4C;
+  --sidebar-bg: #45352E;
+  --sidebar-ink: #F5EFE5;
+  --page-bg: #F5EFE5;
+}
+.casa.refinement { font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 9; }
+.refinement .metric-value { font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 24; }
+.lab-bar { color: var(--ink); background: #E6DACA; }
+.lab-links a:hover { background: #D8C5B0; }
+.lab-sidebar .brand span { color: #B6C3CF; }
+.lab-sidebar .sidebar-caption, .sidebar-footer small { color: #E1CFB7; }
+.lab-sidebar .nav-list a[aria-current="page"] { color: #1A2936; background: #8999A9; }
+.daily-summary { background: #E6DACA; }
+.daily-summary .metric-label, .daily-summary .metric-note { color: #6D5D50; }
+.support-metric { border-color: #BCA48B; }
+.products-panel { background: #FCF8F1; }
+.product-bar { background: #D9CBB9; }
+.product-bar span { background: #765B4C; }
+.payment-pill { border-color: #CBB9A4; }
+.segment { background: #E6DACA; }

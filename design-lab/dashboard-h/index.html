@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="La composición del dashboard D de Kofi en azul grisáceo #8999A9, espresso y crema, con datos ficticios.">
+  <title>Kofi — Pizarra y café</title><link rel="icon" href="data:,">
+  <link rel="preload" href="../shared/fonts/fraunces-soft-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="../shared/exploration.css"><link rel="stylesheet" href="../dashboard-d/styles.css"><link rel="stylesheet" href="./styles.css">
+  <script src="../shared/dashboard.js" defer></script>
+</head>
+<body class="exploration" data-variant="h" data-navigation="closed">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="lab-bar"><a href="../index.html">← Laboratorio Kofi</a><nav class="lab-links" data-exploration-links aria-label="Variaciones de color de D"></nav><span class="demo-label">Pizarra y café · datos ficticios</span></div>
+  <div class="prototype-shell">
+    <aside class="lab-sidebar" id="menu-principal" data-sidebar aria-label="Menú principal" hidden>
+      <div class="sidebar-brand-row"><a class="brand" href="../index.html" aria-label="Kofi, laboratorio">kofi<span>.</span></a><button class="menu-toggle sidebar-close" type="button" data-sidebar-toggle aria-controls="menu-principal" aria-expanded="false" aria-label="Cerrar menú principal"><svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg></button></div>
+      <p class="sidebar-caption">Café, calma y un buen día.</p><nav class="nav-list" data-exploration-nav aria-label="Principal"></nav>
+      <div class="sidebar-footer"><p>Lo pequeño,<br>bien cuidado.</p><div class="operator"><span class="avatar" aria-hidden="true">O</span><div><strong>Operador</strong><small>Tu cafetería</small></div></div></div>
+    </aside>
+    <div class="prototype-workspace" data-workspace>
+      <header class="prototype-header"><button class="menu-toggle" type="button" data-sidebar-toggle data-sidebar-opener aria-controls="menu-principal" aria-expanded="false" aria-label="Mostrar menú principal"><svg class="icon" aria-hidden="true"><use href="#icon-hamburger"></use></svg></button><div><h1>Dashboard</h1><p class="header-detail" data-period-label>Hoy, 18 de octubre</p></div><div class="toolbar"><label><span class="sr-only">Período del resumen</span><select class="date-select" data-period><option value="today">Hoy</option><option value="week">Esta semana</option></select></label><button class="button" type="button" data-demo="sale"><svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>Nueva venta</button></div></header>
+      <main class="prototype-main" id="contenido">
+        <div class="intro-line"><h2>Tu día, de un vistazo.</h2><p>El café se disfruta mejor con todo en orden.</p></div>
+        <div class="day-grid">
+          <section class="day-overview" aria-label="Resumen del negocio"><div><p class="metric-label">Ingresos registrados</p><strong class="metric-value" data-income>Bs 1.284,50</strong><p class="metric-note">Efectivo y QR · bolivianos</p></div><div class="summary-pair"><div><p class="metric-label">Ventas realizadas</p><strong class="metric-value" data-order-count>42</strong></div><div><p class="metric-label">Pedidos registrados</p><strong class="metric-value" data-order-count>42</strong></div></div><p class="overview-note"><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg>Cada atención, en su lugar.</p></section>
+          <section class="prototype-panel chart-panel" aria-labelledby="chart-title"><div class="section-head"><div><h2 id="chart-title">El ritmo de tu cafetería</h2><p>Actividad a lo largo del período</p></div><div class="segment" role="group" aria-label="Datos del gráfico"><button type="button" data-series="income" aria-pressed="true">Ingresos</button><button type="button" data-series="orders" aria-pressed="false">Pedidos</button></div></div><figure class="chart"><div data-chart="line"></div><figcaption class="chart-caption" data-chart-caption>Ingresos en bolivianos</figcaption></figure></section>
+        </div>
+        <div class="details-grid">
+          <section class="prototype-panel products-panel" aria-labelledby="products-title"><div class="section-head"><div><h2 id="products-title">Los favoritos de la casa</h2><p>Productos más vendidos · unidades</p></div><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg></div><ol class="product-list" data-products></ol></section>
+          <section class="prototype-panel sales-panel" aria-labelledby="sales-title"><div class="section-head"><div><h2 id="sales-title">Últimas ventas</h2><p>Una mirada a las atenciones más recientes</p></div><label class="search-box"><span class="sr-only">Buscar una venta de muestra</span><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input type="search" data-search placeholder="Buscar una venta…"></label></div><div class="table-scroll" data-sales-table><table><caption class="sr-only">Últimas seis ventas ficticias</caption><thead><tr><th scope="col">Venta</th><th scope="col">Hora</th><th scope="col">Pago</th><th scope="col" data-sort-heading aria-sort="none"><button class="sort-button" type="button" data-sort aria-label="Ordenar ventas por importe">Importe<svg class="icon" aria-hidden="true"><use href="#icon-down"></use></svg></button></th></tr></thead><tbody data-sales></tbody></table></div><div class="empty-state" data-empty hidden><h3>No encontramos esa venta</h3><p>Prueba otro producto, número o método de pago.</p><button class="button button-secondary" type="button" data-clear>Limpiar búsqueda</button></div><p class="sales-status" data-sales-status aria-live="polite"></p></section>
+        </div>
+        <section class="payments-band" aria-labelledby="payments-title"><div><h2 id="payments-title">Así te pagan</h2><p>Distribución de ingresos registrados</p></div><div class="payment-line"><span class="payment-name"><span class="swatch"></span>QR · 58 %</span><strong data-qr-total>Bs 745,01</strong></div><div class="payment-line"><span class="payment-name"><span class="swatch swatch-sand"></span>Efectivo · 42 %</span><strong data-cash-total>Bs 539,49</strong></div><div class="payment-bar" aria-hidden="true"><span></span><span></span></div></section>
+        <footer class="page-footer"><span>Pizarra y café · Fraunces suave</span><span>Prototipo H · composición de D</span></footer>
+      </main>
+    </div>
+  </div>
+  <button class="sidebar-backdrop" type="button" data-sidebar-backdrop aria-label="Cerrar menú" tabindex="-1" hidden></button><div class="toast" data-toast role="status" hidden></div>
+  <noscript>Activa JavaScript para probar el menú y los datos de demostración.</noscript>
+</body>
+</html>

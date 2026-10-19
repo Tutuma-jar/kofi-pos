@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exploración compacta del dashboard de Kofi con datos ficticios.">
+  <title>Kofi — Dashboard compacto</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="../shared/fonts/fraunces-soft-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../shared/dashboard.js" defer></script>
+</head>
+<body data-variant="c">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="lab-bar"><a href="../index.html">← Laboratorio Kofi</a><nav class="lab-links" aria-label="Variantes de diseño"><a href="../dashboard-a/index.html">A · Cálida</a><a href="../dashboard-b/index.html">B · Minimalista</a><a href="./index.html" aria-current="page">C · Compacta</a></nav><span class="demo-label">Exploración visual · datos ficticios</span></div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación de Kofi">
+      <a class="brand" href="../index.html" aria-label="Kofi, laboratorio de diseño">kofi<span>.</span></a>
+      <p class="sidebar-caption">Tu cafetería, en orden.</p>
+      <nav class="nav-list" aria-label="Principal"><a href="./index.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#icon-dashboard"></use></svg>Dashboard</a><button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>Mi menú</button><button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-orders"></use></svg>Pedidos y ventas</button><button type="button" data-demo><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg>Historial y reportes</button></nav>
+      <div class="sidebar-bottom"><p class="local-note"><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg>Una cafetería.<br>Todo lo que importa.</p><div class="operator"><span class="avatar" aria-hidden="true">O</span><div><strong>Operador</strong><small>Tu cafetería</small></div></div></div>
+    </aside>
+    <main id="contenido" class="main-content">
+      <div class="heading-row"><div class="heading-copy"><h1>Dashboard</h1><p data-period-label>Hoy, 18 de octubre</p></div><div class="toolbar"><label><span class="sr-only">Período del resumen</span><select class="date-select" data-period><option value="today">Hoy</option><option value="week">Esta semana</option></select></label><button class="button" type="button" data-demo="sale"><svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>Nueva venta</button></div></div>
+      <section class="metrics" aria-label="Resumen del negocio"><div class="metric metric-featured"><p class="metric-label">Ingresos registrados</p><strong class="metric-value" data-income>Bs 1.284,50</strong><p class="metric-note">Pagos en efectivo y QR</p></div><div class="metric"><p class="metric-label">Ventas realizadas</p><strong class="metric-value" data-order-count>42</strong><p class="metric-note">Pagadas en el período</p></div><div class="metric"><p class="metric-label">Pedidos registrados</p><strong class="metric-value" data-order-count>42</strong><p class="metric-note">Actividad del período</p></div></section>
+      <div class="dashboard-grid">
+        <section class="panel sales-panel" aria-labelledby="sales-title"><div class="section-head"><div><h2 id="sales-title">Ventas recientes</h2><p>Cada atención, en su lugar.</p></div><button class="text-action" type="button" data-demo>Ver historial<svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button></div><label class="search-box"><span class="sr-only">Buscar una venta de muestra</span><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg><input type="search" data-search placeholder="Buscar por venta, producto o pago…"></label><div class="table-scroll" data-sales-table><table><caption class="sr-only">Últimas seis ventas ficticias</caption><thead><tr><th scope="col">Venta</th><th scope="col">Hora</th><th scope="col">Pago</th><th scope="col" aria-sort="none" data-sort-heading><button class="sort-button" type="button" data-sort aria-label="Ordenar ventas por importe">Importe<svg class="icon" aria-hidden="true"><use href="#icon-down"></use></svg></button></th></tr></thead><tbody data-sales></tbody></table></div><div class="empty-state" data-empty hidden><h3>No encontramos esa venta</h3><p>Prueba con el número, un producto o el método de pago.</p><button class="button button-secondary" type="button" data-clear>Limpiar búsqueda</button></div><p class="sales-status" data-sales-status aria-live="polite"></p><div class="sales-bottom-note"><svg class="icon" aria-hidden="true"><use href="#icon-orders"></use></svg><span>Los pagos se registran antes de preparar o entregar.</span></div></section>
+        <section class="panel chart-panel" aria-labelledby="chart-title"><div class="section-head"><h2 id="chart-title">Actividad</h2><div class="segment" role="group" aria-label="Datos del gráfico"><button type="button" data-series="income" aria-pressed="true">Ingresos</button><button type="button" data-series="orders" aria-pressed="false">Pedidos</button></div></div><figure class="chart"><div data-chart="area"></div><figcaption class="chart-caption" data-chart-caption>Ingresos en bolivianos</figcaption></figure></section>
+        <section class="panel products-panel" aria-labelledby="products-title"><div class="section-head"><div><h2 id="products-title">Productos favoritos</h2><p>Más vendidos · unidades</p></div><svg class="icon" aria-hidden="true"><use href="#icon-cup"></use></svg></div><ol class="product-list" data-products></ol></section>
+        <section class="panel payments-panel" aria-labelledby="payments-title"><div class="section-head"><div><h2 id="payments-title">Métodos de pago</h2><p>Distribución de ingresos registrados</p></div></div><div class="payment-bar" aria-hidden="true"><span></span><span></span></div><div class="payment-summary"><div class="payment-line"><span class="payment-name"><span class="swatch"></span>QR · 58 %</span><strong data-qr-total>Bs 745,01</strong></div><div class="payment-line"><span class="payment-name"><span class="swatch swatch-sand"></span>Efectivo · 42 %</span><strong data-cash-total>Bs 539,49</strong></div></div><p class="payment-note">Solo registro del medio de pago, sin procesamiento de transacciones.</p></section>
+      </div>
+      <footer class="page-footer"><span>Kofi · simple para trabajar.</span><span>Prototipo C · datos ficticios</span></footer>
+    </main>
+  </div>
+  <div class="toast" data-toast role="status" hidden></div>
+  <noscript>Activa JavaScript para explorar los datos ficticios y los controles de este prototipo.</noscript>
+</body>
+</html>

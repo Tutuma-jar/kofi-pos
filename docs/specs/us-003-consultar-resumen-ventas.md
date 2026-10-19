@@ -1,0 +1,122 @@
+# US-003 — Consultar el resumen de ventas
+
+## Descripción
+
+Como operador, quiero consultar las ventas e ingresos de hoy o de este mes, para conocer los resultados generales del negocio.
+
+## Objetivo
+
+Ofrecer un resumen general del negocio en el Dashboard, sin duplicar el detalle de Historial y reportes ni contar pedidos por separado.
+
+## Alcance
+
+- Incluye: selección de hoy o este mes, cantidad de ventas, ingresos totales en BOB y cantidad de ventas por método de pago, efectivo y QR.
+- Incluye los criterios comunes del Dashboard: actualización en tiempo real entre sesiones, ausencia de ventas y contenido en una pantalla.
+- Excluye: preparar, cobrar o registrar ventas, administrar el catálogo, contador de pedidos, jornadas operativas, otros períodos o filtros, detalle de ventas y métricas adicionales de reportes.
+- La actualización SSE y lectura común se seleccionan en la [base técnica aprobada](../ai-context/architecture.md#7-base-técnica-mínima-aprobada); esta historia concreta latencia y dimensiones de comprobación, no una distribución visual ni los DTO/rutas de API.
+
+## Criterios de aceptación
+
+| ID | Comportamiento observable |
+| --- | --- |
+| CA-01 | Al abrir el Dashboard se selecciona hoy por defecto y se permite cambiar a este mes. La selección se aplica al resumen, los productos vendidos y el gráfico. |
+| CA-02 | Hoy y este mes se determinan por las fechas en horario de Bolivia, sin jornadas operativas ni horas de corte propias del negocio. |
+| CA-03 | Para un período con ventas, se muestra la cantidad de ventas registradas y la suma de sus totales, identificada en BOB. Los ingresos incluyen las ventas independientemente del método de pago. |
+| CA-04 | Se muestra la cantidad de ventas del período registradas con efectivo y con QR. No se muestra un contador separado de pedidos. |
+| CA-05 | Cuando el operador recibe el dinero y registra manualmente la venta en el módulo de ventas, el resumen, la lista de productos y el gráfico del período correspondiente se actualizan en tiempo real, sin recargar la página. Esto también se cumple si la venta se registra desde otra computadora o sesión. |
+| CA-06 | Si no hay ventas en el período seleccionado, el contenido informativo se sustituye únicamente por «Aún no se realizaron ventas hoy» o «Aún no se realizaron ventas este mes», según corresponda. |
+| CA-07 | En el uso principal desde computadora o laptop, el Dashboard se mantiene en una pantalla sin scroll general. Solo la lista de productos vendidos tiene scroll interno cuando su contenido supera el espacio disponible. Se verifica en ventanas de 1280 × 720 y 1366 × 768 píxeles CSS, no mediante la resolución física del monitor. |
+| CA-08 | Con conexión activa y bajo condiciones de prueba acordadas, los tres bloques reflejan una venta registrada en hasta 2 segundos desde la confirmación del registro. Se releen resultados al reconectar y al cambiar el día o mes en Bolivia; los avisos perdidos se cubren mediante conciliación según el contrato técnico. |
+| CA-09 | Carga, error y período sin ventas se distinguen. Una consulta fallida no se presenta como «sin ventas» ni se hace pasar información no confirmada por resultados vigentes. |
+
+### Verificación prevista de los criterios
+
+- CA-01 y CA-02: comprobar selección inicial, cambio de período y límites de día y mes en horario de Bolivia con fechas controladas, incluidas ventas fuera del período.
+- CA-03 y CA-04: contrastar cantidades, sumas y desglose por método con ventas conocidas mediante pruebas de cálculos e integración de los datos del resumen.
+- CA-05: integración del registro de ventas y actualización de los tres bloques; recorrido con dos sesiones autenticadas para observar cambios sin recarga, sin duplicar cantidades o importes.
+- CA-06 y CA-07: revisión manual del período vacío y del Dashboard con suficientes productos para requerir scroll interno, en las dos dimensiones CSS acordadas y navegadores de US-001. La inspección visual es apropiada para comprobar mensajes y desplazamiento; registrar tamaño efectivo de la ventana y zoom.
+- CA-08: recorrido con dos sesiones y medición entre confirmación del registro y presentación de los tres bloques, con reloj y datos controlados. Acordar entorno, red, volumen de datos y carga antes de ejecutarlo; sin esas condiciones no se acredita el objetivo. Incluir reconexión, aviso perdido y cambio de día/mes en Bolivia, coordinados con CA-02 y CA-05.
+- CA-09: simular carga y error de lectura/actualización con período vacío y con ventas; comprobar que el fallo no activa el mensaje de ausencia de ventas ni una confirmación falsa de vigencia.
+
+Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el agente principal concretará los casos y comandos disponibles según el procedimiento documental de testing; el hook ejecutará las comprobaciones rápidas aplicables. Las herramientas están elegidas en arquitectura, pero no instaladas ni configuradas; el mecanismo y umbral anteriores fueron aprobados, no verificados.
+
+## Dependencias relevantes
+
+- [Producto: Dashboard](../ai-context/product.md#32-dashboard).
+- [US-001 — Iniciar sesión](us-001-iniciar-sesion.md): acceso y sesiones simultáneas de la cuenta compartida.
+- [US-004 — Consultar los productos vendidos](us-004-consultar-productos-vendidos.md) y [US-005 — Identificar las horas con más ventas](us-005-identificar-horas-mas-ventas.md): contenido restante del Dashboard.
+- [US-013 — Registrar la venta después del pago](us-013-registrar-venta-pagada.md): fecha/hora, total y método de las ventas registradas. Gestión de ventas ya tiene historias y tareas documentadas, no implementadas. El Dashboard consulta esos resultados; una venta en curso no se cuenta ni aporta ingresos y esta historia no implementa selección ni registro.
+- Antes de implementar deben concretarse los contratos de datos, actualización y presentación de carga/error conforme a CA-08/CA-09, sin incorporar funcionalidades nuevas ni suponer acceso sin conexión.
+
+## Aprobación
+
+El responsable del proyecto respondió «si» a «¿Apruebas estas tres historias con este alcance?» en la conversación del 2026-10-18, después de confirmar la propuesta consolidada del Dashboard. Posteriormente respondió «autorizo» al cambio de US-001 para permitir varias sesiones simultáneas de la cuenta compartida, necesario para la actualización entre computadoras y sesiones.
+
+La aprobación inicial corresponde a las historias y sus criterios; no autorizó implementación ni aprobó por sí sola las tareas técnicas.
+
+En la aprobación del menú del 2026-10-18, el responsable autorizó actualizar las referencias afectadas del Dashboard: se sustituye «módulo de pedidos» por «módulo de ventas» y se reconoce la venta en curso sin pedidos independientes. No cambian métricas, períodos ni actualización del Dashboard.
+
+En la corrección posterior autorizada en esta conversación del 2026-10-18 se elimina la dependencia de la antigua historia de consulta y selección para vender y se explicita que solo Gestión de ventas prepara y registra ventas. Los criterios del Dashboard no cambian.
+
+Posteriormente, el 2026-10-18, el responsable respondió «ok apruebo las tareas» tras revisar las ocho tareas propuestas con `requirements-analyst` y su formato oficial de numeración global. Se aprueban TASK-008 a TASK-015 para registro documental; esta historia define TASK-008 a TASK-011. Se conservan alcance, criterios y condiciones técnicas previas. La aprobación no autoriza iniciar implementación.
+
+El 2026-10-18, al aprobar todas las recomendaciones de la base técnica mínima y su registro sin implementación, el responsable aprobó SSE, lectura común, objetivo de hasta 2 segundos con conexión activa y condiciones acordadas, las dos dimensiones CSS y la distinción carga/error/vacío. CA-07 se concreta y CA-08/CA-09 amplían la verificación dentro de las tareas existentes; no se crean tareas ni se certifica cumplimiento.
+
+## Tareas técnicas asociadas
+
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-008, TASK-009, TASK-010 y TASK-011 sustituyen respectivamente las etiquetas locales RES-BE, RES-FE, ACT-BE y ACT-FE. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación.
+
+### Condiciones previas compartidas
+
+- Fuente de datos: [US-013 — Registrar la venta después del pago](us-013-registrar-venta-pagada.md) y sus tareas están aprobadas documentalmente, no implementadas. Se necesitan fecha/hora, total, método y snapshots de productos. Para US-004, identidad estable y nombre actual con cantidades/importes históricos intactos; el Dashboard no implementa registro ni modifica catálogo.
+- Concretar contratos de lectura común y actualización SSE de los tres bloques e integración con US-013, con períodos de Bolivia, carga/error y CA-08. La base técnica ya está elegida; faltan DTO/rutas, autorización del stream, frecuencia de conciliación y condiciones de medición, no una nueva elección de transporte o umbral.
+- Disponer de las estructuras de backend/frontend y del acceso protegido de US-001 para la integración correspondiente. Esta aprobación no autoriza tareas fundacionales ni implementación de otros módulos.
+- Usar las dimensiones de CA-07 al cerrar la comprobación visual de una pantalla sin scroll general.
+- Las verificaciones de cada tarea reutilizan la sección de verificación prevista de esta historia. El principal concretará casos y comandos según el [procedimiento de testing](../ai-context/documentation.md#7-procedimiento-de-testing). No hay pruebas del POS configuradas ni resultados ejecutados.
+- Frontend seguirá el [sistema de diseño](../ai-context/design-system.md): Impeccable → Emil → React Best Practices cuando corresponda código React. El cierre se coordina sobre la página integrada, sin repetir revisiones por bloque ni sustituir las verificaciones funcionales.
+- Las dependencias siguientes distinguen construcción de cada parte y comprobación conjunta: esta última requiere los tres bloques y el registro de ventas integrados, pero no crea prerrequisitos circulares para construirlos. Las tareas están aprobadas para registro; la autorización de implementación sigue siendo necesaria.
+- CA-08 se distribuye en TASK-010 (aviso tras persistencia/autorización) y TASK-011 (relectura, recuperación y medición conjunta). CA-09 corresponde a TASK-009 para el marco común y TASK-011 para actualizaciones, con errores distinguibles de TASK-008. Las tareas consumidoras de US-004/US-005 reutilizan esos estados y verificaciones, sin duplicarlas.
+
+### TASK-008 — Obtener el resumen del período
+
+- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md).
+- Responsabilidad: backend.
+- Descripción y objetivo: obtener cantidades e ingresos fiables de las ventas registradas para hoy y este mes.
+- Alcance y exclusiones: delimitar ambos períodos en horario de Bolivia; contar ventas, sumar sus totales y contar las realizadas con efectivo y QR. Excluir ventas en curso, pedidos independientes, métricas adicionales y escritura de ventas. Compartir la definición de períodos con los demás bloques, sin imponer una estructura técnica.
+- Resultado esperado: el resumen coincide con las ventas registradas del período y permite distinguir un período sin ventas.
+- Criterios aplicables: CA-02 a CA-04; soporte de datos para CA-01/CA-06 y errores distinguibles para CA-09.
+- Verificación prevista: contrastar cálculos e integración con ventas conocidas, límites de día/mes, métodos distintos, períodos vacíos y ventas ajenas al período.
+- Dependencias: contratos y datos de las condiciones compartidas; protección de operaciones y sesiones de [US-001](us-001-iniciar-sesion.md). No depende de TASK-012 ni TASK-014.
+
+### TASK-009 — Presentar el resumen y el marco común del Dashboard
+
+- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md).
+- Responsabilidad: frontend.
+- Descripción y objetivo: presentar el resumen y una selección de período común para toda la pantalla.
+- Alcance y exclusiones: hoy por defecto, cambio a este mes, cantidades e ingresos en BOB y cantidades por efectivo/QR; marco de composición para lista y gráfico. Sin ventas, sustituir el contenido informativo por los mensajes exactos de CA-06. Resolver el espacio de una pantalla, reservando el desplazamiento interno a productos. Excluir implementación de la lista, el gráfico y el mecanismo compartido de actualización.
+- Resultado esperado: selección compartida y resumen visibles, mensajes correctos del período vacío y marco preparado para integrar productos y gráfico sin scroll general.
+- Criterios aplicables: CA-01, presentación de CA-03 y CA-04, CA-06, estructura de CA-07 y marco de carga/error de CA-09.
+- Verificación prevista: comprobar selector, datos y mensajes con períodos controlados; inspeccionar la composición en las dimensiones acordadas. La comprobación definitiva de CA-07 se realiza con los tres bloques integrados.
+- Dependencias: TASK-008 para datos reales, contratos compartidos y acceso protegido de US-001; dimensiones acordadas para el cierre visual. TASK-013 y TASK-015 no son prerrequisitos para construir el marco.
+
+### TASK-010 — Habilitar la actualización compartida tras registrar ventas
+
+- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md); reutilizada por US-004 y US-005.
+- Responsabilidad: backend.
+- Descripción y objetivo: hacer disponible la actualización del Dashboard cuando una venta queda registrada, también para otras sesiones.
+- Alcance y exclusiones: integrar la confirmación del registro con SSE y acceso común a resultados vigentes del período, conforme a arquitectura y CA-08. Excluir registro de ventas, procesamiento de pagos y mecanismos independientes para cada bloque; concretar autorización, reconexión y conciliación sin credenciales en URL.
+- Resultado esperado: las sesiones autorizadas pueden obtener los resultados vigentes después de registrar una venta, sin contar ventas en curso ni duplicar sus resultados al recibir actualizaciones repetidas.
+- Criterios aplicables: soporte backend de CA-05 y CA-08 en aviso tras persistencia, autorización y reconexión.
+- Verificación prevista: integrar con ventas registradas y sesiones autorizadas; comprobar que selección, fallos y repetición de una misma operación o actualización no agregan ventas ni ingresos adicionales, en coordinación con US-013 CA-06.
+- Dependencias: contrato común e integración externa del registro de US-013; definición de períodos de TASK-008 y sesiones/protección de US-001. TASK-012 y TASK-014 no son prerrequisitos del mecanismo común.
+
+### TASK-011 — Consumir una actualización común sin recargar
+
+- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md); reutilizada por US-004 y US-005.
+- Responsabilidad: frontend.
+- Descripción y objetivo: mantener los bloques vinculados al período seleccionado mediante una integración compartida de actualización.
+- Alcance y exclusiones: integrar el mecanismo acordado en el Dashboard y habilitar su consumo por resumen, productos y gráfico; conservar la selección de período y aplicar el estado vacío común. Excluir cálculos propios de productos/horas y tres implementaciones independientes del mecanismo.
+- Resultado esperado: información vigente del período sin recargar la página, también cuando otra sesión registra una venta; el primer registro sustituye el mensaje vacío por los resultados correspondientes.
+- Criterios aplicables: CA-05 y su interacción con CA-01/CA-06; CA-08 en relectura, reconexión, conciliación y medición conjunta; CA-09 en errores de actualización.
+- Verificación prevista: comprobar resumen y transición desde un período vacío sin recarga; completar el recorrido común de los tres bloques con dos sesiones cuando sus consumidores estén integrados. Reutilizar la evidencia en US-004, US-005 y el recorrido de US-013, sin repetir comprobaciones equivalentes.
+- Dependencias: TASK-010 y TASK-009. TASK-013 y TASK-015 consumen esta integración; se necesitan para la comprobación conjunta, no como prerrequisitos circulares para construirla.

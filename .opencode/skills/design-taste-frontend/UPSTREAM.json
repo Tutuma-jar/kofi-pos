@@ -1,0 +1,188 @@
+{
+    "revision":  "f624f37a8c650b9cc550253104925efe4c8de246",
+    "files":  [
+                  {
+                      "path":  "README.md",
+                      "source":  "skills/taste-skill/README.md",
+                      "git_blob_sha1":  "a98ba126ce373ba5e639560d8628834d5fa43347",
+                      "bytes":  5345
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "source":  "skills/taste-skill/SKILL.md",
+                      "git_blob_sha1":  "91d114a9d8d1e9999ff8bdc7c6fc2303a49af754",
+                      "bytes":  29312
+                  },
+                  {
+                      "path":  "assets/base.css",
+                      "source":  "skills/taste-skill/assets/base.css",
+                      "git_blob_sha1":  "c40759686d0fc1dafadb805648344584c15167df",
+                      "bytes":  6017
+                  },
+                  {
+                      "path":  "assets/base.js",
+                      "source":  "skills/taste-skill/assets/base.js",
+                      "git_blob_sha1":  "86ec0afacba394f64db238c44b8e7b980f2383b3",
+                      "bytes":  2162
+                  },
+                  {
+                      "path":  "evals/evals.json",
+                      "source":  "skills/taste-skill/evals/evals.json",
+                      "git_blob_sha1":  "c858083b374fd2b8133d5e87717055a538e54ab0",
+                      "bytes":  5153
+                  },
+                  {
+                      "path":  "library/directions.json",
+                      "source":  "skills/taste-skill/library/directions.json",
+                      "git_blob_sha1":  "f7f82e1a921e7009da7ce6f88410d2c8a94cf214",
+                      "bytes":  61466
+                  },
+                  {
+                      "path":  "library/heroes.json",
+                      "source":  "skills/taste-skill/library/heroes.json",
+                      "git_blob_sha1":  "3f5e82315886d7f8f614886a78871827463bdc45",
+                      "bytes":  87404
+                  },
+                  {
+                      "path":  "library/motions.json",
+                      "source":  "skills/taste-skill/library/motions.json",
+                      "git_blob_sha1":  "3943594c1ef69e90996a68a0f71ecc124d655ab1",
+                      "bytes":  4554
+                  },
+                  {
+                      "path":  "library/palettes.json",
+                      "source":  "skills/taste-skill/library/palettes.json",
+                      "git_blob_sha1":  "9de29b16db9c9f57b977dd38648a47f866572e54",
+                      "bytes":  34753
+                  },
+                  {
+                      "path":  "library/photos.json",
+                      "source":  "skills/taste-skill/library/photos.json",
+                      "git_blob_sha1":  "f403b772d3d6ae11ef07cfe44514fb019d918820",
+                      "bytes":  160632
+                  },
+                  {
+                      "path":  "library/sections.json",
+                      "source":  "skills/taste-skill/library/sections.json",
+                      "git_blob_sha1":  "6de684a2ea91a39a6cdbc4d8d3542e716a44e30f",
+                      "bytes":  253292
+                  },
+                  {
+                      "path":  "library/sites.json",
+                      "source":  "skills/taste-skill/library/sites.json",
+                      "git_blob_sha1":  "222d10975897adee673160c6d42f7121825e189a",
+                      "bytes":  686973
+                  },
+                  {
+                      "path":  "library/type.json",
+                      "source":  "skills/taste-skill/library/type.json",
+                      "git_blob_sha1":  "72c1c1e493b006a5c10ec4ee18db69c99fdc4892",
+                      "bytes":  82290
+                  },
+                  {
+                      "path":  "references/colour.md",
+                      "source":  "skills/taste-skill/references/colour.md",
+                      "git_blob_sha1":  "a20a810fa1f080414035a5e0fdc5002977e56ab2",
+                      "bytes":  6853
+                  },
+                  {
+                      "path":  "references/copy.md",
+                      "source":  "skills/taste-skill/references/copy.md",
+                      "git_blob_sha1":  "69f20af2bff6d40cc07d4dcadaa45440ced550bf",
+                      "bytes":  9436
+                  },
+                  {
+                      "path":  "references/critique.md",
+                      "source":  "skills/taste-skill/references/critique.md",
+                      "git_blob_sha1":  "8f955f6a70bcec88723d4c3897461d5bd8c8668a",
+                      "bytes":  10179
+                  },
+                  {
+                      "path":  "references/imagery.md",
+                      "source":  "skills/taste-skill/references/imagery.md",
+                      "git_blob_sha1":  "d66fb169b17fe215ab340d03427930eab081301b",
+                      "bytes":  24421
+                  },
+                  {
+                      "path":  "references/layout.md",
+                      "source":  "skills/taste-skill/references/layout.md",
+                      "git_blob_sha1":  "00d538ecafeb9852c96b21e78bf94f7ae1dcce9a",
+                      "bytes":  10540
+                  },
+                  {
+                      "path":  "references/motion.md",
+                      "source":  "skills/taste-skill/references/motion.md",
+                      "git_blob_sha1":  "06554724217a9b351a3b65fa3ac9645f7f80a130",
+                      "bytes":  13999
+                  },
+                  {
+                      "path":  "references/research.md",
+                      "source":  "skills/taste-skill/references/research.md",
+                      "git_blob_sha1":  "2e45b174b2918cdb0e842ff94112f6d46adcd985",
+                      "bytes":  20403
+                  },
+                  {
+                      "path":  "references/tells.md",
+                      "source":  "skills/taste-skill/references/tells.md",
+                      "git_blob_sha1":  "875d4a970bd79892295f922f08f67aa812efee3c",
+                      "bytes":  7420
+                  },
+                  {
+                      "path":  "references/type.md",
+                      "source":  "skills/taste-skill/references/type.md",
+                      "git_blob_sha1":  "c1552b700e9bebb2fedf79f82c875615d0f876ac",
+                      "bytes":  8495
+                  },
+                  {
+                      "path":  "scripts/assets.mjs",
+                      "source":  "skills/taste-skill/scripts/assets.mjs",
+                      "git_blob_sha1":  "4f9c5b1c1fcc5a821685c5cea35f326bcf15d75b",
+                      "bytes":  64522
+                  },
+                  {
+                      "path":  "scripts/draw.mjs",
+                      "source":  "skills/taste-skill/scripts/draw.mjs",
+                      "git_blob_sha1":  "dc4b533c55e766ef08d056086c6cc1c23d1ebbdd",
+                      "bytes":  48609
+                  },
+                  {
+                      "path":  "scripts/inspect.mjs",
+                      "source":  "skills/taste-skill/scripts/inspect.mjs",
+                      "git_blob_sha1":  "1c5b6ccccd967988ca885393785fc2d1954e1914",
+                      "bytes":  17810
+                  },
+                  {
+                      "path":  "scripts/lib/cdp.mjs",
+                      "source":  "skills/taste-skill/scripts/lib/cdp.mjs",
+                      "git_blob_sha1":  "ddbbc12ca60bd2a85f5d328c2f9bc644dd88502b",
+                      "bytes":  9691
+                  },
+                  {
+                      "path":  "scripts/lib/probe.mjs",
+                      "source":  "skills/taste-skill/scripts/lib/probe.mjs",
+                      "git_blob_sha1":  "1739967e93f3bbd1bc735eb00ea66d6709b7a99e",
+                      "bytes":  45663
+                  },
+                  {
+                      "path":  "scripts/lib/rules.mjs",
+                      "source":  "skills/taste-skill/scripts/lib/rules.mjs",
+                      "git_blob_sha1":  "a2dada25b50065c32bb11581699b729230213e50",
+                      "bytes":  17331
+                  },
+                  {
+                      "path":  "scripts/lint.mjs",
+                      "source":  "skills/taste-skill/scripts/lint.mjs",
+                      "git_blob_sha1":  "b0bdc7b302ed9617096202b2ca44d47b58400af3",
+                      "bytes":  10549
+                  },
+                  {
+                      "path":  "LICENSE",
+                      "source":  "LICENSE",
+                      "git_blob_sha1":  "48a2f6640b81ff8eca9ce7f6a96337692713ef5b",
+                      "bytes":  1065
+                  }
+              ],
+    "version":  "v2",
+    "skill":  "design-taste-frontend",
+    "repository":  "https://github.com/Leonxlnx/taste-skill"
+}

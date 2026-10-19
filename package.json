@@ -1,0 +1,36 @@
+{
+  "name": "kofi-pos",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": ">=24.19.0 <25",
+    "npm": ">=11.17.0 <12"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace @kofi/frontend",
+    "dev:backend": "npm run dev --workspace @kofi/backend",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "eslint frontend backend eslint.config.mjs --max-warnings 0",
+    "format:check": "prettier --check package.json package-lock.json eslint.config.mjs .prettierrc.json frontend backend README.md",
+    "format": "prettier --write package.json package-lock.json eslint.config.mjs .prettierrc.json frontend backend README.md",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "taskKey": "describe-the-approved-work",
+  "kind": "maintenance",
+  "approval": "Sustituir por referencia real y fecha de la aprobación del alcance",
+  "requiresSpec": false,
+  "reason": "Sustituir por motivo concreto por el que este mantenimiento no requiere especificación formal",
+  "spec": null,
+  "taskId": null,
+  "scope": ["docs/example.md"],
+  "related": [],
+  "checks": ["links"],
+  "inputs": [],
+  "manual": [],
+  "documentation": {
+    "required": [],
+    "reason": "Sustituir por documentación necesaria o justificación concreta de no aplicabilidad"
+  }
+}
