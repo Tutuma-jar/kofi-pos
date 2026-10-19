@@ -132,3 +132,56 @@ Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registr
 ### Tareas retiradas
 
 - TASK-004 — Completar el inicio de sesión — Retirada el 2026-10-19; cobertura en TASK-001 y TASK-002. La pantalla la implementa Frontend sin tareas.
+
+## Interfaz — Acceso: registro de entrega
+
+- **Autorización:** el responsable aprobó el inventario y encargó expresamente el diseño e implementación simulados de US-001 y US-002 el 2026-10-19, con React Router, base compartida P, comprobaciones y commit local sin push, conforme a constitución §11. No se autoriza integración de acceso real.
+- **Historias:** US-001 y [US-002](us-002-cerrar-sesion.md).
+- **Rama y commit:** `feat/ui-auth-acceso`; commit de entrega `feat(auth): add simulated access module`, que contiene este registro. Base `origin/develop` recién obtenida: `f785250eaacbaecb47c9ff6de9ff6c005ffbd908`. El primer fetch falló por conexión reiniciada y el segundo terminó correctamente; el HEAD inicial se comprobó igual a esa base. Sin push ni integración.
+- **Pantallas y estados:** `/login` vacío, enviando, credenciales incorrectas, conexión fallida y avisos de sesión finalizada/expirada/cerrada; comprobación inicial sin mostrar contenido protegido; `/dashboard` redirige a login sin sesión simulada y es únicamente un destino provisional tras autenticarse, sin indicadores ni contenido de US-003 a US-005. Cierre pendiente, confirmado, fallido e incierto, sin anunciar invalidación antes de la confirmación simulada. No se añadió confirmación previa del operador.
+- **Base compartida:** tokens CSS y CSS Modules con lenguaje P; Fraunces y Source Sans 3 locales y sus licencias SIL OFL; `Button` reutilizado y estructura autenticada presentacional sin imports de Acceso. Menú lateral izquierdo con hamburguesa y cerrar sesión, controles desmontados al ocultarlo y modalidad estrecha con fondo inerte, foco y retorno. La presentación de sesión/cierre pertenece a `auth/`, no a `shared/`.
+- **Dependencias:** React Router `8.5.0`, instalado con versión exacta en `@kofi/frontend`; compatible con Node 24 y React 19.3.1 de la base. Manifest y lockfile actualizados. Sin otras dependencias directas añadidas. Auditoría de la instalación: 0 vulnerabilidades conocidas en esa consulta, no garantía de seguridad de la aplicación. Script `lint` del workspace con ESLint ya existente.
+
+### Supuestos y límites del contrato provisional
+
+Fuente única de tipos: [`frontend/src/auth/api/contract.provisional.ts`](../../frontend/src/auth/api/contract.provisional.ts). Son supuestos para la integración, no endpoints, DTO ni contratos aprobados:
+
+- Entrada de usuario/contraseña y resultados aceptado, incorrecto, conexión fallida o respuesta superada. Los escenarios deciden el resultado; no hay credenciales reales ni contraseña especial de acceso. El formulario advierte no introducir secretos reales.
+- Estado de sesión comprobando, anónimo con motivo, autenticado, cerrando o cierre no confirmado. Una respuesta de acceso tardía no repone autorización retirada; los errores de cierre no simulan un éxito.
+- Capa sustituible en `auth/api/`, cliente HTTP común con transporte inyectado y propagación de 401. Sin solicitudes de autenticación reales, almacenamiento/token o mecanismo de protección definidos.
+- Presencia cada 30 segundos y finalización a los 120 segundos desde la última señal simulada recibida, con reloj controlado en pruebas. No mide teclado/ratón, no contacta servidor ni decide autorización real; una señal tardía no revive la sesión.
+- Recarga, pestaña nueva, duplicación y restauración son fixtures. **La recarga real pierde la sesión de esta implementación en memoria**: la conservación exigida por CA-07 queda pendiente de TASK-005. Las instancias simuladas son independientes; no constituyen una identidad de pestaña validada.
+- Cierre fallido o incierto suspende la interacción local y permite reintentar el escenario, sin acreditar revocación ni resolver el resultado remoto. No hay persistencia, backend ni servicios externos.
+
+### Cierre de diseño y evidencia local
+
+Frontend aplicó **Impeccable → Emil Design Engineering → React Best Practices** tanto al login como al destino provisional y su estructura. Impeccable se usó como skill/guía de diseño, sin ejecutar su motor. Emil contrastó las capturas finales; se resolvieron estilos duplicados con `Button`, dependencia de Acceso desde `shared/` y riesgo de enfocar fondos inertes. React Best Practices revisó suscripciones, estado y limpieza de efectos sin aplicar reglas de Next.js. Las revisiones no sustituyen pruebas ni certifican accesibilidad completa.
+
+Comprobaciones ejecutadas por el principal sobre la entrega final; después solo se amplió un comentario explicativo de contrato, sin cambios ejecutables:
+
+| Comprobación | Resultado y alcance |
+| --- | --- |
+| `npm run typecheck --workspace @kofi/frontend` | Correcto. |
+| `npm run lint --workspace @kofi/frontend` | Correcto. |
+| `npm run test --workspace @kofi/frontend` | 3 archivos, 28 pruebas correctas: rutas/estados/cierre/foco, simulación de sesiones y presencia, y transporte HTTP/401 sin red. |
+| `npm run build --workspace @kofi/frontend` | Correcto; incluye las dos fuentes locales. |
+| Formato y revisión de alcance | Prettier correcto en `frontend/src`, manifest y lockfile tras formatear este último. Revisión local mediante Node/Git: 33 archivos del alcance y 80 destinos locales existentes, requisitos originales y tracker intactos, cuatro copias de fuentes/licencias idénticas por SHA-256 y Router exacto en manifest/lockfile. `git diff --cached --check` señala únicamente un espacio final heredado en `shared/fonts/source-sans-3-OFL.txt:21`; se conserva la licencia original sin alterarla, observación documental no bloqueante. |
+| Control documental | `node .opencode/scripts/kofi-check.mjs docs`: índice correcto. No se atribuye a un hook Git: `core.hooksPath` no está configurado en este checkout y no se modificó su activación. |
+| Revisión renderizada y teclado | Navegador integrado OpenCode/Electron 44.4.5, Chromium 152.0.7977.130: login y destino a 912 px CSS, fuentes cargadas; modal en iframe temporal de 598 px CSS. Foco inicial, ciclo Shift+Tab/Tab, Escape, retorno a hamburguesa, fondo inerte y limpieza del bloqueo de scroll comprobados. Cierre simulado en el iframe vuelve al login sin alterar la instancia del contenedor. Iframe eliminado al terminar. No equivale a validación de identidad de pestaña. |
+
+**Correspondencia prevista:** entrada/destino y rechazo, CA-01/02; guarda visual, CA-03; escenarios independientes y ciclo de pestaña, CA-04/05/07; estructura sin roles, CA-06 únicamente respecto de la página disponible; presencia y nuevo acceso, CA-08/09. La cobertura del menú y cierre de US-002 se incluye en esta misma evidencia. Los tests de componentes y fixtures **no acreditan CA integrados ni DoD** de las historias.
+
+**Controles y pendientes:** `kofi-start` y `kofi-verify` se intentaron mediante el comando Node y quedaron pendientes con «Especificación sin referencia de aprobación fechada»; salida nativa 2, comprobada explícitamente para `verify`. El validador rechaza la palabra «pendientes» dentro de una aprobación histórica; además exige CA en bullets y TASK, incompatibles con las tablas y Frontend sin tareas vigentes. No se alteraron controles, criterios o aprobaciones para superarlo, ni se inventó una TASK. La aprobación fue contrastada por el principal y el alcance se revisó mediante Git contra la base limpia. No se declara éxito de estos controles. La ejecución de requisitos/alcance/testing del control queda pendiente de una adaptación autorizada; no debe confundirse con los cuatro comandos del workspace, que sí se ejecutaron correctamente.
+
+Pendientes funcionales: aprobación del contrato real, seguridad/autorización, mecanismo de identidad de pestaña y validación en Chrome y Edge estables, recarga real, transporte/presencia y revocación en servidor, protección de operaciones y verificación integrada de TASK-001/002/003/005 y TASK-006 de US-002. La CI remota no se ejecutó para esta rama sin publicar. Tracker y tareas no se completan por esta entrega de interfaz.
+
+### Actualización de los controles tras incorporar develop
+
+Por solicitud del responsable se ejecutó `git pull --no-rebase origin develop` en `feat/ui-auth-acceso` el 2026-10-19, incorporando `280add41f72a36de0504c441c9e0e664bab22dd3`. El único conflicto, en CHANGELOG, se resolvió conservando las entradas de ambos lados. No se modificaron los controles recibidos ni el código de Acceso.
+
+El ajuste publicado en develop resuelve el bloqueo del apartado anterior. El contexto local de comprobación usa `taskId: null`, `scope` limitado a `frontend/` y documentos/lockfile/control como rutas relacionadas justificadas, según el README actualizado. Los pendientes de integración real siguen fuera del alcance de esta interfaz simulada; las comprobaciones manuales de interfaz ya ejecutadas no se vuelven a declarar pendientes.
+
+- `node .opencode/scripts/kofi-check.mjs start --context .opencode/.cache/kofi-check/pull-develop-auth.context.json`: correcto, salida 0, reconoce Frontend sin TASK y conserva como base los 23 archivos del merge ya pendientes al comenzar esta comprobación. No atribuye retroactivamente su implementación al control.
+- `node .opencode/scripts/kofi-check.mjs verify --context .opencode/.cache/kofi-check/pull-develop-auth.context.json`: correcto, salida 0; alcance sin desviaciones, dos comprobaciones de sintaxis y 425 destinos de enlaces válidos en el pase con la evidencia actualizada. El contexto predeterminado se actualizó al mismo encargo y también pasó. JSON seleccionado sin archivos JSON afectados (0 comprobaciones). Verifica los cambios presentes del merge y su evidencia, no equivale a una nueva ejecución de pruebas de aplicación ni a acreditar CA integrados.
+- Regresiones específicas: `node --test --test-name-pattern="contexto obligatorio|mantenimiento justificado|Frontend sin tareas|no presume|base preservada|rutas relacionadas" .opencode/scripts/kofi-check.test.mjs`: seis pruebas correctas.
+- Se reutilizan typecheck, lint, 28 pruebas, build y revisión renderizada/teclado del registro anterior: el merge no cambia fuentes, manifest, lockfile ni configuración de la aplicación. No se ejecutó la suite completa de controles ni CI remota. Se mantienen los pendientes funcionales de acceso real.
