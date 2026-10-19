@@ -9,9 +9,11 @@ import styles from './AuthenticatedAccess.module.css';
 export function AuthenticatedAccess({
   children,
   title,
+  bounded = false,
 }: {
   children: ReactNode;
   title: string;
+  bounded?: boolean;
 }) {
   const { client, session } = useAuth();
   const statusHeading = useRef<HTMLHeadingElement>(null);
@@ -29,6 +31,7 @@ export function AuthenticatedAccess({
   return (
     <AuthenticatedLayout
       title={title}
+      bounded={bounded}
       accountLabel={'label' in session ? session.label : ''}
       onLogout={() => {
         void client.logout();
@@ -64,7 +67,7 @@ export function AuthenticatedAccess({
           </section>
         ) : null
       }
-      footerSlot={<ScenarioPicker />}
+      footerSlot={bounded ? null : <ScenarioPicker />}
     >
       {children}
     </AuthenticatedLayout>

@@ -106,3 +106,33 @@
   background: var(--selection);
   color: var(--selection-text);
 }
+.bounded .main {
+  padding: 0 24px;
+}
+.bounded .content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+@media (min-width: 1101px) and (min-height: 650px) {
+  .bounded {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .bounded .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .bounded .header {
+    height: 84px;
+    flex-shrink: 0;
+  }
+  .bounded main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+}

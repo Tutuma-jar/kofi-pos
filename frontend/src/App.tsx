@@ -3,7 +3,7 @@ import { AuthContext } from './auth/auth-context';
 import { demoClient } from './auth/api/demo-client';
 import type { AuthClient } from './auth/api/contract.provisional';
 import { LoginPage } from './auth/pages/LoginPage';
-import { DashboardDestination } from './auth/pages/DashboardDestination';
+import { DashboardPage } from './dashboard/pages/DashboardPage';
 import { ProtectedRoute } from './auth/components/ProtectedRoute';
 import { AuthenticatedAccess } from './auth/components/AuthenticatedAccess';
 import './shared/styles/fonts.css';
@@ -19,8 +19,8 @@ export function AccessRoutes({ client }: { client: AuthClient }) {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <AuthenticatedAccess title="Dashboard">
-                <DashboardDestination />
+              <AuthenticatedAccess title="Dashboard" bounded>
+                <DashboardPage />
               </AuthenticatedAccess>
             </ProtectedRoute>
           }

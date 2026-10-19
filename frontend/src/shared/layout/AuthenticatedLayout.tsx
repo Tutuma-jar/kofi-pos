@@ -13,6 +13,7 @@ export function AuthenticatedLayout({
   contentInert = false,
   statusSlot,
   footerSlot,
+  bounded = false,
 }: {
   children: ReactNode;
   title: string;
@@ -22,6 +23,7 @@ export function AuthenticatedLayout({
   contentInert?: boolean;
   statusSlot?: ReactNode;
   footerSlot?: ReactNode;
+  bounded?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [narrow, setNarrow] = useState(
@@ -108,7 +110,7 @@ export function AuthenticatedLayout({
     </div>
   );
   return (
-    <div className={styles.shell}>
+    <div className={[styles.shell, bounded ? styles.bounded : ''].join(' ')}>
       <a href="#main-content" className={styles.skip} inert={narrow && open}>
         Ir al contenido
       </a>
@@ -176,7 +178,9 @@ export function AuthenticatedLayout({
         </header>
         <main id="main-content" ref={content} tabIndex={-1}>
           {statusSlot}
-          <div inert={contentInert}>{children}</div>
+          <div className={styles.content} inert={contentInert}>
+            {children}
+          </div>
           {footerSlot}
         </main>
       </div>

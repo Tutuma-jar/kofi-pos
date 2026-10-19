@@ -165,7 +165,9 @@ test('login aceptado llega directamente al destino Dashboard', async () => {
   fillLogin();
   await settle();
   expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeDefined();
-  expect(screen.getByText(/destino provisional de Acceso/)).toBeDefined();
+  expect(
+    screen.getByRole('group', { name: 'Período de ventas' }),
+  ).toBeDefined();
   expect(document.title).toBe('Dashboard · Kofi');
 });
 
