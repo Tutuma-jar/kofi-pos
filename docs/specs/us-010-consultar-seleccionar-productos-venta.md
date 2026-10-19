@@ -19,7 +19,7 @@ Elegir los productos que se venderán sin confundir la preparación con una vent
 
 | ID | Comportamiento observable |
 | --- | --- |
-| CA-01 | El operador puede consultar productos activos por categoría; los inactivos no se ofrecen para nuevas selecciones. |
+| CA-01 | El operador puede consultar productos activos por categoría; los inactivos no se ofrecen para nuevas selecciones. Las categorías sin productos activos no se muestran. El catálogo se lee al cargar la pantalla de venta; los cambios hechos después desde otras sesiones no se reflejan automáticamente en ella y se detectan en la revisión previa al cobro de [US-012](us-012-revisar-cambios-catalogo-antes-cobro.md). |
 | CA-02 | Para elegir se muestran nombre, precio en BOB con un decimal e imagen o marcador neutro. La descripción está disponible al consultar el producto, sin exigir que aparezca en cada tarjeta. |
 | CA-03 | Se pueden agregar varios productos activos a la venta en curso. Volver a seleccionar el mismo producto suma una unidad a su cantidad. |
 | CA-04 | La selección se conserva al navegar entre módulos dentro de la misma pestaña. Es independiente de otras pestañas autenticadas y no genera ventas ni ingresos en el Dashboard. |
@@ -27,7 +27,7 @@ Elegir los productos que se venderán sin confundir la preparación con una vent
 
 ### Verificación prevista de los criterios
 
-- CA-01 a CA-03: integración de consulta con categorías, productos activos e inactivos y productos con y sin imagen; recorrido de selección de productos distintos y repetidos.
+- CA-01 a CA-03: integración de consulta con categorías, incluidas una vacía y otra solo con inactivos que no deben mostrarse, productos activos e inactivos y productos con y sin imagen; recorrido de selección de productos distintos y repetidos. Con la pantalla cargada, desactivar o cambiar el precio de un producto desde otra sesión: la pantalla no cambia sin una nueva carga y la revisión de US-012 detecta el cambio.
 - CA-04: recorrido entre módulos y con dos pestañas autenticadas independientemente; contrastar sus selecciones y comprobar que no se registran ventas ni cambian las métricas por seleccionar.
 - CA-05: recorrido en navegador real para navegación, recarga, cierre de pestaña y cierre de sesión; comprobar descarte y comportamiento del aviso bajo las restricciones del navegador. El navegador real es necesario para verificar estos eventos.
 
@@ -47,6 +47,10 @@ El responsable respondió «si apruebo todo» en la conversación del 2026-10-18
 Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas estas nueve tareas para asignarles IDs y registrarlas como pendientes, sin iniciar implementación?». Queda aprobado su registro documental como TASK-024 a TASK-032 en US-010 a US-013. La aprobación no resuelve las decisiones pendientes de revisión/cobro, ajustes posteriores o comprobación de registros inciertos tras salida ni autoriza implementar.
 
 El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-024 se amplía con la conexión en `frontend/src/sales/api/` y la verificación integrada del catálogo y de la selección; TASK-025 y TASK-026 se retiran porque su interfaz y la selección en memoria las implementa Frontend. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
+El 2026-10-19 el responsable respondió «estoy de acuerdo» a las respuestas sugeridas por el principal a las preguntas abiertas de Administración del menú, entre ellas ocultar en Ventas las categorías sin productos activos. CA-01 incorpora esa regla; TASK-024 la cubre sin cambiar su alcance. No autoriza implementación ni cambios en el tracker.
+
+El 2026-10-19 el responsable respondió «sigue tus sugerencias» a las preguntas planteadas por `requirements-analyst` sobre Gestión de ventas. En esta historia se resuelve la frescura del catálogo (pregunta P4, opción a): el catálogo se lee al cargar la pantalla de venta y los cambios de otras sesiones se detectan en la revisión de US-012, sin relectura periódica ni tiempo real. CA-01 y su verificación lo incorporan; TASK-024 lo cubre sin cambiar su alcance. No autoriza implementación ni cambios en el tracker.
 
 ## Tareas técnicas asociadas
 
