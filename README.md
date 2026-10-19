@@ -6,7 +6,7 @@ Base técnica de un POS web. Las funcionalidades de las US todavía no están im
 
 - Node **24.19.0** (`.node-version`); engines admite versiones compatibles de la rama 24 desde esa versión.
 - npm **11.17.0**, sin modificar instalaciones globales.
-- No se necesita MongoDB para este arranque.
+- Docker con Docker Compose para el MongoDB local del backend (replica set de un nodo, necesario para transacciones). El frontend no lo necesita.
 
 ## Instalación
 
@@ -26,11 +26,17 @@ En una terminal:
 npm run dev:frontend
 ```
 
-En otra:
+En otra, con MongoDB local levantado y `backend/.env` creado a partir de `backend/.env.example`:
+
+```powershell
+npm run db:up --workspace @kofi/backend
+```
 
 ```powershell
 npm run dev:backend
 ```
+
+`db:up` inicia [backend/compose.yaml](backend/compose.yaml) y espera a que el replica set `rs0` esté listo; la primera vez lo inicializa. Los datos persisten en el volumen `kofi_mongo-data`. `npm run db:down --workspace @kofi/backend` detiene el contenedor sin borrar el volumen. El backend no arranca sin `MONGODB_URI` válido o si MongoDB no es replica set.
 
 - React: <http://127.0.0.1:5173>. Muestra solo contenido técnico, sin página funcional o diseño definitivo.
 - Express: <http://127.0.0.1:3000>. No tiene endpoints de negocio: `/api` devuelve **404**, no indica un fallo de arranque.
@@ -47,7 +53,15 @@ npm test
 npm run build
 ```
 
-`npm test` ejecuta únicamente el montaje React con Vitest/Testing Library/jsdom y el humo de Express con Vitest/Supertest. No prueba ventas, autenticación, datos ni criterios de las US. `npm run format` formatea solo los archivos del arranque, no los documentos, herramientas o prototipos previos.
+`npm test` ejecuta únicamente el montaje React con Vitest/Testing Library/jsdom y el humo de Express con Vitest/Supertest. No prueba ventas, autenticación, datos ni criterios de las US. En el backend incluye también la validación de configuración de entorno.
+
+Con MongoDB local levantado, las pruebas de integración del backend usan una base temporal que se elimina al terminar. No forman parte de `npm test` ni de la CI:
+
+```powershell
+npm run test:integration --workspace @kofi/backend
+```
+
+`npm run format` formatea solo los archivos del arranque, no los documentos, herramientas o prototipos previos.
 
 Tras compilar:
 
@@ -97,6 +111,6 @@ se exige un revisor humano adicional como parte de esta configuración inicial.
 
 ## Límites y próximos pasos
 
-No hay login, sesiones, Dashboard, catálogo, ventas, modelos, conexión MongoDB, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. React Router, MongoDB, Zod y Playwright están elegidos, pero se instalarán cuando exista trabajo autorizado que los necesite. La primera CI remota verifica exclusivamente el bootstrap, no requisitos de las US ni despliegue.
+No hay login, sesiones, Dashboard, catálogo, ventas, modelos, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. El backend ya tiene preparados `mongodb`, `zod`, la conexión a MongoDB local y la prueba de transacciones ([preparación del backend](docs/ai-context/architecture.md#11-preparación-del-backend-autorizada)); React Router y Playwright se instalarán cuando exista trabajo autorizado que los necesite. La primera CI remota verifica exclusivamente el bootstrap, no requisitos de las US ni despliegue.
 
 El control rápido de OpenCode sigue comprobando configuración y documentación. No ejecuta estos scripts ni acredita las US; el principal selecciona y ejecuta las comprobaciones técnicas por separado, conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing). Las funcionalidades requieren autorización posterior.
