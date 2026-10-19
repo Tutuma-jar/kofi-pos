@@ -317,7 +317,7 @@ test('seis perfiles sin modelo fijo, delegación ni herramientas amplias', () =>
   }
 });
 
-test('testing retirado y Frontend con las tres skills pertinentes, sin permisos extra de ejecución', () => {
+test('testing retirado y Frontend conserva las tres skills pertinentes', () => {
   assert.equal(existsSync(path.join(project, '.opencode/skills/testing/SKILL.md')), false);
   for (const name of readdirSync(path.join(project, '.opencode/agents'))) {
     const text = readFileSync(path.join(project, '.opencode/agents', name), 'utf8');
@@ -332,6 +332,61 @@ test('testing retirado y Frontend con las tres skills pertinentes, sin permisos 
   const command = readFileSync(path.join(project, '.opencode/commands/kofi-verify.md'), 'utf8');
   assert.doesNotMatch(command, /Carga la skill testing/);
   assert.match(command, /principal determina las comprobaciones/);
+});
+
+test('Git de implementadores: origin actualizado, mutaciones con confirmación y operaciones ajenas denegadas', () => {
+  for (const role of ['frontend', 'backend']) {
+    const text = readFileSync(path.join(project, `.opencode/agents/${role}.md`), 'utf8');
+    const rules = [...text.split('---')[1].matchAll(/action: shell, resource: "([^"]+)", effect: (allow|ask|deny)/g)]
+      .map((match) => ({ resource: match[1], effect: match[2] }));
+    function effect(command) {
+      let result = 'deny';
+      for (const rule of rules) {
+        const expression = rule.resource.split('*').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+        if (new RegExp(`^${expression}$`, 'i').test(command)) result = rule.effect;
+      }
+      return result;
+    }
+    assert.equal(effect('git fetch origin'), 'allow');
+    assert.equal(effect('git rev-parse --verify origin/develop'), 'allow');
+    assert.equal(effect('git switch --no-track --create feat/task-001-example origin/develop'), 'ask');
+    assert.equal(effect('git switch feat/task-001-example'), 'ask');
+    assert.equal(effect(`git add -- ${role}/src/example.ts`), 'ask');
+    assert.equal(effect('git commit -m "feat: implement approved task" -m "Refs: TASK-001 (US-001)"'), 'ask');
+    const other = role === 'frontend' ? 'backend' : 'frontend';
+    for (const command of ['git fetch origin --prune',
+      'git switch --no-track --create feat/task-001-example develop',
+      'git switch --no-track --create feat/task-001-example HEAD',
+      'git switch develop', 'git switch feat/task-001-example --discard-changes',
+      'git switch feat/task-001-example --force', 'git switch feat/task-001-example -f',
+      'git switch feat/task-001-example -C feat/task-002-other',
+      `git add -- ${other}/src/example.ts`, 'git add .', 'git add -A',
+      'git commit -m "example" --no-verify', 'git commit -m "example" --amend',
+      'git commit -m "example" --all', 'git commit -m "example" -a', 'git commit -m "example" -n',
+      'git push origin HEAD', 'git merge origin/develop', 'git rebase origin/develop',
+      'git reset --hard', 'git stash', 'git config core.hooksPath other']) {
+      assert.equal(effect(command), 'deny', `${role}: ${command}`);
+    }
+  }
+});
+
+test('instrucciones Git acotadas solo a Frontend/Backend y sin autorización de iniciar funcionalidades', () => {
+  for (const role of ['frontend', 'backend']) {
+    const text = readFileSync(path.join(project, `.opencode/agents/${role}.md`), 'utf8');
+    for (const command of ['git fetch origin', 'git rev-parse --verify origin/develop',
+      'git switch --no-track --create <rama> origin/develop', 'git rev-parse HEAD']) {
+      assert.ok(text.includes(command), `${role}: ${command}`);
+    }
+    assert.match(text, /nunca un develop local posiblemente desactualizado/);
+    assert.match(text, /No hacer push ni integrar por este permiso/);
+    assert.match(text, /clones\/worktrees separados/);
+    assert.match(text, /no autoriza iniciar funcionalidades|no autoriza.*funcionalidades/i);
+    assert.doesNotMatch(text, /Sin delegación, instalaciones, commits/);
+  }
+  for (const role of ['architect', 'requirements-analyst', 'database', 'documenter']) {
+    const text = readFileSync(path.join(project, `.opencode/agents/${role}.md`), 'utf8');
+    assert.doesNotMatch(text.split('---')[1], /resource: "git (?:fetch|switch|add|commit)/);
+  }
 });
 
 test('React Best Practices conserva los 48 originales verificados y declara su adaptación/licencia real', () => {
