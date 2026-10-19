@@ -117,7 +117,7 @@ Conflicto y resultado incierto no aplican a una lectura. El envoltorio se alinea
 - `GET /api/dashboard-events`, `text/event-stream`. Emite `event: sales-changed` con `data: {}` solo después de confirmar la persistencia de una venta registrada (US-013 CA-06; TASK-010). No indica período: toda venta registrada afecta a la vez a hoy y al mes vigentes.
 - El cliente relee el período seleccionado. Un aviso repetido solo provoca otra relectura y no puede duplicar ventas ni ingresos (CA-05). El orden se resuelve descartando respuestas de solicitudes anteriores o de otro período.
 - Se relee al abrir, al reconectar, al alcanzar `periodEndsAt` y en cada conciliación periódica (CA-08). No se usa `Last-Event-ID`.
-- El rechazo de apertura o reconexión responde 401 `UNAUTHORIZED` con el envoltorio de error. El servidor cierra el stream al revocar o expirar la sesión. Un fallo de relectura usa los errores de la lectura (CA-09; TASK-011).
+- El rechazo de apertura o reconexión responde 401 `UNAUTHORIZED` con el envoltorio de error. El servidor cierra el stream al revocar o expirar la sesión. Un fallo de relectura usa los errores de la lectura (CA-09; TASK-010).
 
 ### Pendientes del contrato
 
@@ -129,61 +129,47 @@ Conflicto y resultado incierto no aplican a una lectura. El envoltorio se alinea
 
 Construir contra este contrato con datos simulados no acredita integración, CA-05 entre sesiones, el cierre definitivo de CA-07 ni CA-08.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-008 y TASK-010 se amplían con la conexión de la página y de la actualización; TASK-009 y TASK-011 se retiran. El orden de interfaz aprobado antes (TASK-009 → TASK-013 y TASK-015 → TASK-011) se conserva como trabajo de interfaz del Dashboard sin tareas. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-008, TASK-009, TASK-010 y TASK-011 sustituyen respectivamente las etiquetas locales RES-BE, RES-FE, ACT-BE y ACT-FE. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación.
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-008 y TASK-010 sustituyeron las etiquetas locales RES-BE y ACT-BE; las de RES-FE y ACT-FE se retiraron el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación.
 
 ### Condiciones previas compartidas
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Fuente de datos: [US-013 — Registrar la venta después del pago](us-013-registrar-venta-pagada.md) y sus tareas están aprobadas documentalmente, no implementadas. Se necesitan fecha/hora, total, método y snapshots de productos. Para US-004, identidad estable y nombre actual con cantidades/importes históricos intactos; el Dashboard no implementa registro ni modifica catálogo.
 - El [contrato de lectura y actualización](#contrato-de-lectura-y-actualización) concreta DTO, rutas, errores y aviso SSE de los tres bloques. Siguen pendientes la autorización del stream, la frecuencia de conciliación y las condiciones de medición enumeradas allí, no una nueva elección de transporte o umbral.
 - Disponer de las estructuras de backend/frontend y del acceso protegido de US-001 para la integración correspondiente. Esta aprobación no autoriza tareas fundacionales ni implementación de otros módulos.
 - Usar las dimensiones de CA-07 al cerrar la comprobación visual de una pantalla sin scroll general.
 - Las verificaciones de cada tarea reutilizan la sección de verificación prevista de esta historia. El principal concretará casos y comandos según el [procedimiento de testing](../ai-context/documentation.md#7-procedimiento-de-testing). No hay pruebas del POS configuradas ni resultados ejecutados.
-- Frontend seguirá el [sistema de diseño](../ai-context/design-system.md): Impeccable → Emil → React Best Practices cuando corresponda código React. El cierre se coordina sobre la página integrada, sin repetir revisiones por bloque ni sustituir las verificaciones funcionales.
+- Frontend construye la página sin tareas y sigue el [sistema de diseño](../ai-context/design-system.md): Impeccable → Emil → React Best Practices sobre la página completa, sin repetir revisiones por bloque ni sustituir las verificaciones funcionales.
 - Las dependencias siguientes distinguen construcción de cada parte y comprobación conjunta: esta última requiere los tres bloques y el registro de ventas integrados, pero no crea prerrequisitos circulares para construirlos. Las tareas están aprobadas para registro; la autorización de implementación sigue siendo necesaria.
-- CA-08 se distribuye en TASK-010 (aviso tras persistencia/autorización) y TASK-011 (relectura, recuperación y medición conjunta). CA-09 corresponde a TASK-009 para el marco común y TASK-011 para actualizaciones, con errores distinguibles de TASK-008. Las tareas consumidoras de US-004/US-005 reutilizan esos estados y verificaciones, sin duplicarlas.
+- CA-08 corresponde a TASK-010 (aviso tras persistencia, autorización, relectura, recuperación y medición conjunta). CA-09 corresponde a TASK-008 en lectura y a TASK-010 en actualizaciones. US-003 CA-07 definitivo se acredita en TASK-012 con los tres bloques integrados. Las tareas de US-004/US-005 reutilizan esos estados y verificaciones, sin duplicarlas.
 
-### TASK-008 — Obtener el resumen del período
+### TASK-008 — Obtener e integrar el resumen del período
 
 - Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md).
 - Responsabilidad: backend.
-- Descripción y objetivo: obtener cantidades e ingresos fiables de las ventas registradas para hoy y este mes.
-- Alcance y exclusiones: delimitar ambos períodos en horario de Bolivia; contar ventas, sumar sus totales y contar las realizadas con efectivo y QR. Excluir ventas en curso, pedidos independientes, métricas adicionales y escritura de ventas. Compartir la definición de períodos con los demás bloques, sin imponer una estructura técnica.
-- Resultado esperado: el resumen coincide con las ventas registradas del período y permite distinguir un período sin ventas.
-- Criterios aplicables: CA-02 a CA-04; soporte de datos para CA-01/CA-06 y errores distinguibles para CA-09.
+- Descripción y objetivo: obtener cantidades e ingresos fiables de las ventas registradas para hoy y este mes mediante `GET /api/dashboard-periods/{period}` del contrato aprobado, y conectarlos en `frontend/src/dashboard/api/`.
+- Alcance y exclusiones: delimitar ambos períodos en horario de Bolivia; contar ventas, sumar sus totales y contar las realizadas con efectivo y QR. Excluir ventas en curso, pedidos independientes, métricas adicionales y escritura de ventas. Compartir la definición de períodos con los demás bloques, sin imponer una estructura técnica. Agrega las secciones de TASK-012 y TASK-014, responde los errores 400, 401 y 500 y verifica en la página integrada el selector, el estado vacío y la carga/error. Excluye el aviso (TASK-010) y el cierre definitivo de CA-07 (TASK-012).
+- Resultado esperado: hoy por defecto y cambio a este mes; cifras iguales a ventas conocidas; mensaje exacto de período vacío solo con un 200 vacío y error distinguible.
+- Criterios aplicables: CA-01 (P), CA-02, CA-03 (BOB, P), CA-04, CA-06 (P) y CA-09 en lectura (P).
 - Verificación prevista: contrastar cálculos e integración con ventas conocidas, límites de día/mes, métodos distintos, períodos vacíos y ventas ajenas al período.
-- Dependencias: contratos y datos de las condiciones compartidas; protección de operaciones y sesiones de [US-001](us-001-iniciar-sesion.md). No depende de TASK-012 ni TASK-014.
+- Dependencias: contratos y datos de las condiciones compartidas; protección de operaciones y sesiones de [US-001](us-001-iniciar-sesion.md). No depende de TASK-012 ni TASK-014. Ventas aisladas o TASK-030 y registro de entrega de interfaz del Dashboard.
 
-### TASK-009 — Presentar el resumen y el marco común del Dashboard
-
-- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: presentar el resumen y una selección de período común para toda la pantalla.
-- Alcance y exclusiones: hoy por defecto, cambio a este mes, cantidades e ingresos en BOB y cantidades por efectivo/QR; marco de composición para lista y gráfico. Sin ventas, sustituir el contenido informativo por los mensajes exactos de CA-06. Resolver el espacio de una pantalla, reservando el desplazamiento interno a productos. Excluir implementación de la lista, el gráfico y el mecanismo compartido de actualización.
-- Resultado esperado: selección compartida y resumen visibles, mensajes correctos del período vacío y marco preparado para integrar productos y gráfico sin scroll general.
-- Criterios aplicables: CA-01, presentación de CA-03 y CA-04, CA-06, estructura de CA-07 y marco de carga/error de CA-09.
-- Verificación prevista: comprobar selector, datos y mensajes con períodos controlados; inspeccionar la composición en las dimensiones acordadas. La comprobación definitiva de CA-07 se realiza con los tres bloques integrados.
-- Dependencias: TASK-008 para datos reales, contratos compartidos y acceso protegido de US-001; dimensiones acordadas para el cierre visual. TASK-013 y TASK-015 no son prerrequisitos para construir el marco.
-
-### TASK-010 — Habilitar la actualización compartida tras registrar ventas
+### TASK-010 — Habilitar e integrar la actualización compartida tras registrar ventas
 
 - Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md); reutilizada por US-004 y US-005.
 - Responsabilidad: backend.
-- Descripción y objetivo: hacer disponible la actualización del Dashboard cuando una venta queda registrada, también para otras sesiones.
-- Alcance y exclusiones: integrar la confirmación del registro con SSE y acceso común a resultados vigentes del período, conforme a arquitectura y CA-08. Excluir registro de ventas, procesamiento de pagos y mecanismos independientes para cada bloque; concretar autorización, reconexión y conciliación sin credenciales en URL.
-- Resultado esperado: las sesiones autorizadas pueden obtener los resultados vigentes después de registrar una venta, sin contar ventas en curso ni duplicar sus resultados al recibir actualizaciones repetidas.
-- Criterios aplicables: soporte backend de CA-05 y CA-08 en aviso tras persistencia, autorización y reconexión.
+- Descripción y objetivo: emitir `sales-changed` tras la persistencia de una venta registrada y sustituir el emisor simulado de `frontend/src/dashboard/api/` por la suscripción real con relectura, para que los tres bloques se actualicen sin recargar, también desde otras sesiones.
+- Alcance y exclusiones: stream autorizado sin credenciales en URL que se cierra al revocar la sesión; en la capa de acceso, relectura al abrir, al reconectar, al alcanzar `periodEndsAt` y en la conciliación periódica, descarte de respuestas obsoletas y agrupación de ráfagas; resolver con aprobación los pendientes 1 a 4 del contrato; medición de CA-08 y recorrido con dos sesiones. Excluye registro de ventas, procesamiento de pagos, cálculos por bloque y mecanismos independientes para cada bloque.
+- Resultado esperado: actualización en hasta 2 segundos en las condiciones acordadas, sin contar ventas en curso ni duplicar resultados ante avisos repetidos; si falla una relectura, los datos previos se marcan como no actualizados.
+- Criterios aplicables: CA-05, CA-08 y CA-09 en actualización (P). Evidencia reutilizable por US-004 CA-05, US-005 CA-05 y US-013 CA-06.
 - Verificación prevista: integrar con ventas registradas y sesiones autorizadas; comprobar que selección, fallos y repetición de una misma operación o actualización no agregan ventas ni ingresos adicionales, en coordinación con US-013 CA-06.
-- Dependencias: contrato común e integración externa del registro de US-013; definición de períodos de TASK-008 y sesiones/protección de US-001. TASK-012 y TASK-014 no son prerrequisitos del mecanismo común.
+- Dependencias: TASK-008, TASK-030 y TASK-005 de US-001; TASK-012 y TASK-014 integradas para la prueba conjunta, no para construir.
 
-### TASK-011 — Consumir una actualización común sin recargar
+### Tareas retiradas
 
-- Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md); reutilizada por US-004 y US-005.
-- Responsabilidad: frontend.
-- Descripción y objetivo: mantener los bloques vinculados al período seleccionado mediante una integración compartida de actualización.
-- Alcance y exclusiones: integrar el mecanismo acordado en el Dashboard y habilitar su consumo por resumen, productos y gráfico; conservar la selección de período y aplicar el estado vacío común. Excluir cálculos propios de productos/horas y tres implementaciones independientes del mecanismo.
-- Resultado esperado: información vigente del período sin recargar la página, también cuando otra sesión registra una venta; el primer registro sustituye el mensaje vacío por los resultados correspondientes.
-- Criterios aplicables: CA-05 y su interacción con CA-01/CA-06; CA-08 en relectura, reconexión, conciliación y medición conjunta; CA-09 en errores de actualización.
-- Verificación prevista: comprobar resumen y transición desde un período vacío sin recarga; completar el recorrido común de los tres bloques con dos sesiones cuando sus consumidores estén integrados. Reutilizar la evidencia en US-004, US-005 y el recorrido de US-013, sin repetir comprobaciones equivalentes.
-- Dependencias: TASK-010 y TASK-009. TASK-013 y TASK-015 consumen esta integración; se necesitan para la comprobación conjunta, no como prerrequisitos circulares para construirla.
+- TASK-009 — Presentar el resumen y el marco común del Dashboard — Retirada el 2026-10-19; cobertura en TASK-008 y, para CA-07 definitivo, TASK-012.
+- TASK-011 — Consumir una actualización común sin recargar — Retirada el 2026-10-19; cobertura en TASK-010. Frontend construye la página y sus estados sin tareas.

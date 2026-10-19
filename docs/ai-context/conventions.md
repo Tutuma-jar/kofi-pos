@@ -31,7 +31,7 @@ Documentación en español e identificadores de código en inglés. Usar nombres
 - Historias: `US-001`, `US-002`, etc.
 - Tareas técnicas: `TASK-001`, `TASK-002`, etc., con secuencia global, no reiniciada por historia.
 - Cada tarea de implementación identifica su historia relacionada; los números de tarea e historia no tienen que coincidir.
-- Asignar identificadores únicos al registrar trabajo aprobado. No reutilizarlos ni renumerar trabajo existente; ampliar los dígitos si se supera 999.
+- Asignar identificadores únicos al registrar trabajo aprobado. No reutilizarlos ni renumerar trabajo existente; ampliar los dígitos si se supera 999. Las tareas retiradas siguen la [regla de retiro](documentation.md#6-changelog-y-tracker).
 - Especificaciones: `us-001-titulo-breve.md`, con el ID en mayúsculas dentro del documento.
 - Conservar identificadores y enlaces al cambiar un título. La forma de documentarlos está en [documentation.md](documentation.md).
 

@@ -55,35 +55,31 @@ Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas e
 
 El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técnica mínima y autorizó documentarlas sin implementación. Esta aprobación posterior resuelve la fijación desde confirmar para cobrar, la nueva revisión al ajustar antes del pago, el registro sin edición después del pago y la ausencia de caducidad automática, sin recuperación tras salida. Se añaden CA-06/CA-07 y verificaciones a TASK-028/TASK-029; los contratos técnicos y carreras no concretados siguen pendientes.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-028 se amplía con la conexión en `frontend/src/sales/api/` y la verificación integrada de la resolución y la confirmación; TASK-029 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-028 y TASK-029 sustituyen respectivamente las etiquetas locales P12-A y P12-B. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-028 sustituyó la etiqueta local P12-A; TASK-029 (P12-B) se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
 
 ### Condiciones previas compartidas
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Aplicar CA-06/CA-07: las reglas de fijación, ajustes y continuidad hasta el registro ya están aprobadas; no se mantienen como decisiones abiertas ni se introduce caducidad.
 - Concretar contrato entre comprobación, resolución, confirmación y registro, y protección de la evidencia backend. Faltan DTO/rutas y mecanismo de protección/confirmación concurrente; la concurrencia de edición del catálogo no sustituye este contrato.
 - Las tareas pueden construirse contra contratos aprobados. El recorrido completo de conservación tras el cobro requiere US-013; no obliga a implementar primero su interfaz para construir la comprobación de catálogo.
 - Aplican las condiciones de cierre visual de [US-010](us-010-consultar-seleccionar-productos-venta.md#condiciones-previas-compartidas). Las verificaciones siguientes son futuras, no ejecutadas; no hay pruebas del POS configuradas.
 
-### TASK-028 — Comprobar y proteger la revisión frente al catálogo concurrente
+### TASK-028 — Comprobar y proteger la revisión e integrar su resolución y confirmación
 
 - Historia relacionada: [US-012](us-012-revisar-cambios-catalogo-antes-cobro.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: contrastar la selección con el catálogo y sustentar una revisión confirmada utilizable en el registro.
-- Alcance y exclusiones: detectar cambios de precio y desactivación, proporcionar información para resolverlos y proteger lo revisado según el contrato aprobado. Sin bloqueo global del catálogo, procesamiento de pagos ni persistencia de borradores.
+- Alcance y exclusiones: detectar cambios de precio y desactivación, proporcionar información para resolverlos y proteger lo revisado según el contrato aprobado. Sin bloqueo global del catálogo, procesamiento de pagos ni persistencia de borradores. Conecta la revisión de Frontend en `frontend/src/sales/api/` y verifica con dos sesiones que ningún cambio se aplica silenciosamente ni se continúa al cobro con productos desactivados pendientes o selección vacía.
 - Resultado esperado: diferencias comprobables y base fiable para respetar precios y productos revisados ante cambios posteriores al cobro.
-- Criterios aplicables: CA-01 a CA-07, parte de reglas y datos, protección de fijación y contenido y rechazo de registros no correspondientes a la revisión confirmada.
+- Criterios aplicables: CA-01, CA-02 y CA-03 (P), CA-04 (P), CA-05, CA-06 y CA-07 (invalidación y descarte, C); protección de fijación y contenido y rechazo de registros no correspondientes a la revisión confirmada.
 - Verificación prevista: integración con dos sesiones, cambios conjuntos de precio/desactivación y carreras definidas por el contrato aprobado. Comprobar retiro exigido, aplicación del precio vigente tras confirmar y conservación de lo revisado tras cambios posteriores al cobro, integrada con US-013.
-- Dependencias: US-007/US-009, contratos de selección e importes de US-010/US-011 y resolución de las condiciones previas. La construcción no depende de TASK-029; la verificación completa de CA-05 requiere TASK-030 de US-013.
+- Dependencias: US-007/US-009 (TASK-018 y TASK-022), TASK-024 de US-010, TASK-027 de US-011 y resolución de las condiciones previas; registro de entrega de la revisión. La verificación completa de CA-05 requiere TASK-030 de US-013.
 
-### TASK-029 — Guiar la resolución y confirmación explícita de la revisión
+### Tareas retiradas
 
-- Historia relacionada: [US-012](us-012-revisar-cambios-catalogo-antes-cobro.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: mostrar los cambios y permitir continuar únicamente con la revisión resuelta y confirmada.
-- Alcance y exclusiones: precio anterior/nuevo, aviso de desactivación, retiro obligatorio, total resultante y confirmación explícita. Sin elegir conservar un precio anterior ni verificar automáticamente el pago.
-- Resultado esperado: ningún cambio se aplica silenciosamente ni se continúa al cobro con productos desactivados pendientes de retirar o selección vacía.
-- Criterios aplicables: CA-01 a CA-04, CA-06/CA-07 en interacción y descarte, y continuidad de CA-05 hacia US-013.
-- Verificación prevista: recorrido con edición desde otra sesión; comprobar ambos precios, aplicación tras confirmar, retiro obligatorio, total y selección que queda vacía. Cubrir los recorridos de CA-06/CA-07 ya aprobados y las carreras técnicas cuando se concrete su contrato.
-- Dependencias: TASK-026 de US-010, TASK-027 de US-011 y contrato de TASK-028; integración final con TASK-028 y resolución de las decisiones previas de revisión y cobro.
+- TASK-029 — Guiar la resolución y confirmación explícita de la revisión — Retirada el 2026-10-19; cobertura en TASK-028. La interfaz la implementa Frontend sin tareas.

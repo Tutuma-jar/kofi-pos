@@ -63,46 +63,42 @@ Posteriormente, el 2026-10-18, el responsable respondió «si» a «¿Apruebas e
 
 El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técnica mínima y su registro sin implementar ni instalar: identidad idempotente y venta documental íntegra, referencia opaca para comprobación tras salida/autenticación y resolución frente a envíos tardíos sin sustituir una operación incierta. Se añaden CA-07/CA-08 a las tareas existentes. Se mantiene pendiente concretar y aprobar conservación/limpieza y protocolo terminal; no se presume recuperación de borradores ni se crean estados operativos de pedidos.
 
+El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-030 y TASK-031 se amplían con la conexión del registro manual y de la comunicación de incertidumbre en `frontend/src/sales/api/`; TASK-032 se retira y se reparte entre ambas. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
 ## Tareas técnicas asociadas
 
-Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-030, TASK-031 y TASK-032 sustituyen respectivamente las etiquetas locales P13-A, P13-B y P13-C. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
+Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-030 y TASK-031 sustituyeron las etiquetas locales P13-A y P13-B; TASK-032 (P13-C) se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementar.
 
 ### Condiciones previas compartidas
 
+- **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Concretar DTO/rutas, validación autoritativa y persistencia sobre identidad única y venta completa elegidas en arquitectura. Misma identidad y contenido devuelve el mismo resultado; contenido distinto se rechaza como conflicto. No volver a elegir stack o transportar importes sin validación backend.
 - Resolver los detalles técnicos de las condiciones previas de esta historia y de US-012, incluidos almacenamiento/conservación/limpieza de referencia y conciliación terminal. Las reglas de continuidad y descarte de CA-07/CA-08 ya están aprobadas.
-- La actualización común del Dashboard ya corresponde a TASK-010/TASK-011 de [US-003](us-003-consultar-resumen-ventas.md#tareas-técnicas-asociadas). Estas tareas solo proveen la confirmación del registro y se integran con ese contrato; no recrean el mecanismo ni sus consumidores. Las dependencias de integración conjunta no son ciclos de construcción.
+- La actualización común del Dashboard ya corresponde a TASK-010 de [US-003](us-003-consultar-resumen-ventas.md#tareas-técnicas-asociadas). Estas tareas solo proveen la confirmación del registro y se integran con ese contrato; no recrean el mecanismo ni sus consumidores. Las dependencias de integración conjunta no son ciclos de construcción.
 - Aplican las condiciones de cierre visual de [US-010](us-010-consultar-seleccionar-productos-venta.md#condiciones-previas-compartidas). Las verificaciones siguientes son futuras, no ejecutadas; el principal concretará casos y comandos, reutilizando evidencia de integración con Dashboard sin repetir pruebas equivalentes. No hay pruebas del POS configuradas.
 
-### TASK-030 — Registrar íntegramente la operación sin duplicados
+### TASK-030 — Registrar íntegramente la operación sin duplicados e integrar el registro manual
 
 - Historia relacionada: [US-013](us-013-registrar-venta-pagada.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: guardar una venta pagada completa, validada y vinculada a una única operación.
-- Alcance y exclusiones: método único admitido, identidad estable del producto y datos históricos, validación de cantidades/importes, respeto de la revisión confirmada, integridad y protección frente a dobles envíos/reintentos. Proporcionar la confirmación al contrato común de actualización; sin implementar Dashboard, procesar pagos, anular ni devolver ventas.
+- Alcance y exclusiones: método único admitido, identidad estable del producto y datos históricos, validación de cantidades/importes, respeto de la revisión confirmada, integridad y protección frente a dobles envíos/reintentos. Proporcionar la confirmación al contrato común de actualización; sin implementar Dashboard, procesar pagos, anular ni devolver ventas. Conecta el registro manual de Frontend en `frontend/src/sales/api/`: elección de efectivo o QR, acción inequívoca de registrar una venta ya pagada, selección conservada hasta confirmar el éxito y limpieza tras él.
 - Resultado esperado: una venta completa o ninguna; repetir la misma operación no genera otra venta ni ingresos adicionales.
-- Criterios aplicables: CA-01 a CA-03, parte productora de CA-06 y contribución atómica/idempotente a CA-08 en coordinación con TASK-031.
-- Verificación prevista: integración aislada con datos conocidos, métodos inválidos, cantidades/importes inválidos según los contratos aprobados, fallos durante el guardado, doble envío simultáneo y reintentos. Contrastar datos conservados tras editar/desactivar productos y cambios posteriores al cobro. Para CA-06, recorrido conjunto con TASK-010/TASK-011 y consumidores del Dashboard, sin duplicar su implementación.
-- Dependencias: protección de US-001, contrato de revisión de TASK-028 y contratos/límites aprobados. La construcción no exige Dashboard terminado; la comprobación de CA-06 requiere TASK-010/TASK-011 y los consumidores de US-003 a US-005 integrados.
+- Criterios aplicables: CA-01 (texto de la acción y método, P), CA-02, CA-03, CA-04 (C) y CA-06 (con TASK-010); contribución atómica e idempotente a CA-08 en coordinación con TASK-031.
+- Verificación prevista: integración aislada con datos conocidos, métodos inválidos, cantidades/importes inválidos según los contratos aprobados, fallos durante el guardado, doble envío simultáneo y reintentos. Contrastar datos conservados tras editar/desactivar productos y cambios posteriores al cobro. Para CA-06, recorrido conjunto con TASK-010 y el Dashboard integrado, sin duplicar su implementación.
+- Dependencias: protección de US-001 (TASK-003 y TASK-005), TASK-027 de US-011, contrato de revisión de TASK-028 y contratos/límites aprobados; registro de entrega del registro manual. La construcción no exige Dashboard terminado; la comprobación de CA-06 requiere TASK-010 y las tareas de US-003 a US-005 integradas.
 
-### TASK-031 — Resolver resultados inciertos de la misma operación
+### TASK-031 — Resolver resultados inciertos de la misma operación e integrar su comunicación
 
 - Historia relacionada: [US-013](us-013-registrar-venta-pagada.md).
 - Responsabilidad: backend.
 - Descripción y objetivo: permitir comprobar o reintentar un registro cuya respuesta se perdió sin crear otra operación.
-- Alcance y exclusiones: comunicar el resultado comprobado y reutilizar con seguridad la identidad de operación. Sin recuperar selecciones descartadas ni construir consultas de Historial. La protección de guardado y duplicados se implementa una sola vez en TASK-030 y se reutiliza aquí.
+- Alcance y exclusiones: comunicar el resultado comprobado y reutilizar con seguridad la identidad de operación. Sin recuperar selecciones descartadas ni construir consultas de Historial. La protección de guardado y duplicados se implementa una sola vez en TASK-030 y se reutiliza aquí. Guarda y consulta la referencia opaca en el navegador (`frontend/src/sales/api/`) y conecta la comprobación y el reintento con la comunicación de Frontend, sin éxito ni fracaso prematuros.
 - Resultado esperado: el frontend puede resolver la incertidumbre sin deducir fracaso de una respuesta perdida ni provocar duplicados.
-- Criterios aplicables: CA-03, CA-05, CA-07 en consulta autenticada y CA-08 en resolución terminal; la conservación de referencia en navegador se integra con TASK-032.
+- Criterios aplicables: CA-03 (reintentos), CA-05 (P), CA-07 en conservación y consulta autenticada de la referencia y CA-08 (P) en resolución terminal y comunicación sin sustitución prematura.
 - Verificación prevista: pérdida de respuesta con guardado realizado y sin guardado, comprobaciones y reintentos repetidos o concurrentes; incluir recarga, cierre y fin de sesión según la decisión aprobada, sin duplicados ni recuperación de borradores.
-- Dependencias: TASK-030 y concreción del contrato de comprobación/reintento, conciliación y conservación de referencias sobre la continuidad aprobada tras salida. No depende de implementar Historial ni de la pantalla de TASK-032 para construir el contrato.
+- Dependencias: TASK-030, TASK-005 de US-001, TASK-006 de US-002 y concreción del contrato de comprobación/reintento, conciliación y conservación de referencias sobre la continuidad aprobada tras salida. No depende de implementar Historial.
 
-### TASK-032 — Completar el registro manual y comunicar su resultado
+### Tareas retiradas
 
-- Historia relacionada: [US-013](us-013-registrar-venta-pagada.md).
-- Responsabilidad: frontend.
-- Descripción y objetivo: cerrar el recorrido posterior al pago comunicando un resultado fiable.
-- Alcance y exclusiones: elegir efectivo o QR, acción inequívoca de registrar una venta ya pagada, conservar la selección hasta confirmar éxito, comprobar/reintentar y limpiar tras éxito. Sin cobro integrado, verificación QR ni recuperación de borradores.
-- Resultado esperado: confirmación y selección vacía tras éxito; selección conservada ante fallo o incertidumbre mientras no ocurra una salida que la descarte conforme a US-010.
-- Criterios aplicables: CA-01, CA-04, CA-05, CA-07 en conservación/consulta de referencia y CA-08 en comunicación sin sustitución prematura; integración con CA-02 y CA-03.
-- Verificación prevista: recorrido completo con ambos métodos, ausencia de método, éxito, fallo confirmado y respuesta perdida. Comprobar comunicación sin éxito/fracaso prematuros, conservación/limpieza y reintento de la misma operación; incluir modificación del catálogo después del cobro.
-- Dependencias: TASK-027 de US-011, TASK-029 de US-012 y contratos de TASK-030/TASK-031 para construir la interfaz; integración con esas tareas y detalles de conciliación/conservación de referencia tras salida para el recorrido completo.
+- TASK-032 — Completar el registro manual y comunicar su resultado — Retirada el 2026-10-19; cobertura de CA-01 y CA-04 en TASK-030 y de CA-05, CA-07 y CA-08 en TASK-031. La interfaz la implementa Frontend sin tareas.
