@@ -35,8 +35,16 @@ Fuente oficial del estado del trabajo aprobado. Consultar el [formato y las regl
 - [ ] US-013 — Registrar la venta después del pago — Pendiente — [Especificación](../specs/us-013-registrar-venta-pagada.md)
   - [ ] TASK-030 — Registrar íntegramente la operación sin duplicados e integrar el registro manual — Pendiente
   - [ ] TASK-031 — Resolver resultados inciertos de la misma operación e integrar su comunicación — Pendiente
+- [ ] US-014 — Consultar el historial de ventas por fecha — Pendiente — [Especificación](../specs/us-014-consultar-historial-ventas.md)
+  - [ ] TASK-033 — Filtrar y paginar el historial de ventas registradas e integrar la lista — Pendiente
+- [ ] US-015 — Consultar el detalle de una venta — Pendiente — [Especificación](../specs/us-015-consultar-detalle-venta.md)
+  - [ ] TASK-034 — Obtener el detalle registrado de una venta e integrar su consulta — Pendiente
+- [ ] US-016 — Consultar el resumen del período — Pendiente — [Especificación](../specs/us-016-consultar-resumen-periodo.md)
+  - [ ] TASK-035 — Calcular el resumen del rango e integrarlo en Historial — Pendiente
+- [ ] US-017 — Identificar los productos más vendidos — Pendiente — [Especificación](../specs/us-017-identificar-productos-mas-vendidos.md)
+  - [ ] TASK-036 — Calcular el ranking de productos más vendidos del rango e integrarlo en Historial — Pendiente
 
-Las historias vigentes están aprobadas para su registro documental. Desde el 2026-10-19 hay 18 tareas vigentes, todas de backend con integración de la interfaz; Frontend implementa las interfaces sin tareas, según la [constitución](../ai-context/constitution.md#11-etapa-actual), y su avance se registra como entrega de interfaz en las especificaciones. US-006 a US-009 corresponden exclusivamente a Administración del menú, renumeradas por solicitud explícita del responsable el 2026-10-18. US-010 a US-013 corresponden a Gestión de ventas; sus decisiones previas a implementar siguen descritas en sus especificaciones. Historial y reportes todavía no tiene historias ni atomización aprobadas. Las definiciones y dependencias se encuentran en las especificaciones enlazadas. El registro no representa funcionalidades implementadas ni autoriza comenzar su implementación.
+Las historias vigentes están aprobadas para su registro documental. Desde el 2026-10-19 hay 22 tareas vigentes, todas de backend con integración de la interfaz; Frontend implementa las interfaces sin tareas, según la [constitución](../ai-context/constitution.md#11-etapa-actual), y su avance se registra como entrega de interfaz en las especificaciones. US-006 a US-009 corresponden exclusivamente a Administración del menú, renumeradas por solicitud explícita del responsable el 2026-10-18. US-010 a US-013 corresponden a Gestión de ventas; sus decisiones previas a implementar siguen descritas en sus especificaciones. US-014 a US-017 corresponden a Historial y reportes, aprobadas por el responsable el 2026-10-19 («apruebo»), y sus tareas TASK-033 a TASK-036 el mismo día («Apruebo las tareas TASK-033 a TASK-036»); su interfaz no está autorizada por la constitución. Las definiciones y dependencias se encuentran en las especificaciones enlazadas. El registro no representa funcionalidades implementadas ni autoriza comenzar su implementación.
 
 ## Antecedentes retirados del trabajo vigente
 

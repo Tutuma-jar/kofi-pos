@@ -88,6 +88,23 @@ test('mantenimiento justificado no exige historia; feature requiere criterios, a
   assert.throws(() => requirements(root, feature), /tracker/);
 });
 
+test('Frontend sin tareas: especificación aprobada, criterios en tabla y pendientes técnicos', (t) => {
+  const root = fixture(t);
+  const table = spec.replace('- El valor inválido muestra un error observable.',
+    '| ID | Comportamiento observable |\n| --- | --- |\n| CA-01 | El valor inválido muestra un error observable. |')
+    .replace('no aprobación real de producto.', 'no aprobación real de producto; respondió «si a todo». La identidad de pestaña permanece pendiente.');
+  assert.throws(() => validateContext(context({ reason: 'TODO justificar' })), /exención/);
+  const ui = context({ kind: 'feature', requiresSpec: true, spec: 'docs/specs/us-001-fixture.md', taskId: null, scope: ['frontend/src/auth/**'] });
+  write(root, ui.spec, table);
+  write(root, 'docs/progress/tracker.md', '- [ ] US-001 — Fixture — Pendiente — [Especificación](../specs/us-001-fixture.md)\n');
+  assert.match(requirements(root, ui)[0], /interfaz de Frontend sin tareas/);
+  assert.throws(() => requirements(root, { ...ui, scope: ['frontend/src/auth/**', 'backend/src/**'] }), /taskId/);
+  write(root, 'docs/progress/tracker.md', 'Sin historias registradas.');
+  assert.throws(() => requirements(root, ui), /historia no está registrada/);
+  write(root, ui.spec, table.replace('La identidad de pestaña permanece pendiente.', 'Pendiente de aprobación.'));
+  assert.throws(() => requirements(root, ui), /aprobación/);
+});
+
 test('no presume finalización sin inicio ni ejecuta selección ausente', (t) => {
   const root = fixture(t);
   assert.equal(verify(root, context()).code, 2);

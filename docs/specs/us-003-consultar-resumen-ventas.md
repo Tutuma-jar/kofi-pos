@@ -21,22 +21,22 @@ Ofrecer un resumen general del negocio en el Dashboard, sin duplicar el detalle 
 | --- | --- |
 | CA-01 | Al abrir el Dashboard se selecciona hoy por defecto y se permite cambiar a este mes. La selección se aplica al resumen, los productos vendidos y el gráfico. |
 | CA-02 | Hoy y este mes se determinan por las fechas en horario de Bolivia, sin jornadas operativas ni horas de corte propias del negocio. |
-| CA-03 | Para un período con ventas, se muestra la cantidad de ventas registradas y la suma de sus totales, identificada en BOB. Los ingresos incluyen las ventas independientemente del método de pago. |
+| CA-03 | Para un período con ventas, se muestra la cantidad de ventas registradas y la suma de sus totales con el [formato de importes del Dashboard](#decisiones-de-presentación-y-medición): `BOB`, un decimal con punto y sin separador de miles. Los ingresos incluyen las ventas independientemente del método de pago. |
 | CA-04 | Se muestra la cantidad de ventas del período registradas con efectivo y con QR. No se muestra un contador separado de pedidos. |
 | CA-05 | Cuando el operador recibe el dinero y registra manualmente la venta en el módulo de ventas, el resumen, la lista de productos y el gráfico del período correspondiente se actualizan en tiempo real, sin recargar la página. Esto también se cumple si la venta se registra desde otra computadora o sesión. |
-| CA-06 | Si no hay ventas en el período seleccionado, el contenido informativo se sustituye únicamente por «Aún no se realizaron ventas hoy» o «Aún no se realizaron ventas este mes», según corresponda. |
+| CA-06 | Si no hay ventas en el período seleccionado, el contenido informativo se sustituye únicamente por «Aún no se realizaron ventas hoy» o «Aún no se realizaron ventas este mes», según corresponda. El selector de período y la navegación permanecen visibles y operables. |
 | CA-07 | En el uso principal desde computadora o laptop, el Dashboard se mantiene en una pantalla sin scroll general. Solo la lista de productos vendidos tiene scroll interno cuando su contenido supera el espacio disponible. Se verifica en ventanas de 1280 × 720 y 1366 × 768 píxeles CSS, no mediante la resolución física del monitor. |
-| CA-08 | Con conexión activa y bajo condiciones de prueba acordadas, los tres bloques reflejan una venta registrada en hasta 2 segundos desde la confirmación del registro. Se releen resultados al reconectar y al cambiar el día o mes en Bolivia; los avisos perdidos se cubren mediante conciliación según el contrato técnico. |
-| CA-09 | Carga, error y período sin ventas se distinguen. Una consulta fallida no se presenta como «sin ventas» ni se hace pasar información no confirmada por resultados vigentes. |
+| CA-08 | Con conexión activa y en las [condiciones de medición](#decisiones-de-presentación-y-medición) del contrato, los tres bloques reflejan una venta registrada en hasta 2 segundos desde la confirmación del registro. Se releen resultados al reconectar y al cambiar el día o mes en Bolivia; los avisos perdidos se cubren mediante conciliación según el contrato técnico. |
+| CA-09 | Carga, error y período sin ventas se distinguen. Una consulta fallida no se presenta como «sin ventas» ni se hace pasar información no confirmada por resultados vigentes. Una sesión finalizada (401) no se presenta como error de datos ni como vacío: aplica la reacción común de [US-001](us-001-iniciar-sesion.md) (TASK-005). |
 
 ### Verificación prevista de los criterios
 
 - CA-01 y CA-02: comprobar selección inicial, cambio de período y límites de día y mes en horario de Bolivia con fechas controladas, incluidas ventas fuera del período.
-- CA-03 y CA-04: contrastar cantidades, sumas y desglose por método con ventas conocidas mediante pruebas de cálculos e integración de los datos del resumen.
+- CA-03 y CA-04: contrastar cantidades, sumas y desglose por método con ventas conocidas mediante pruebas de cálculos e integración de los datos del resumen. Comprobar la coherencia interna de cada respuesta: `cashSalesCount + qrSalesCount = salesCount`, suma de `products[].revenueTenths` = `summary.revenueTenths` y suma de `hourlySales[].salesCount` = `summary.salesCount`. Incluir importes con decimal, cero décimas y totales de cuatro o más cifras para el formato.
 - CA-05: integración del registro de ventas y actualización de los tres bloques; recorrido con dos sesiones autenticadas para observar cambios sin recarga, sin duplicar cantidades o importes.
-- CA-06 y CA-07: revisión manual del período vacío y del Dashboard con suficientes productos para requerir scroll interno, en las dos dimensiones CSS acordadas y navegadores de US-001. La inspección visual es apropiada para comprobar mensajes y desplazamiento; registrar tamaño efectivo de la ventana y zoom.
-- CA-08: recorrido con dos sesiones y medición entre confirmación del registro y presentación de los tres bloques, con reloj y datos controlados. Acordar entorno, red, volumen de datos y carga antes de ejecutarlo; sin esas condiciones no se acredita el objetivo. Incluir reconexión, aviso perdido y cambio de día/mes en Bolivia, coordinados con CA-02 y CA-05.
-- CA-09: simular carga y error de lectura/actualización con período vacío y con ventas; comprobar que el fallo no activa el mensaje de ausencia de ventas ni una confirmación falsa de vigencia.
+- CA-06 y CA-07: revisión manual del período vacío, con selector de período y navegación operables, y del Dashboard con suficientes productos para requerir scroll interno, en las dos dimensiones CSS acordadas y navegadores de US-001. La inspección visual es apropiada para comprobar mensajes y desplazamiento; registrar tamaño efectivo de la ventana y zoom.
+- CA-08: recorrido con dos sesiones y medición entre confirmación del registro y presentación de los tres bloques, con reloj y datos controlados. Se ejecuta en las condiciones de medición del contrato; con otras condiciones no se acredita el objetivo. Incluir reconexión, aviso perdido y cambio de día/mes en Bolivia, coordinados con CA-02 y CA-05.
+- CA-09: simular carga y error de lectura/actualización con período vacío y con ventas; comprobar que el fallo no activa el mensaje de ausencia de ventas ni una confirmación falsa de vigencia. Simular 401 en la lectura y en el stream y comprobar la reacción común de US-001.
 
 Estas comprobaciones están previstas, no ejecutadas. Antes de implementar, el agente principal concretará los casos y comandos disponibles según el procedimiento documental de testing; el hook ejecutará las comprobaciones rápidas aplicables. Las herramientas están elegidas en arquitectura, pero no instaladas ni configuradas; el mecanismo y umbral anteriores fueron aprobados, no verificados.
 
@@ -63,6 +63,8 @@ Posteriormente, el 2026-10-18, el responsable respondió «ok apruebo las tareas
 El 2026-10-18, al aprobar todas las recomendaciones de la base técnica mínima y su registro sin implementación, el responsable aprobó SSE, lectura común, objetivo de hasta 2 segundos con conexión activa y condiciones acordadas, las dos dimensiones CSS y la distinción carga/error/vacío. CA-07 se concreta y CA-08/CA-09 amplían la verificación dentro de las tareas existentes; no se crean tareas ni se certifica cumplimiento.
 
 El 2026-10-19, tras revisar la propuesta redactada con `requirements-analyst`, el responsable respondió «Apruebo el contrato del Dashboard, las dos excepciones y tus recomendaciones de la tabla». Se aprueban el [contrato de lectura y actualización](#contrato-de-lectura-y-actualización) y sus decisiones: lectura única por período a cargo de TASK-008, aviso SSE sin período, `periodEndsAt`, conservación de datos previos marcados como no actualizados, desempate por `productId`, eje de 24 horas y exclusión de «ventas recientes». Se autoriza sustituir la frase que excluía DTO/rutas del alcance. No cambian criterios ni tareas.
+
+El 2026-10-19, tras revisar con `requirements-analyst` las mejoras y preguntas abiertas del Dashboard, el responsable respondió «usa tus sugerencias para cada uno». Se aprueban las [decisiones de presentación y medición](#decisiones-de-presentación-y-medición): formato de importes, conciliación cada 30 segundos con latido, condiciones de medición de CA-08 (resuelven los pendientes 2 y 3), selector visible sin ventas, reacción común ante 401 y límites numéricos heredados. Se precisan CA-03, CA-06, CA-08 y CA-09 y la verificación con comprobaciones de coherencia. No cambian alcance, métricas ni tareas, ni se autoriza implementación.
 
 ## Contrato de lectura y actualización
 
@@ -110,7 +112,7 @@ Errores:
 | 401 | `UNAUTHORIZED` | Sesión inválida, expirada o revocada. |
 | 500 | `INTERNAL_ERROR` | Fallo del servidor, incluida la base de datos no disponible. |
 
-Conflicto y resultado incierto no aplican a una lectura. El envoltorio se alineará con el formato de error común de la API cuando se defina.
+Conflicto y resultado incierto no aplican a una lectura. El envoltorio sigue las [convenciones comunes del contrato HTTP](../ai-context/architecture.md#convenciones-comunes-del-contrato-http), aprobadas el 2026-10-19, que lo generalizan sin cambiarlo.
 
 ### Aviso de actualización
 
@@ -119,13 +121,25 @@ Conflicto y resultado incierto no aplican a una lectura. El envoltorio se alinea
 - Se relee al abrir, al reconectar, al alcanzar `periodEndsAt` y en cada conciliación periódica (CA-08). No se usa `Last-Event-ID`.
 - El rechazo de apertura o reconexión responde 401 `UNAUTHORIZED` con el envoltorio de error. El servidor cierra el stream al revocar o expirar la sesión. Un fallo de relectura usa los errores de la lectura (CA-09; TASK-010).
 
+### Decisiones de presentación y medición
+
+Aprobadas el 2026-10-19 para US-003 a US-005:
+
+- **Formato de importes.** `BOB` seguido de un espacio y el importe con un decimal y punto decimal, sin separador de miles, igual que en Gestión de ventas ([producto §3.4](../ai-context/product.md#34-gestión-de-ventas)). Ejemplo: `revenueTenths` 45505 se presenta como `BOB 4550.5`. No se usa «Bs» ni coma decimal; el formato del laboratorio visual no aplica.
+- **Conciliación y latido (pendiente 2).** Mientras el Dashboard está abierto, el cliente relee el período seleccionado cada 30 segundos, alineado con la presencia de US-001. El servidor envía un comentario SSE de latido cada 25 segundos; si el cliente no recibe datos ni latidos durante 60 segundos, trata el stream como cortado, reconecta y relee. La conciliación fija la frescura máxima ante un aviso perdido, no sustituye el objetivo de CA-08.
+- **Condiciones de medición de CA-08 (pendiente 3).** Backend, MongoDB y dos sesiones autenticadas en navegadores de US-001 sobre la misma computadora, para compartir reloj, sin limitación de red. Datos sembrados: 1 500 ventas registradas en el mes en curso y 60 productos distintos vendidos. Se registran 20 ventas desde una sesión, separadas al menos 5 segundos, y se mide en la otra desde la confirmación del registro hasta la presentación actualizada de los tres bloques. Se cumple si las 20 mediciones son ≤ 2 segundos. Se registran equipo, navegador, versiones y resultados.
+- **Sin ventas.** El mensaje de CA-06 sustituye resumen, lista y gráfico; el selector de período y la navegación siguen visibles.
+- **Sesión finalizada.** Un 401 en la lectura o el stream se propaga al cliente HTTP común de US-001 y aplica su reacción (TASK-005); el Dashboard no muestra un error propio ni el estado vacío.
+- **Horas futuras y renombrado.** Ver [US-005](us-005-identificar-horas-mas-ventas.md) CA-01 y [US-004](us-004-consultar-productos-vendidos.md) CA-07.
+- **Límites numéricos.** El Dashboard no define máximos comerciales. Las sumas de décimas de BOB y de cantidades deben ser exactas dentro del rango entero que se apruebe para US-011 a US-013 y nunca superar `Number.MAX_SAFE_INTEGER`; superar el rango es un 500, no un valor truncado.
+
 ### Pendientes del contrato
 
 1. Autorización del stream sin credenciales en URL (`EventSource` no admite cabeceras: cookie de sesión o stream sobre `fetch`) y cómo distingue el cliente un cierre por autorización de un corte de red. Depende del acceso e identidad de pestaña de US-001.
-2. Frecuencia de la conciliación periódica y, si se usan, latidos del stream.
-3. Condiciones de medición de CA-08: entorno, red, volumen de datos sin paginación, carga y reloj.
+2. Resuelto el 2026-10-19: conciliación y latido en las decisiones anteriores.
+3. Resuelto el 2026-10-19: condiciones de medición de CA-08 en las decisiones anteriores.
 4. Agrupación de relecturas ante ráfagas de avisos sin comprometer los 2 segundos.
-5. Envoltorio de error común a toda la API.
+5. Resuelto el 2026-10-19: envoltorio de error común en las [convenciones comunes del contrato HTTP](../ai-context/architecture.md#convenciones-comunes-del-contrato-http) («Apruebo las 9 recomendaciones de architect»).
 
 Construir contra este contrato con datos simulados no acredita integración, CA-05 entre sesiones, el cierre definitivo de CA-07 ni CA-08.
 
@@ -139,7 +153,7 @@ Las siguientes tareas de `requirements-analyst` están aprobadas para registro d
 
 - **Integración común.** Cada tarea de esta historia define el contrato a partir de los supuestos de `frontend/src/<módulo>/api/contract.provisional.ts` y lo presenta para aprobación (si ya existe contrato aprobado, lo aplica), implementa endpoint y reglas, sustituye la capa de acceso simulada en `frontend/src/<módulo>/api/` sin tocar componentes ni estilos y ejecuta la verificación integrada de sus criterios, incluidos los marcados P (presentación) y C (comportamiento de cliente construido por Frontend). Para conectar se necesita el registro de entrega de interfaz de la página. Los ajustes de interfaz que exija el contrato vuelven a Frontend y la tarea queda `Bloqueado: ajuste de interfaz pendiente en Frontend`.
 - Fuente de datos: [US-013 — Registrar la venta después del pago](us-013-registrar-venta-pagada.md) y sus tareas están aprobadas documentalmente, no implementadas. Se necesitan fecha/hora, total, método y snapshots de productos. Para US-004, identidad estable y nombre actual con cantidades/importes históricos intactos; el Dashboard no implementa registro ni modifica catálogo.
-- El [contrato de lectura y actualización](#contrato-de-lectura-y-actualización) concreta DTO, rutas, errores y aviso SSE de los tres bloques. Siguen pendientes la autorización del stream, la frecuencia de conciliación y las condiciones de medición enumeradas allí, no una nueva elección de transporte o umbral.
+- El [contrato de lectura y actualización](#contrato-de-lectura-y-actualización) concreta DTO, rutas, errores y aviso SSE de los tres bloques. Siguen pendientes la autorización del stream y la agrupación de ráfagas enumeradas allí, no una nueva elección de transporte o umbral.
 - Disponer de las estructuras de backend/frontend y del acceso protegido de US-001 para la integración correspondiente. Esta aprobación no autoriza tareas fundacionales ni implementación de otros módulos.
 - Usar las dimensiones de CA-07 al cerrar la comprobación visual de una pantalla sin scroll general.
 - Las verificaciones de cada tarea reutilizan la sección de verificación prevista de esta historia. El principal concretará casos y comandos según el [procedimiento de testing](../ai-context/documentation.md#7-procedimiento-de-testing). No hay pruebas del POS configuradas ni resultados ejecutados.
@@ -163,7 +177,7 @@ Las siguientes tareas de `requirements-analyst` están aprobadas para registro d
 - Historia relacionada: [US-003](us-003-consultar-resumen-ventas.md); reutilizada por US-004 y US-005.
 - Responsabilidad: backend.
 - Descripción y objetivo: emitir `sales-changed` tras la persistencia de una venta registrada y sustituir el emisor simulado de `frontend/src/dashboard/api/` por la suscripción real con relectura, para que los tres bloques se actualicen sin recargar, también desde otras sesiones.
-- Alcance y exclusiones: stream autorizado sin credenciales en URL que se cierra al revocar la sesión; en la capa de acceso, relectura al abrir, al reconectar, al alcanzar `periodEndsAt` y en la conciliación periódica, descarte de respuestas obsoletas y agrupación de ráfagas; resolver con aprobación los pendientes 1 a 4 del contrato; medición de CA-08 y recorrido con dos sesiones. Excluye registro de ventas, procesamiento de pagos, cálculos por bloque y mecanismos independientes para cada bloque.
+- Alcance y exclusiones: stream autorizado sin credenciales en URL que se cierra al revocar la sesión; en la capa de acceso, relectura al abrir, al reconectar, al alcanzar `periodEndsAt` y en la conciliación periódica, descarte de respuestas obsoletas y agrupación de ráfagas; resolver con aprobación los pendientes 1 y 4 del contrato y aplicar la conciliación y el latido aprobados; medición de CA-08 y recorrido con dos sesiones. Excluye registro de ventas, procesamiento de pagos, cálculos por bloque y mecanismos independientes para cada bloque.
 - Resultado esperado: actualización en hasta 2 segundos en las condiciones acordadas, sin contar ventas en curso ni duplicar resultados ante avisos repetidos; si falla una relectura, los datos previos se marcan como no actualizados.
 - Criterios aplicables: CA-05, CA-08 y CA-09 en actualización (P). Evidencia reutilizable por US-004 CA-05, US-005 CA-05 y US-013 CA-06.
 - Verificación prevista: integrar con ventas registradas y sesiones autorizadas; comprobar que selección, fallos y repetición de una misma operación o actualización no agregan ventas ni ingresos adicionales, en coordinación con US-013 CA-06.
