@@ -1,0 +1,51 @@
+import type { Catalog } from './contract.provisional';
+export const catalogFixture: Catalog = {
+  categories: [
+    { id: 'coffee', version: 1, name: 'Café' },
+    { id: 'bakery', version: 1, name: 'Panadería' },
+    { id: 'cold', version: 1, name: 'Bebidas frías' },
+    { id: 'seasonal', version: 1, name: 'Temporada' },
+  ],
+  products: [
+    {
+      id: 'espresso',
+      version: 1,
+      name: 'Espresso',
+      description: 'Café intenso, de extracción corta.',
+      priceTenths: 100,
+      categoryId: 'coffee',
+      image: null,
+      active: true,
+    },
+    {
+      id: 'latte',
+      version: 1,
+      name: 'Café con leche',
+      description: 'Espresso con leche caliente y una capa fina de espuma.',
+      priceTenths: 180,
+      categoryId: 'coffee',
+      image: null,
+      active: true,
+    },
+    {
+      id: 'croissant',
+      version: 1,
+      name: 'Croissant de mantequilla',
+      description: 'Hojaldre horneado, de corteza delicada.',
+      priceTenths: 125,
+      categoryId: 'bakery',
+      image: null,
+      active: true,
+    },
+    {
+      id: 'lemonade',
+      version: 1,
+      name: 'Limonada',
+      description: 'Limón fresco y agua, servida fría.',
+      priceTenths: 150,
+      categoryId: 'cold',
+      image: null,
+      active: false,
+    },
+  ],
+};

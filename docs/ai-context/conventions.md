@@ -31,7 +31,7 @@ Documentación en español e identificadores de código en inglés. Usar nombres
 - Historias: `US-001`, `US-002`, etc.
 - Tareas técnicas: `TASK-001`, `TASK-002`, etc., con secuencia global, no reiniciada por historia.
 - Cada tarea de implementación identifica su historia relacionada; los números de tarea e historia no tienen que coincidir.
-- Asignar identificadores únicos al registrar trabajo aprobado. No reutilizarlos ni renumerar trabajo existente; ampliar los dígitos si se supera 999.
+- Asignar identificadores únicos al registrar trabajo aprobado. No reutilizarlos ni renumerar trabajo existente; ampliar los dígitos si se supera 999. Las tareas retiradas siguen la [regla de retiro](documentation.md#6-changelog-y-tracker).
 - Especificaciones: `us-001-titulo-breve.md`, con el ID en mayúsculas dentro del documento.
 - Conservar identificadores y enlaces al cambiar un título. La forma de documentarlos está en [documentation.md](documentation.md).
 
@@ -52,6 +52,19 @@ Se conserva la rama existente `develop`. Esta convención no crea ramas ni decid
 
 Por autorización posterior del responsable («hazlo» al publicar la base y CI), la política de integración de `develop` exige el check `technical-checks` del workflow `CI`, emitido por GitHub Actions, y la rama actualizada antes de integrar, también para administradores. El trabajo nuevo se prepara en ramas como las anteriores y se integra mediante PR; no se exige un revisor humano adicional en esta configuración inicial. Las reglas reales se configuran y verifican en GitHub, sin sobrescribir protecciones previas; esta política no define releases ni crea otra rama principal.
 
+### Ciclo Git de Frontend y Backend
+
+La solicitud del responsable autoriza este flujo para futuros encargos de implementación aprobados, no para iniciar funcionalidades o publicar esta configuración. Cada TASK de backend tiene su rama. Frontend, que no recibe tareas, usa una rama por módulo o página con el formato `<tipo>/ui-<módulo>-<descripción>` (por ejemplo `feat/ui-menu-productos`) y referencias `Refs: US-NNN`. Ningún perfil tiene ramas permanentes. El principal entrega TASK/US, rutas autorizadas, dependencias/contrato y selección de verificaciones; una instrucción del usuario de no hacer commit prevalece.
+
+1. **Comprobar aislamiento.** Revisar rama, árbol e índice antes de empezar. Si hay cambios pendientes, otra tarea usa la misma carpeta o el índice contiene trabajo ajeno, detenerse y coordinar sin descartar, stashear o arrastrar cambios. Para paralelismo, cada tarea necesita un clon/worktree asignado por el principal; varias ramas no permiten varios checkouts simultáneos en una carpeta.
+2. **Actualizar origin antes de crear.** Ejecutar `git fetch origin` y exigir éxito. Comprobar `git rev-parse --verify origin/develop`; si falta el remoto/ref o falla la autenticación, informar, sin usar `develop` local como alternativa ni cambiar el remoto. Conservar el SHA obtenido como base de la tarea.
+3. **Crear desde la ref remota actualizada.** Usar `git switch --no-track --create <tipo>/task-NNN-descripcion origin/develop` en Backend o `<tipo>/ui-<módulo>-<descripción>` en Frontend. El tipo, TASK o módulo deben corresponder al encargo real; no inventar IDs. Comparar `git rev-parse HEAD` con el SHA recién obtenido de `origin/develop`, antes de implementar. `--no-track` evita configurar por error el upstream de una rama de tarea como `origin/develop`. No se hace pull, reset o rebase para preparar esta base.
+4. **Reanudar sin sobrescribir.** Si existe la rama de esa TASK o módulo, confirmar su identidad, ubicación y cambios con el principal antes de reutilizarla. No recrearla con fuerza ni reiniciar su historial a la ref remota. Actualizar origin no autoriza integrar nuevos commits en una tarea ya iniciada: cualquier merge/rebase requiere coordinación y autorización separadas.
+5. **Verificar y revisar.** Ejecutar la selección mínima aplicable y coordinar con el principal los comandos no permitidos o la documentación necesaria fuera del módulo. La advertencia fija `PENDIENTE aplicación` del hook no se ignora: el principal evalúa la evidencia externa. Fallos o verificaciones obligatorias sin evidencia impiden el cierre local. Revisar diff e índice, secretos y archivos temporales; no repetir éxitos válidos.
+6. **Commit acotado.** Preparar archivos explícitos de la TASK o del módulo de Frontend dentro de su ámbito, no `git add .`, `git add -A`, globs o `git commit -a/--all`. Si hay cambios ajenos preparados, no incluirlos ni retirarlos unilateralmente: detenerse. El principal coordina la documentación del mismo alcance antes del commit si el pre-commit la requiere. Generar un commit ordinario Conventional Commits con referencias TASK/US (solo US en Frontend), sin --amend, --no-verify ni opciones para anular hooks. Entregar rama, SHA base, SHA del commit y verificaciones/pendientes; no marcar DoD o tracker por cuenta propia.
+
+El permiso de tarea incluye este ciclo local, no push ni integración. Los comandos mutantes requieren confirmación nativa `ask` en OpenCode; no se conceden permisos generales de Git ni se eluden confirmaciones. El principal conserva la coordinación y el responsable autoriza publicación/integración por separado. No hacer commits de tarea en `develop`.
+
 ## 4. Commits
 
 Utilizar Conventional Commits: `<tipo>(<scope-opcional>): <resumen>`. Escribir resúmenes claros; para mantener consistencia con los ejemplos, usar inglés en los mensajes de commit.
@@ -65,7 +78,7 @@ test(orders): add order tests
 
 Cuando exista una tarea, relacionarla en el cuerpo, por ejemplo `Refs: TASK-001 (US-001)`. No inventar IDs para cambios administrativos o triviales sin historia.
 
-Antes de solicitar autorización para un commit, revisar el diff y los archivos preparados. Evitar secretos, archivos temporales, artefactos generados y modificaciones ajenas al objetivo. No hacer commits ni pushes automáticamente.
+Antes de un commit, revisar el diff y los archivos preparados. Evitar secretos, archivos temporales, artefactos generados y modificaciones ajenas al objetivo. La autorización de un encargo Frontend/Backend puede incluir el commit local según el ciclo anterior; fuera de ese caso se requiere autorización explícita adicional. No hacer pushes ni integrar automáticamente por haber creado un commit.
 
 ## 5. Pull Requests
 

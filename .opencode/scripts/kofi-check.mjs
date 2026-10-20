@@ -13,11 +13,13 @@ const defaultContext = '.opencode/task.local.json';
 const checkIds = ['syntax', 'json', 'links', 'self-test'];
 const trackerPath = 'docs/progress/tracker.md';
 const hash = (value) => createHash('sha256').update(value).digest('hex');
-const placeholder = /sustituir|describe-the-approved|\[\.\.\.\]|\bTODO\b/i;
+// Marcadores de plantilla sin rellenar. `TODO` distingue mayúsculas para no confundirlo con la palabra «todo».
+const placeholder = /sustituir por|describe-the-approved|\[\.\.\.\]/i;
+const todoMarker = /\bTODO\b/;
 const normalize = (value) => value.replaceAll('\\', '/');
 
 function meaningful(value) {
-  return typeof value === 'string' && value.trim().length > 3 && !placeholder.test(value);
+  return typeof value === 'string' && value.trim().length > 3 && !placeholder.test(value) && !todoMarker.test(value);
 }
 
 export function relativePath(value) {
@@ -121,10 +123,19 @@ export function requirements(root, context) {
   const spec = readLocal(root, context.spec);
   const approval = section(spec, 'Aprobación');
   const criteria = section(spec, 'Criterios de aceptación');
-  if (!meaningful(approval) || /pendiente|no aprobad|por aprobar/i.test(approval)
+  // Los pendientes técnicos registrados en la aprobación no equivalen a falta de aprobación.
+  if (!meaningful(approval) || /pendiente de aprobaci|no aprobad|por aprobar/i.test(approval)
       || !/20\d{2}-\d{2}-\d{2}/.test(approval)) throw new Error('Especificación sin referencia de aprobación fechada.');
-  if (!criteria.split('\n').some((line) => /^\s*-\s+\S/.test(line) && meaningful(line))) {
+  if (!criteria.split('\n').some((line) => (/^\s*-\s+\S/.test(line) || /^\s*\|\s*CA-\d+\s*\|\s*\S/.test(line))
+      && meaningful(line))) {
     throw new Error('Especificación sin criterios de aceptación verificables.');
+  }
+  // Frontend no recibe tareas (constitución §11): basta una especificación aprobada registrada en el tracker
+  // y un alcance limitado a frontend/.
+  if (!context.taskId && context.scope.every((item) => normalize(item).startsWith('frontend/'))) {
+    const name = normalize(context.spec).split('/').pop();
+    if (!readLocal(root, trackerPath).includes(`specs/${name}`)) throw new Error('La historia no está registrada en tracker.');
+    return ['OK requisitos: interfaz de Frontend sin tareas; el principal debe contrastar aprobación, criterios y alcance.'];
   }
   const tasks = section(spec, 'Tareas técnicas asociadas');
   if (!/TASK-\d{3,}/.test(tasks)) throw new Error('Identificar tareas técnicas en la especificación.');

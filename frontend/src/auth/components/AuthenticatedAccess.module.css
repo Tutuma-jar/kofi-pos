@@ -1,0 +1,14 @@
+.status {
+  margin-top: 36px;
+  max-width: 620px;
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  padding: 24px;
+}
+.status h2 {
+  font-size: 28px;
+}
+.status p {
+  line-height: 1.6;
+}

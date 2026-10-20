@@ -1,0 +1,213 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+}
+.header {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 clamp(24px, 4vw, 64px) 48px;
+}
+.toggle {
+  width: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+}
+.sidebar {
+  width: 244px;
+  flex-shrink: 0;
+  padding: 28px 16px 22px;
+  background: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--control-border) var(--sidebar);
+}
+.rail {
+  display: flex;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100dvh;
+}
+.rail[hidden] {
+  display: none;
+}
+.brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 43px;
+  color: var(--action);
+  letter-spacing: -0.035em;
+}
+.brandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 12px;
+}
+.brand span {
+  opacity: 0.65;
+}
+.sidebarCaption {
+  margin: 16px 12px 32px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.navigation {
+  display: grid;
+  gap: 8px;
+}
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px;
+  border-radius: 7px;
+  color: var(--ink);
+  background: transparent;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.link:hover,
+.toggle:hover {
+  background: var(--surface);
+}
+.link:active {
+  background: var(--line);
+}
+.link[aria-current='page'] {
+  color: var(--selection-text);
+  background: var(--selection);
+  font-weight: 600;
+}
+.footer {
+  margin-top: auto;
+  padding: 32px 12px 0;
+}
+.operator {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-top: 1px solid var(--control-border);
+  padding-top: 20px;
+  margin-bottom: 16px;
+}
+.operator > div {
+  min-width: 0;
+}
+.operator strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+}
+.footer p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+.logout {
+  text-align: left;
+  width: 100%;
+}
+.skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  transform: translateY(-200%);
+  padding: 12px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.skip:focus {
+  transform: none;
+}
+.dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: min(290px, 88vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  color: var(--ink);
+  background: var(--sidebar);
+}
+.dialog::backdrop {
+  background: rgb(26 41 54 / 0.4);
+}
+.dialog .sidebar {
+  width: 100%;
+  height: 100%;
+}
+.close {
+  width: 44px;
+  padding: 9px;
+  display: grid;
+  place-items: center;
+}
+.toggle:active {
+  background: var(--selection);
+  color: var(--selection-text);
+}
+.bounded .main {
+  padding: 0 24px;
+}
+.bounded .content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+@media (min-width: 1101px) and (min-height: 650px) {
+  .bounded {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .bounded .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .bounded .header {
+    height: 84px;
+    flex-shrink: 0;
+  }
+  .bounded main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+}

@@ -1,102 +1,78 @@
 # Kofi
 
-Base técnica de un POS web. Las funcionalidades de las US todavía no están implementadas: consulta el [tracker](docs/progress/tracker.md), el [producto](docs/ai-context/product.md) y el [alcance fundacional autorizado](docs/specs/technical-bootstrap.md).
+Kofi es un **punto de venta (POS) web para una cafetería**. Permite iniciar sesión con una cuenta compartida del local, consultar un dashboard de ventas, administrar el menú (productos, categorías y su activación) y, como objetivo final, registrar ventas y consultar su historial.
 
-## Requisitos
+- **Aplicación desplegada:** <https://kofi-pos.onrender.com>
+- **Usuario de demostración:** `admin` · **Contraseña:** `admin`
 
-- Node **24.19.0** (`.node-version`); engines admite versiones compatibles de la rama 24 desde esa versión.
-- npm **11.17.0**, sin modificar instalaciones globales.
-- No se necesita MongoDB para este arranque.
+> El plan gratuito de Render se suspende tras 15 minutos sin tráfico: la primera carga puede tardar alrededor de un minuto.
 
-## Instalación
+## Equipo
 
-Desde la raíz:
+- Pablo Ramírez ([@Tutuma-jar](https://github.com/Tutuma-jar))
+- Natalia Arteaga
 
-```powershell
-npm ci --ignore-scripts --no-audit --no-fund
-```
+## Arquitectura y despliegue
 
-Se usa un único `package-lock.json` y npm workspaces. `.npmrc` fija versiones exactas y deshabilita lifecycle scripts de terceros; los comandos locales se ejecutan explícitamente con `npm run`. Si una futura dependencia necesita un script de instalación, revisarlo antes de habilitarlo. No usar `npm audit fix --force` ni cambiar versiones indiscriminadamente.
+| Parte         | Tecnología                                          | Despliegue                                                                                        |
+| ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Frontend      | React 19 + TypeScript + Vite                        | Compilado y servido por Express en el mismo origen                                                |
+| Backend       | Express 5 + TypeScript (API en `/api`)              | Render Web Service, plan free, despliegue automático desde `develop` ([render.yaml](render.yaml)) |
+| Base de datos | MongoDB (replica set, necesario para transacciones) | MongoDB Atlas M0; la URI se configura solo en el panel de Render                                  |
 
-## Desarrollo
+La integración continua está en [`.github/workflows/ci.yml`](.github/workflows/ci.yml): en cada PR y push a `develop` ejecuta tipos, lint, formato, pruebas (Vitest y Supertest) y build. Instalación, desarrollo local y pasos de despliegue: [guía técnica](docs/development.md).
 
-En una terminal:
+## Estado del desarrollo
 
-```powershell
-npm run dev:frontend
-```
+El estado oficial de cada historia y tarea está en el [tracker](docs/progress/tracker.md); una tarea solo se marca completada al comprobar su Definición de Hecho. Resumen por módulo:
 
-En otra:
+| Módulo                  | Historias       | Estado                                                                                                                                                                                         |
+| ----------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acceso                  | US-001, US-002  | Interfaz, API y MongoDB integrados: login, sesiones revocables, presencia y cierre de sesión. Pendiente la protección completa de pestañas (TASK-005, bloqueada)                               |
+| Dashboard               | US-003 a US-005 | Interfaz conectada al backend; las métricas reales dependen del registro de ventas, aún no implementado                                                                                        |
+| Administración del menú | US-006 a US-009 | Interfaz, API y MongoDB integrados: registrar, editar, activar/desactivar productos y crear, renombrar y eliminar categorías con control de concurrencia. Pendiente el cierre formal de la DoD |
+| Gestión de ventas       | US-010 a US-013 | Interfaz completa con datos simulados; backend pendiente                                                                                                                                       |
+| Historial y reportes    | US-014 a US-017 | Especificado; sin implementar                                                                                                                                                                  |
 
-```powershell
-npm run dev:backend
-```
+Aproximadamente **9 de 17 historias** tienen implementación integrada y 4 más tienen interfaz simulada. La documentación SDD (constitución, producto, especificaciones por historia, tracker y changelog) está en [`docs/`](docs).
 
-- React: <http://127.0.0.1:5173>. Muestra solo contenido técnico, sin página funcional o diseño definitivo.
-- Express: <http://127.0.0.1:3000>. No tiene endpoints de negocio: `/api` devuelve **404**, no indica un fallo de arranque.
-- Puertos fijos en Vite para evitar cambiar de puerto silenciosamente. Express admite `PORT` entre 1 y 65535; opcionalmente copiar `backend/.env.example` a `backend/.env`. Nunca guardar credenciales en Git.
-- Los servidores escuchan solo en loopback y usan HTTP local. Esto no constituye despliegue ni resuelve HTTPS, origen común, proxy, sesiones o contratos de API de las futuras US.
+## Desarrollo asistido por IA
 
-## Comprobaciones técnicas
+El proyecto se desarrolla con **OpenCode** y **Claude Code** sobre un contexto común ([AGENTS.md](AGENTS.md) y [`docs/ai-context/`](docs/ai-context)). Detalle de controles y permisos: [`.opencode/README.md`](.opencode/README.md).
 
-```powershell
-npm run typecheck
-npm run lint
-npm run format:check
-npm test
-npm run build
-```
+### Hooks
 
-`npm test` ejecuta únicamente el montaje React con Vitest/Testing Library/jsdom y el humo de Express con Vitest/Supertest. No prueba ventas, autenticación, datos ni criterios de las US. `npm run format` formatea solo los archivos del arranque, no los documentos, herramientas o prototipos previos.
+| Hook                         | Ubicación                                              | Qué hace                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` de Git          | [`.githooks/pre-commit`](.githooks/pre-commit)         | Ejecuta `kofi-check docs`: valida que la documentación requerida por la tarea esté preparada y que no se cierren tareas del tracker sin evidencia. Se activa con `git config --local core.hooksPath .githooks` |
+| Control de requisitos        | `/kofi-start`                                          | Comprueba que la tarea tenga especificación y aprobación y registra su base antes de implementar                                                                                                               |
+| Control de alcance y testing | `/kofi-verify`                                         | Al cerrar una tarea, verifica que los cambios estén dentro del alcance autorizado y ejecuta las comprobaciones seleccionadas                                                                                   |
+| Integración continua         | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Check `technical-checks` obligatorio para integrar en `develop`                                                                                                                                                |
 
-Tras compilar:
+Los tres controles locales usan el mismo script determinista, [`kofi-check.mjs`](.opencode/scripts/kofi-check.mjs), con su propia batería de pruebas.
 
-```powershell
-npm run preview --workspace @kofi/frontend
-```
+### Subagentes
 
-```powershell
-npm start --workspace @kofi/backend
-```
+Definidos en [`.opencode/agents/`](.opencode/agents) y expuestos a Claude Code en [`.claude/agents/`](.claude/agents). Solo actúan con autorización explícita, tienen herramientas restringidas por rol y no delegan en otros agentes.
 
-Preview: <http://127.0.0.1:4173>. Es una comprobación del build local, **no un servidor de producción**. Detener cada proceso con `Ctrl+C`.
+| Subagente              | Responsabilidad                                                            |
+| ---------------------- | -------------------------------------------------------------------------- |
+| `requirements-analyst` | Redacta especificaciones SDD, criterios verificables y tareas; no programa |
+| `architect`            | Propone decisiones estructurales justificadas; no implementa               |
+| `database`             | Diseña modelos, colecciones e índices de MongoDB                           |
+| `backend`              | Implementa la API Express, validaciones y reglas de negocio                |
+| `frontend`             | Diseña e implementa la interfaz React con las skills de diseño             |
+| `documenter`           | Registra cambios y verificaciones reales sin inventar resultados           |
 
-## CI inicial en GitHub Actions
+### Skills y comandos
 
-El workflow [CI](.github/workflows/ci.yml) se ejecutará al publicar cambios en
-`develop`, abrir/actualizar PR hacia `develop` o solicitar una ejecución manual.
-El check estable se llama **`technical-checks`**. La ejecución manual requiere que
-el workflow esté disponible en la rama predeterminada del repositorio GitHub.
+| Skill / comando               | Uso en Kofi                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| `impeccable`                  | Planificación y revisión del diseño de cada página (jerarquía, accesibilidad, estados) |
+| `emil-design-eng`             | Revisión posterior de pulido visual, componentes y animaciones                         |
+| `react-best-practices`        | Revisión de rendimiento y patrones del código React                                    |
+| `design-taste-frontend`       | Dirección de arte; carga solo bajo pedido explícito                                    |
+| `/kofi-start`, `/kofi-verify` | Controles de requisitos y de alcance/testing descritos en [Hooks](#hooks)              |
+| `/impeccable`                 | Comando para lanzar una revisión de diseño con el contexto aprobado                    |
 
-- Usa Node de `.node-version`, npm exacto de `packageManager` y el lockfile raíz.
-  Un ajuste de npm ocurre solo en el runner efímero, no en la instalación del usuario.
-- Para cambios técnicos ejecuta instalación sin lifecycle de terceros y los cinco
-  comandos de comprobación anteriores. Solo cachea la descarga npm, no resultados
-  locales de pruebas ni `node_modules`.
-- Documentación en `docs/` y Markdown fuera de aplicaciones omite instalación/build/pruebas.
-  README raíz conserva solo formato, sin build. Los archivos de frontend/backend,
-  incluso Markdown o fixtures, se consideran entradas técnicas por seguridad.
-- Primer push, ejecución manual, cambios de CI o diff incierto ejecutan la base completa.
-  Las reglas del selector se comprueban siempre y el check existe también en PR documentales.
-- No necesita secretos, MongoDB, navegadores, despliegues o permisos de escritura.
-  El resultado actual solo acredita la base técnica y sus pruebas disponibles, no las US.
-
-Para comprobar localmente las reglas de selección:
-
-```powershell
-node --test .github/scripts/ci-scope.test.mjs
-```
-
-La base está publicada en GitHub y la primera ejecución completa de CI pasó;
-la [evidencia remota](docs/progress/CHANGELOG.md#2026-10-19) identifica el commit y la ejecución.
-La política de integración autorizada para `develop` exige `technical-checks` de
-GitHub Actions correcto y la rama actualizada antes de integrar, también para administradores.
-Esa protección se configura y verifica en GitHub, no se activa por el YAML.
-Para trabajo nuevo, crea una rama de trabajo y abre una PR hacia `develop`; no
-se exige un revisor humano adicional como parte de esta configuración inicial.
-
-## Límites y próximos pasos
-
-No hay login, sesiones, Dashboard, catálogo, ventas, modelos, conexión MongoDB, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. React Router, MongoDB, Zod y Playwright están elegidos, pero se instalarán cuando exista trabajo autorizado que los necesite. La primera CI remota verifica exclusivamente el bootstrap, no requisitos de las US ni despliegue.
-
-El control rápido de OpenCode sigue comprobando configuración y documentación. No ejecuta estos scripts ni acredita las US; el principal selecciona y ejecuta las comprobaciones técnicas por separado, conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing). Las funcionalidades requieren autorización posterior.
+Los criterios de uso de las skills de diseño están en el [sistema de diseño](docs/ai-context/design-system.md).

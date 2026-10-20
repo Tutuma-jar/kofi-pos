@@ -10,6 +10,8 @@ backend/dist/
 .env
 .env.*
 !.env.example
+# Imágenes de producto locales de desarrollo (PRODUCT_IMAGES_DIR por defecto).
+backend/var/
 
 # Contexto y resultados locales de controles; no son otro tracker.
 .opencode/task.local.json
@@ -35,3 +37,4 @@ backend/dist/
 **/.impeccable/live/deferred-svelte-component-accepts.json
 **/.impeccable/live/*.png
 # impeccable-ignore-end
+.opencode/
