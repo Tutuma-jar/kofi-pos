@@ -9,10 +9,12 @@ export function AuthenticatedAccess({
   children,
   title,
   bounded = false,
+  beforeLogout,
 }: {
   children: ReactNode;
   title: string;
   bounded?: boolean;
+  beforeLogout?: () => boolean;
 }) {
   const { client, session } = useAuth();
   const statusHeading = useRef<HTMLHeadingElement>(null);
@@ -33,6 +35,7 @@ export function AuthenticatedAccess({
       bounded={bounded}
       accountLabel={'label' in session ? session.label : ''}
       onLogout={() => {
+        if (beforeLogout && !beforeLogout()) return;
         void client.logout();
       }}
       logoutDisabled={closing}

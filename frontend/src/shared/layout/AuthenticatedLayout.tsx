@@ -82,6 +82,9 @@ export function AuthenticatedLayout({
       )}
       <div className={styles.brand}>kofi</div>
       <nav aria-label="Principal">
+        <NavLink to="/sales" className={styles.link} onClick={close}>
+          Gestión de ventas
+        </NavLink>
         <NavLink to="/menu" end className={styles.link} onClick={close}>
           Administración de Menú
         </NavLink>
