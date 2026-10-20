@@ -3,7 +3,7 @@ import type {
   DashboardClient,
   DemoScenario,
 } from '../api/contract.provisional';
-import { createDemoDashboardClient } from '../api/demo-client';
+import { createRealDashboardClient } from '../api/real-dashboard-client';
 import { scenarioLabels } from '../api/fixtures';
 import { useAuth } from '../../auth/auth-context';
 import { Button } from '../../shared/components/Button';
@@ -20,9 +20,7 @@ export function DashboardPage({
   client?: DashboardClient;
 }) {
   const { client: auth } = useAuth();
-  const [owned] = useState(
-    () => supplied ?? createDemoDashboardClient(auth.unauthorized),
-  );
+  const [owned] = useState(() => supplied ?? createRealDashboardClient(auth));
   const client = supplied ?? owned;
   const state = useSyncExternalStore(client.subscribe, client.getSnapshot);
   const [textHours, setTextHours] = useState(false);
@@ -79,7 +77,9 @@ export function DashboardPage({
                   ? 'Actualizando…'
                   : state.stream === 'reconnecting'
                     ? 'Actualización interrumpida; última lectura confirmada.'
-                    : 'Datos simulados · Sin conexión con ventas reales'}
+                    : client.demo
+                      ? 'Datos simulados · Sin conexión con ventas reales'
+                      : 'Última lectura confirmada'}
         </div>
         {state.stale && (
           <Button
@@ -91,6 +91,7 @@ export function DashboardPage({
           </Button>
         )}
         <span className={styles.clock} title={state.demoDescription}>
+          {state.demonstration && <span>Datos de demostración · </span>}
           {state.clockLabel}
         </span>
       </div>

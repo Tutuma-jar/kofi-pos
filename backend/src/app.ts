@@ -4,8 +4,18 @@ import { authRoutes } from './auth/auth.routes.js';
 import { emptySchema } from './auth/sessions.schemas.js';
 import { errorHandler } from './shared/http/error-handler.js';
 import { notFound } from './shared/http/not-found.js';
+import { createSessionsService } from './auth/sessions.service.js';
+import { createDashboardEvents } from './dashboard/dashboard-events.js';
+import { dashboardRoutes } from './dashboard/dashboard.routes.js';
+import type { DashboardSource } from './dashboard/dashboard.contract.js';
+import { createDashboardDemo } from './dashboard/dashboard-demo.js';
 
-export function createApp(options?: { db: Db; clock?: () => Date }) {
+export function createApp(options?: {
+  db: Db;
+  clock?: () => Date;
+  dashboardSource?: DashboardSource;
+  dashboardDemo?: boolean;
+}) {
   const app = express();
 
   app.disable('x-powered-by');
@@ -21,11 +31,34 @@ export function createApp(options?: { db: Db; clock?: () => Date }) {
     emptySchema.parse(req.query);
     next();
   });
-  if (options)
+  if (options) {
+    const clock = options.clock ?? (() => new Date());
+    const demo =
+      options.dashboardDemo && !options.dashboardSource
+        ? createDashboardDemo(clock)
+        : undefined;
+    const sessions = createSessionsService(options.db, clock, (id) =>
+      events.revoke(id),
+    );
+    const events = createDashboardEvents(sessions, clock, () => demo?.stop());
+    demo?.start(
+      () => events.publishSimulatedChange(),
+      () => events.size > 0,
+    );
+    app.locals.dashboardEvents = events;
     app.use(
       '/api',
-      authRoutes(options.db, options.clock ?? (() => new Date())),
+      dashboardRoutes(
+        options.db,
+        sessions,
+        events,
+        options.dashboardSource,
+        clock,
+        demo,
+      ),
     );
+    app.use('/api', authRoutes(options.db, clock, sessions));
+  }
   app.use(notFound);
   app.use(errorHandler);
 

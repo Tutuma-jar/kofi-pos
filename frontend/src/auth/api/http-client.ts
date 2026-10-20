@@ -63,17 +63,17 @@ export type AuthorizationSnapshot = {
 };
 
 /** Capture authorization per request; an old 401 must not terminate a newer login. */
-export function createAuthorizedHttpClient(options: {
+export function createAuthorizedResponseClient(options: {
   transport: HttpTransport;
   origin: string;
   authorization: () => AuthorizationSnapshot | null;
   unauthorized: (captured: AuthorizationSnapshot) => void;
 }) {
-  return async <T>(
+  return async (
     input: RequestInfo | URL,
     init?: RequestInit,
     expectedStatus?: number,
-  ): Promise<HttpResult<T>> => {
+  ): Promise<HttpResult<Response>> => {
     const raw = input instanceof Request ? input.url : String(input);
     let url: URL;
     try {
@@ -102,19 +102,53 @@ export function createAuthorizedHttpClient(options: {
     );
     headers.set('Authorization', `Bearer ${captured.token}`);
     headers.set('X-Tab-Authorization', captured.binding);
-    const request = createHttpClient(options.transport, () =>
-      options.unauthorized(captured),
-    );
-    return request<T>(
-      input,
-      {
+    let response: Response;
+    try {
+      response = await options.transport(input, {
         ...init,
         headers,
         credentials: 'omit',
         redirect: 'error',
         cache: 'no-store',
-      },
-      expectedStatus,
-    );
+      });
+    } catch {
+      return { kind: 'connection' };
+    }
+    if (!response.ok) {
+      const result = await createHttpClient(
+        async () => response,
+        () => options.unauthorized(captured),
+      )<Response>(input);
+      return result;
+    }
+    if (expectedStatus !== undefined && response.status !== expectedStatus) {
+      await response.body?.cancel();
+      return { kind: 'error', status: response.status };
+    }
+    return { kind: 'ok', data: response };
+  };
+}
+
+export function createAuthorizedHttpClient(
+  options: Parameters<typeof createAuthorizedResponseClient>[0],
+) {
+  const response = createAuthorizedResponseClient(options);
+  return async <T>(
+    input: RequestInfo | URL,
+    init?: RequestInit,
+    expectedStatus?: number,
+  ): Promise<HttpResult<T>> => {
+    const result = await response(input, init, expectedStatus);
+    if (result.kind !== 'ok') return result;
+    if (result.data.status === 204) return { kind: 'ok', data: undefined as T };
+    try {
+      return {
+        kind: 'ok',
+        data: (await result.data.json()) as T,
+        headers: result.data.headers,
+      };
+    } catch {
+      return { kind: 'error', status: result.data.status };
+    }
   };
 }

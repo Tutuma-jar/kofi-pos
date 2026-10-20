@@ -10,12 +10,16 @@ import { sessionDto, type Session } from './session.model.js';
 import { emptySchema, loginSchema } from './sessions.schemas.js';
 import { createSessionsService } from './sessions.service.js';
 
-export function authRoutes(db: Db, clock: () => Date) {
+export function authRoutes(
+  db: Db,
+  clock: () => Date,
+  sharedSessions?: ReturnType<typeof createSessionsService>,
+) {
   const router = Router({ caseSensitive: true, strict: true });
   const credentials = createAuthService(db, {
     rateLimiter: createCredentialRateLimiter({ now: () => clock().getTime() }),
   });
-  const sessions = createSessionsService(db, clock);
+  const sessions = sharedSessions ?? createSessionsService(db, clock);
   const json: RequestHandler = (req, _res, next) => {
     if (!req.is('application/json'))
       throw new ApiError('UNSUPPORTED_MEDIA_TYPE', 'Se requiere JSON.');

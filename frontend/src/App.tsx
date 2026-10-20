@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { AuthContext } from './auth/auth-context';
-import { demoClient } from './auth/api/demo-client';
+import { applicationAuthClient } from './auth/api/application-client';
 import type { AuthClient } from './auth/api/contract.provisional';
 import { LoginPage } from './auth/pages/LoginPage';
 import { DashboardPage } from './dashboard/pages/DashboardPage';
@@ -55,7 +55,7 @@ export function AccessRoutes({ client }: { client: AuthClient }) {
 export function App() {
   return (
     <BrowserRouter>
-      <AccessRoutes client={demoClient} />
+      <AccessRoutes client={applicationAuthClient} />
     </BrowserRouter>
   );
 }
