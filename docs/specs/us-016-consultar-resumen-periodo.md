@@ -74,3 +74,7 @@ Tarea de `requirements-analyst` aprobada por el responsable el 2026-10-19 para r
 - Criterios aplicables: CA-01 (C), CA-02 a CA-04, CA-05 (P), CA-06 (P) y CA-07 (P).
 - Verificación prevista: la de esta historia.
 - Dependencias: TASK-033 (definición del rango y página integrada); TASK-030 de US-013; TASK-003 y TASK-005 de US-001; aprobación de la regla de redondeo; autorización de la interfaz de Historial y su registro de entrega.
+
+## Entrega de interfaz relacionada
+
+La autorización y entrega frontend posterior del 2026-10-20 se registran en [US-014](us-014-consultar-historial-ventas.md#interfaz--historial-y-reportes-registro-de-entrega). Incluye resumen simulado del rango, ventas, ingresos, efectivo/QR y ticket promedio recibido, con carga, vacío sin promedio ficticio, error y reintento. No acredita integración ni DoD de esta historia.

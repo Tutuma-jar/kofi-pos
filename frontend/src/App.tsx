@@ -11,6 +11,7 @@ import { AuthenticatedAccess } from './auth/components/AuthenticatedAccess';
 import { SalesProvider } from './sales/state/SalesProvider';
 import { useSales } from './sales/state/sales-context';
 import { SalesPage } from './sales/pages/SalesPage';
+import { HistoryPage } from './history/pages/HistoryPage';
 import './shared/styles/fonts.css';
 import './shared/styles/tokens.css';
 import './shared/styles/global.css';
@@ -19,6 +20,19 @@ function ModuleRoutes() {
   const { beforeLogout } = useSales();
   return (
     <Routes>
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <AuthenticatedAccess
+              title="Historial y reportes"
+              beforeLogout={beforeLogout}
+            >
+              <HistoryPage />
+            </AuthenticatedAccess>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/sales"
         element={

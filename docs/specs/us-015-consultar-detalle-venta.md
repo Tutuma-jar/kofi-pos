@@ -65,3 +65,7 @@ Tarea de `requirements-analyst` aprobada por el responsable el 2026-10-19 para r
 - Criterios aplicables: CA-01 (C), CA-02, CA-03, CA-04 (P), CA-05 (P) y CA-06 (P).
 - Verificación prevista: la de esta historia.
 - Dependencias: TASK-033 (referencia de venta en las filas y lista integrada); TASK-030 de US-013; TASK-018 y TASK-022 de US-007 y US-009 para comprobar la conservación histórica; TASK-003 y TASK-005 de US-001; autorización de la interfaz de Historial y su registro de entrega.
+
+## Entrega de interfaz relacionada
+
+La autorización y entrega frontend posterior del 2026-10-20 se registran en [US-014](us-014-consultar-historial-ventas.md#interfaz--historial-y-reportes-registro-de-entrega). Incluye detalle histórico simulado, carga, error, venta no encontrada, reintento y cierre accesible. No acredita integración ni DoD de esta historia.

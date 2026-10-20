@@ -102,6 +102,9 @@ export function AuthenticatedLayout({
         >
           Dashboard
         </NavLink>
+        <NavLink to="/history" className={styles.link} onClick={close}>
+          Historial y reportes
+        </NavLink>
       </nav>
       <div className={styles.footer}>
         <p>{accountLabel}</p>
