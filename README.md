@@ -1,141 +1,78 @@
 # Kofi
 
-POS web en desarrollo. Acceso tiene implementación local conectada a Express y MongoDB; los límites de identidad de pestaña y la evidencia se registran en la [entrega de Acceso](docs/progress/access-module-integration.md). Consultar el [tracker](docs/progress/tracker.md) para el estado oficial, no asumir el resto del POS implementado.
+Kofi es un **punto de venta (POS) web para una cafetería**. Permite iniciar sesión con una cuenta compartida del local, consultar un dashboard de ventas, administrar el menú (productos, categorías y su activación) y, como objetivo final, registrar ventas y consultar su historial.
 
-## Requisitos
+- **Aplicación desplegada:** <https://kofi-pos.onrender.com>
+- **Usuario de demostración:** `admin` · **Contraseña:** `admin`
 
-- Node **24.19.0** (`.node-version`); engines admite versiones compatibles de la rama 24 desde esa versión.
-- npm **11.17.0**, sin modificar instalaciones globales.
-- Docker con Docker Compose para MongoDB local (replica set de un nodo, necesario para transacciones). El acceso real requiere frontend, API y MongoDB; las pruebas unitarias de frontend no requieren Docker.
+> El plan gratuito de Render se suspende tras 15 minutos sin tráfico: la primera carga puede tardar alrededor de un minuto.
 
-## Instalación
+## Equipo
 
-Desde la raíz:
+- Pablo Ramírez ([@Tutuma-jar](https://github.com/Tutuma-jar))
+- Natalia Arteaga
 
-```powershell
-npm ci --ignore-scripts --no-audit --no-fund
-```
+## Arquitectura y despliegue
 
-Se usa un único `package-lock.json` y npm workspaces. `.npmrc` fija versiones exactas y deshabilita lifecycle scripts de terceros; los comandos locales se ejecutan explícitamente con `npm run`. Si una futura dependencia necesita un script de instalación, revisarlo antes de habilitarlo. No usar `npm audit fix --force` ni cambiar versiones indiscriminadamente.
+| Parte         | Tecnología                                          | Despliegue                                                                                        |
+| ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Frontend      | React 19 + TypeScript + Vite                        | Compilado y servido por Express en el mismo origen                                                |
+| Backend       | Express 5 + TypeScript (API en `/api`)              | Render Web Service, plan free, despliegue automático desde `develop` ([render.yaml](render.yaml)) |
+| Base de datos | MongoDB (replica set, necesario para transacciones) | MongoDB Atlas M0; la URI se configura solo en el panel de Render                                  |
 
-## Desarrollo
+La integración continua está en [`.github/workflows/ci.yml`](.github/workflows/ci.yml): en cada PR y push a `develop` ejecuta tipos, lint, formato, pruebas (Vitest y Supertest) y build. Instalación, desarrollo local y pasos de despliegue: [guía técnica](docs/development.md).
 
-En una terminal:
+## Estado del desarrollo
 
-```powershell
-npm run dev:frontend
-```
+El estado oficial de cada historia y tarea está en el [tracker](docs/progress/tracker.md); una tarea solo se marca completada al comprobar su Definición de Hecho. Resumen por módulo:
 
-En otra, con MongoDB local levantado y `backend/.env` creado a partir de `backend/.env.example`:
+| Módulo                  | Historias       | Estado                                                                                                                                                                                         |
+| ----------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acceso                  | US-001, US-002  | Interfaz, API y MongoDB integrados: login, sesiones revocables, presencia y cierre de sesión. Pendiente la protección completa de pestañas (TASK-005, bloqueada)                               |
+| Dashboard               | US-003 a US-005 | Interfaz conectada al backend; las métricas reales dependen del registro de ventas, aún no implementado                                                                                        |
+| Administración del menú | US-006 a US-009 | Interfaz, API y MongoDB integrados: registrar, editar, activar/desactivar productos y crear, renombrar y eliminar categorías con control de concurrencia. Pendiente el cierre formal de la DoD |
+| Gestión de ventas       | US-010 a US-013 | Interfaz completa con datos simulados; backend pendiente                                                                                                                                       |
+| Historial y reportes    | US-014 a US-017 | Especificado; sin implementar                                                                                                                                                                  |
 
-```powershell
-npm run db:up --workspace @kofi/backend
-```
+Aproximadamente **9 de 17 historias** tienen implementación integrada y 4 más tienen interfaz simulada. La documentación SDD (constitución, producto, especificaciones por historia, tracker y changelog) está en [`docs/`](docs).
 
-```powershell
-npm run dev:backend
-```
+## Desarrollo asistido por IA
 
-`db:up` inicia [backend/compose.yaml](backend/compose.yaml) y espera a que el replica set `rs0` esté listo; la primera vez lo inicializa. Los datos persisten en el volumen `kofi_mongo-data`. `npm run db:down --workspace @kofi/backend` detiene el contenedor sin borrar el volumen. El backend no arranca sin `MONGODB_URI` válido o si MongoDB no es replica set.
+El proyecto se desarrolla con **OpenCode** y **Claude Code** sobre un contexto común ([AGENTS.md](AGENTS.md) y [`docs/ai-context/`](docs/ai-context)). Detalle de controles y permisos: [`.opencode/README.md`](.opencode/README.md).
 
-- React: <http://127.0.0.1:5173>. Login y pantallas existentes; Vite redirige `/api` a Express en 3000 para usar el mismo origen. No usar secretos en parámetros de URL.
-- Express: <http://127.0.0.1:3000>. API de sesiones en `/api/sessions`; `/api` sin ruta concreta devuelve **404**, no indica un fallo de arranque.
-- Puertos fijos en Vite para evitar cambiar de puerto silenciosamente. Express admite `PORT` entre 1 y 65535; opcionalmente copiar `backend/.env.example` a `backend/.env`. Nunca guardar credenciales en Git.
-- En desarrollo los servidores escuchan solo en loopback y usan HTTP local; el proxy de Vite es únicamente de desarrollo. `HOST`, `TRUST_PROXY` y `FRONTEND_DIST_DIR` solo se definen al desplegar (ver [Despliegue en Render](#despliegue-en-render)).
+### Hooks
 
-### Cuenta externa y Acceso
+| Hook                         | Ubicación                                              | Qué hace                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` de Git          | [`.githooks/pre-commit`](.githooks/pre-commit)         | Ejecuta `kofi-check docs`: valida que la documentación requerida por la tarea esté preparada y que no se cierren tareas del tracker sin evidencia. Se activa con `git config --local core.hooksPath .githooks` |
+| Control de requisitos        | `/kofi-start`                                          | Comprueba que la tarea tenga especificación y aprobación y registra su base antes de implementar                                                                                                               |
+| Control de alcance y testing | `/kofi-verify`                                         | Al cerrar una tarea, verifica que los cambios estén dentro del alcance autorizado y ejecuta las comprobaciones seleccionadas                                                                                   |
+| Integración continua         | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Check `technical-checks` obligatorio para integrar en `develop`                                                                                                                                                |
 
-No se crea ninguna cuenta automáticamente ni existe contraseña predeterminada. La provisión es un paso administrativo externo a la aplicación. Con `MONGODB_URI` en el entorno, ejecutar desde la raíz `node --import tsx backend/scripts/provision-account.ts` y suministrar un único objeto JSON por entrada estándar, con `username` y `password`. No pasar secretos por argumentos, URL, comandos guardados o archivos versionados. El script crea una cuenta nueva con scrypt y sal individual; no modifica ni recupera cuentas existentes. Usar una entrada estándar segura, sin eco ni historial, desde el gestor de secretos del operador.
+Los tres controles locales usan el mismo script determinista, [`kofi-check.mjs`](.opencode/scripts/kofi-check.mjs), con su propia batería de pruebas.
 
-Para desarrollo, `backend/.env` contiene `PORT=3000` y `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Es un archivo local ignorado por Git. `PRODUCT_IMAGES_DIR` indica dónde el backend guarda las imágenes de producto: es obligatoria con `NODE_ENV=production` y, si falta en desarrollo, se usa `backend/var/product-images`, también ignorada por Git. El provisionador lee el entorno del proceso, no carga ese archivo automáticamente. Chrome y Edge requieren almacenamiento del sitio y Web Locks; otras plataformas no se acreditan. No considerar almacenamiento o navegación una prueba infalible de identidad de pestaña.
+### Subagentes
 
-## Despliegue en Render
+Definidos en [`.opencode/agents/`](.opencode/agents) y expuestos a Claude Code en [`.claude/agents/`](.claude/agents). Solo actúan con autorización explícita, tienen herramientas restringidas por rol y no delegan en otros agentes.
 
-[render.yaml](render.yaml) define un único Web Service: Express sirve `/api` y la SPA compilada en el mismo origen, y Render termina HTTPS. Plan free, región Virginia, despliegue automático de `develop`.
+| Subagente              | Responsabilidad                                                            |
+| ---------------------- | -------------------------------------------------------------------------- |
+| `requirements-analyst` | Redacta especificaciones SDD, criterios verificables y tareas; no programa |
+| `architect`            | Propone decisiones estructurales justificadas; no implementa               |
+| `database`             | Diseña modelos, colecciones e índices de MongoDB                           |
+| `backend`              | Implementa la API Express, validaciones y reglas de negocio                |
+| `frontend`             | Diseña e implementa la interfaz React con las skills de diseño             |
+| `documenter`           | Registra cambios y verificaciones reales sin inventar resultados           |
 
-1. Crear un cluster MongoDB Atlas (M0 basta; ya es replica set) con un usuario de lectura/escritura y acceso de red para Render.
-2. En Render, **New → Blueprint**, elegir este repositorio y la rama `develop`.
-3. Introducir `MONGODB_URI` en el panel cuando lo pida (`sync: false`), con el nombre de la base en la ruta, por ejemplo `.../kofi?retryWrites=true&w=majority`. Nunca versionarla.
-4. Crear la cuenta de acceso con el provisionador de [Cuenta externa y Acceso](#cuenta-externa-y-acceso), con `MONGODB_URI` de Atlas en el entorno del proceso.
+### Skills y comandos
 
-Variables de despliegue, además de `MONGODB_URI` y `PRODUCT_IMAGES_DIR`:
+| Skill / comando               | Uso en Kofi                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| `impeccable`                  | Planificación y revisión del diseño de cada página (jerarquía, accesibilidad, estados) |
+| `emil-design-eng`             | Revisión posterior de pulido visual, componentes y animaciones                         |
+| `react-best-practices`        | Revisión de rendimiento y patrones del código React                                    |
+| `design-taste-frontend`       | Dirección de arte; carga solo bajo pedido explícito                                    |
+| `/kofi-start`, `/kofi-verify` | Controles de requisitos y de alcance/testing descritos en [Hooks](#hooks)              |
+| `/impeccable`                 | Comando para lanzar una revisión de diseño con el contexto aprobado                    |
 
-| Variable            | Valor en Render                                      | Por defecto                          |
-| ------------------- | ---------------------------------------------------- | ------------------------------------ |
-| `HOST`              | `0.0.0.0`                                            | `127.0.0.1`                          |
-| `TRUST_PROXY`       | `1` (proxy de Render; `req.ip` es la IP del cliente) | `0`                                  |
-| `FRONTEND_DIST_DIR` | `../frontend/dist`, relativa a `backend/`            | sin definir: Express no sirve la SPA |
-
-El plan free se suspende tras 15 minutos sin tráfico, así que la primera petición tarda en responder, y no tiene disco persistente: las imágenes de producto se pierden al redesplegar o reiniciar. Para conservarlas hace falta un plan de pago con disco montado en `PRODUCT_IMAGES_DIR`.
-
-## Comprobaciones técnicas
-
-```powershell
-npm run typecheck
-npm run lint
-npm run format:check
-npm test
-npm run build
-```
-
-`npm test` ejecuta pruebas React/cliente HTTP con Vitest/Testing Library/jsdom y pruebas unitarias de Express, credenciales y configuración. No sustituye MongoDB real, navegador real ni prueba ventas.
-
-Con MongoDB local levantado, las pruebas de integración del backend usan una base temporal que se elimina al terminar. No forman parte de `npm test` ni de la CI:
-
-```powershell
-npm run test:integration --workspace @kofi/backend
-```
-
-`npm run format` formatea solo los archivos del arranque, no los documentos, herramientas o prototipos previos.
-
-Tras compilar:
-
-```powershell
-npm run preview --workspace @kofi/frontend
-```
-
-```powershell
-npm start --workspace @kofi/backend
-```
-
-Preview: <http://127.0.0.1:4173>. Es una comprobación del build local, **no un servidor de producción**. Detener cada proceso con `Ctrl+C`.
-
-## CI inicial en GitHub Actions
-
-El workflow [CI](.github/workflows/ci.yml) se ejecutará al publicar cambios en
-`develop`, abrir/actualizar PR hacia `develop` o solicitar una ejecución manual.
-El check estable se llama **`technical-checks`**. La ejecución manual requiere que
-el workflow esté disponible en la rama predeterminada del repositorio GitHub.
-
-- Usa Node de `.node-version`, npm exacto de `packageManager` y el lockfile raíz.
-  Un ajuste de npm ocurre solo en el runner efímero, no en la instalación del usuario.
-- Para cambios técnicos ejecuta instalación sin lifecycle de terceros y los cinco
-  comandos de comprobación anteriores. Solo cachea la descarga npm, no resultados
-  locales de pruebas ni `node_modules`.
-- Documentación en `docs/` y Markdown fuera de aplicaciones omite instalación/build/pruebas.
-  README raíz conserva solo formato, sin build. Los archivos de frontend/backend,
-  incluso Markdown o fixtures, se consideran entradas técnicas por seguridad.
-- Primer push, ejecución manual, cambios de CI o diff incierto ejecutan la base completa.
-  Las reglas del selector se comprueban siempre y el check existe también en PR documentales.
-- No necesita secretos, MongoDB, navegadores, despliegues o permisos de escritura.
-  El resultado actual solo acredita la base técnica y sus pruebas disponibles, no las US.
-
-Para comprobar localmente las reglas de selección:
-
-```powershell
-node --test .github/scripts/ci-scope.test.mjs
-```
-
-La base está publicada en GitHub y la primera ejecución completa de CI pasó;
-la [evidencia remota](docs/progress/CHANGELOG.md#2026-10-19) identifica el commit y la ejecución.
-La política de integración autorizada para `develop` exige `technical-checks` de
-GitHub Actions correcto y la rama actualizada antes de integrar, también para administradores.
-Esa protección se configura y verifica en GitHub, no se activa por el YAML.
-Para trabajo nuevo, crea una rama de trabajo y abre una PR hacia `develop`; no
-se exige un revisor humano adicional como parte de esta configuración inicial.
-
-## Límites y próximos pasos
-
-Acceso incorpora sesiones opacas revocables y presencia, con protección conservadora de pestaña y limitaciones explícitas de restauración/duplicación nativas. Dashboard es el destino de entrada; no se implementan aquí indicadores, catálogo real, ventas ni almacenamiento de imágenes. React Router ya está instalado; no se añade Playwright. La CI remota previa no acredita estos cambios locales ni los requisitos de las US.
-
-El control rápido de OpenCode sigue comprobando configuración y documentación. No acredita por sí mismo las US; el principal selecciona y ejecuta las comprobaciones técnicas conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing).
+Los criterios de uso de las skills de diseño están en el [sistema de diseño](docs/ai-context/design-system.md).

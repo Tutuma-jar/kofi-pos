@@ -28,7 +28,7 @@ Sin login, sesiones, identidad de pestaña, prototipos experimentales, navegaci�
 - B-05: alcance y documentación coherentes, tracker y especificaciones funcionales intactos. Ejecutar control local de sintaxis/JSON/enlaces y comparar fingerprints anteriores a este trabajo. El control rápido no ejecuta los comandos nuevos ni verifica el POS; su limitación se informa, no se elimina ampliando el hook sin autorización.
 - B-06: comandos de desarrollo y producción técnica arrancan localmente; comprobar recursos de frontend y respuesta HTTP de Express, y detener los procesos creados. Sin conexiones a datos reales.
 
-Los comandos concretos se mantienen en el [README](../../README.md). Las pruebas de humo no acreditan criterios de ninguna US. La selección y revisión de React Best Practices son técnicas: no se diseña una página con Impeccable y no procede una revisión visual de producto en este alcance.
+Los comandos concretos se mantienen en el [README](../development.md). Las pruebas de humo no acreditan criterios de ninguna US. La selección y revisión de React Best Practices son técnicas: no se diseña una página con Impeccable y no procede una revisión visual de producto en este alcance.
 
 ## Versiones y dependencias
 
