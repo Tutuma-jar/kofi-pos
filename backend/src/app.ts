@@ -10,12 +10,16 @@ import { createDashboardEvents } from './dashboard/dashboard-events.js';
 import { dashboardRoutes } from './dashboard/dashboard.routes.js';
 import type { DashboardSource } from './dashboard/dashboard.contract.js';
 import { createDashboardDemo } from './dashboard/dashboard-demo.js';
+import { productsRoutes } from './products/products.routes.js';
+import type { ImageStore } from './products/image-store.js';
 
 export function createApp(options?: {
   db: Db;
   clock?: () => Date;
   dashboardSource?: DashboardSource;
   dashboardDemo?: boolean;
+  // Product routes are mounted only with an image volume (server always has one).
+  productImages?: ImageStore;
 }) {
   const app = express();
 
@@ -60,6 +64,11 @@ export function createApp(options?: {
     );
     // Before authRoutes: its fallback answers any other /api path with 404.
     app.use('/api', categoriesRoutes(options.db, sessions, clock));
+    if (options.productImages)
+      app.use(
+        '/api',
+        productsRoutes(options.db, sessions, options.productImages, clock),
+      );
     app.use('/api', authRoutes(options.db, clock, sessions));
   }
   app.use(notFound);
