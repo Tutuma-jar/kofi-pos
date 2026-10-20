@@ -8,6 +8,7 @@ import type { ImageStore } from './image-store.js';
 import { IMAGE_MAX_BYTES, imageContentTypes } from './product-images.js';
 import {
   parseCreateProduct,
+  parseProductActivation,
   parseUpdateProduct,
   productParamsSchema,
 } from './products.schemas.js';
@@ -73,6 +74,15 @@ export function productsRoutes(
     emptySchema.parse(req.query);
     const input = parseUpdateProduct(req.body);
     res.json(await service.update(id, input));
+  });
+  // Activation (TASK-022): `{ version, active }` with the explicit target
+  // state; same 409 VERSION_CONFLICT as edition. No deletion route (US-009
+  // CA-04).
+  router.patch('/products/:id/activation', protect, json, async (req, res) => {
+    const id = productId(req);
+    emptySchema.parse(req.query);
+    const input = parseProductActivation(req.body);
+    res.json(await service.setActive(id, input));
   });
   router.post('/product-images', protect, binary, raw, async (req, res) => {
     emptySchema.parse(req.query);

@@ -10,9 +10,9 @@ import type {
 /** Menu administration over the common authorized client of auth/api.
  * TASK-020: categories (creation and reading). TASK-016: product creation,
  * administrative reading and local images. TASK-018: product edition with
- * optimistic version control. Renaming/deleting categories (TASK-020) and
- * activation (TASK-022) are not available yet and fail explicitly, without
- * requests.
+ * optimistic version control. TASK-022: product activation with the same
+ * version. Renaming/deleting categories (TASK-020) are not available yet and
+ * fail explicitly, without requests.
  */
 export const menuMessages = {
   duplicate: 'Ya existe una categoría con este nombre.',
@@ -443,7 +443,27 @@ export function createRealMenuClient(
       if (!validCategory(data)) throw connectionError();
     },
     deleteCategory: unavailable,
-    setActive: unavailable,
+    async setActive(product) {
+      if (!objectId.test(product.id))
+        throw new MenuError('CONNECTION_ERROR', productMessages.missing);
+      const active = !product.active;
+      const data = await send(
+        `/api/products/${product.id}/activation`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ version: product.version, active }),
+        },
+        productFailure,
+      );
+      // Only the same product in the requested state is a success.
+      if (
+        !validProduct(data) ||
+        data.id !== product.id ||
+        data.active !== active
+      )
+        throw connectionError();
+    },
     // Compatibility surface for the simulated UI: no fixture fallback.
     setScenario() {},
   };

@@ -3,6 +3,10 @@
  * `POST /api/product-images` (binario) y `GET /api/product-images/:id`.
  * TASK-018 (contrato aprobado): `PATCH /api/products/:id` con `version`; sin
  * `imageId` conserva la imagen, `null` la quita; 409 `VERSION_CONFLICT`.
+ * TASK-022 (contrato aprobado): `PATCH /api/products/:id/activation` con
+ * `{ version, active }` (estado destino); mismo estado con la versión vigente:
+ * 200 sin cambios; 409 `VERSION_CONFLICT` compartido con la edición. Sin
+ * eliminación de productos.
  * Imágenes: al guardar, data URL local de la imagen nueva; al leer, object URL
  * de la imagen protegida descargada con autorización, o `null` (marcador neutro).
  * Conteo acordado con backend (TASK-020): grafemas tras trim(), igual en ambos lados.

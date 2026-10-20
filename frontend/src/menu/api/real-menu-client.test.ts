@@ -187,7 +187,7 @@ test('CA-05 a version conflict maps to the exact category message', async () => 
   });
 });
 
-test('rename, delete and activation are explicitly unavailable without requests', async () => {
+test('rename and delete are explicitly unavailable without requests', async () => {
   const auth = transport();
   const client = createRealMenuClient(auth);
   const unavailable = {
@@ -200,17 +200,98 @@ test('rename, delete and activation are explicitly unavailable without requests'
   await expect(client.deleteCategory(category)).rejects.toMatchObject(
     unavailable,
   );
-  await expect(client.setActive({} as never)).rejects.toMatchObject(
-    unavailable,
-  );
   // A malformed identity cannot exist: no request.
   await expect(client.getProduct('x')).rejects.toMatchObject({
+    code: 'CONNECTION_ERROR',
+    message: productMessages.missing,
+  });
+  await expect(client.setActive({ id: 'x' } as Product)).rejects.toMatchObject({
     code: 'CONNECTION_ERROR',
     message: productMessages.missing,
   });
   client.setScenario('connection');
   expect(auth.request).not.toHaveBeenCalled();
 });
+
+const shown: Product = {
+  id: product.id,
+  version: 1,
+  name: product.name,
+  description: product.description,
+  priceTenths: 105,
+  categoryId: category.id,
+  image: null,
+  active: true,
+};
+
+test('US-009 CA-01/CA-03 setActive sends the target state with the version', async () => {
+  const off = { ...product, active: false, version: 2 };
+  const auth = transport(ok(off), ok({ ...off, active: true, version: 3 }));
+  const client = createRealMenuClient(auth);
+  await expect(client.setActive(shown)).resolves.toBeUndefined();
+  await expect(
+    client.setActive({ ...shown, active: false, version: 2 }),
+  ).resolves.toBeUndefined();
+  expect(
+    auth.request.mock.calls.map(([path, init]) => [
+      path,
+      init?.method,
+      init?.body,
+    ]),
+  ).toEqual([
+    [
+      `/api/products/${product.id}/activation`,
+      'PATCH',
+      JSON.stringify({ version: 1, active: false }),
+    ],
+    [
+      `/api/products/${product.id}/activation`,
+      'PATCH',
+      JSON.stringify({ version: 2, active: true }),
+    ],
+  ]);
+});
+
+test.each([
+  [
+    error(409, 'VERSION_CONFLICT', { current: { ...product, version: 2 } }),
+    'CONFLICT',
+    productMessages.conflict,
+  ],
+  [error(404, 'NOT_FOUND'), 'CONNECTION_ERROR', productMessages.missing],
+  [
+    { kind: 'unauthorized' } as HttpResult<unknown>,
+    'CONNECTION_ERROR',
+    menuMessages.session,
+  ],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'active', code: 'INVALID_FORMAT' }],
+    }),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+  [error(500, 'INTERNAL_ERROR'), 'CONNECTION_ERROR', menuMessages.connection],
+  [
+    { kind: 'connection' } as HttpResult<unknown>,
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+  [ok(null), 'CONNECTION_ERROR', menuMessages.connection],
+  [ok({ ...product, version: 2 }), 'CONNECTION_ERROR', menuMessages.connection],
+  [
+    ok({ ...product, id: 'c'.repeat(24), active: false, version: 2 }),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+])(
+  'US-009 CA-05 setActive failure %# is reported, never as success',
+  async (result, code, message) => {
+    await expect(
+      createRealMenuClient(transport(result)).setActive(shown),
+    ).rejects.toMatchObject({ code, message });
+  },
+);
 
 test('a request without answer is aborted and reported as a connection error', async () => {
   vi.useFakeTimers();

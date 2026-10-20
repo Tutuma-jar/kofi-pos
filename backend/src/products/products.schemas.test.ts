@@ -1,6 +1,10 @@
 import { expect, test } from 'vitest';
 import { ApiError } from '../shared/http/api-error.js';
-import { parseCreateProduct, parseUpdateProduct } from './products.schemas.js';
+import {
+  parseCreateProduct,
+  parseProductActivation,
+  parseUpdateProduct,
+} from './products.schemas.js';
 
 const valid = {
   name: 'Café americano',
@@ -183,4 +187,42 @@ test('US-007 edition: activation and unknown fields are not editable here', () =
       code: 'NOT_ALLOWED',
     });
   expect(rejectUpdate(null)).toEqual([{ field: '', code: 'INVALID_FORMAT' }]);
+});
+
+// US-009 (TASK-022): activation carries only the target state and the version.
+const rejectActivation = (input: unknown) =>
+  rejection(input, parseProductActivation);
+
+test('US-009 CA-01/CA-03 activation accepts an explicit target state with its version', () => {
+  expect(parseProductActivation({ version: 1, active: false })).toEqual({
+    version: 1,
+    active: false,
+  });
+  expect(parseProductActivation({ version: 7, active: true })).toEqual({
+    version: 7,
+    active: true,
+  });
+});
+
+test.each([
+  [{ active: false }, 'version'],
+  [{ version: 0, active: false }, 'version'],
+  [{ version: 1.5, active: false }, 'version'],
+  [{ version: '1', active: false }, 'version'],
+  [{ version: 1 }, 'active'],
+  [{ version: 1, active: 'false' }, 'active'],
+  [{ version: 1, active: 0 }, 'active'],
+  [{ version: 1, active: null }, 'active'],
+])('US-009 activation rejects %j at %s', (input, field) => {
+  expect(rejectActivation(input)).toEqual([{ field, code: 'INVALID_FORMAT' }]);
+});
+
+test('US-009 CA-01/CA-02 activation never carries other fields', () => {
+  for (const extra of [{ name: 'x' }, { categoryId: 'x' }, { delete: true }])
+    expect(
+      rejectActivation({ version: 1, active: false, ...extra }),
+    ).toContainEqual({ field: '', code: 'NOT_ALLOWED' });
+  expect(rejectActivation(null)).toEqual([
+    { field: '', code: 'INVALID_FORMAT' },
+  ]);
 });
