@@ -7,6 +7,12 @@
  * `{ version, active }` (estado destino); mismo estado con la versión vigente:
  * 200 sin cambios; 409 `VERSION_CONFLICT` compartido con la edición. Sin
  * eliminación de productos.
+ * TASK-020 (contrato aprobado): `GET/POST /api/categories`;
+ * `PATCH /api/categories/:id` con `{ version, name }` → 200 `{ id, name, version }`;
+ * `DELETE /api/categories/:id` con cuerpo JSON `{ version }` → 204. Errores: 409
+ * `DUPLICATE_NAME`, 400 `VALIDATION_ERROR` (`TOO_SHORT`/`TOO_LONG`), 409
+ * `VERSION_CONFLICT` (comprobado antes que el contador), 409 `CATEGORY_NOT_EMPTY`
+ * (productos asociados, incluidos inactivos) y 404 si ya no existe.
  * Imágenes: al guardar, data URL local de la imagen nueva; al leer, object URL
  * de la imagen protegida descargada con autorización, o `null` (marcador neutro).
  * Conteo acordado con backend (TASK-020): grafemas tras trim(), igual en ambos lados.

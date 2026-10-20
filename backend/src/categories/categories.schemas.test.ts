@@ -1,7 +1,10 @@
 import { expect, test } from 'vitest';
 import {
   categoryNameKey,
+  categoryParamsSchema,
   createCategorySchema,
+  deleteCategorySchema,
+  updateCategorySchema,
   visibleLength,
 } from './categories.schemas.js';
 
@@ -73,4 +76,71 @@ test.each([
   [{ name: 'Café', version: 1 }],
 ])('rejects missing, mistyped or unknown input %#', (input) => {
   expect(createCategorySchema.safeParse(input).success).toBe(false);
+});
+
+// --- TASK-020: renaming and deletion ----------------------------------------
+
+const updateIssues = (input: unknown) => {
+  const result = updateCategorySchema.safeParse(input);
+  if (result.success) throw new Error('Expected a rejection');
+  return result.error.issues.map((issue) => ({
+    path: issue.path.join('.'),
+    code: issue.code,
+  }));
+};
+
+test('CA-06 renaming applies the creation rules: trimmed, NFC, graphemes', () => {
+  expect(updateCategorySchema.parse({ version: 3, name: '  Baño  ' })).toEqual({
+    version: 3,
+    name: 'Baño',
+  });
+  for (const name of ['a', 'ñ'.repeat(80), '👨‍👩‍👧'.repeat(80)])
+    expect(updateCategorySchema.safeParse({ version: 1, name }).success).toBe(
+      true,
+    );
+});
+
+test.each([
+  ['', 'too_small'],
+  ['  \t ', 'too_small'],
+  ['a'.repeat(81), 'too_big'],
+  ['ñ'.repeat(81), 'too_big'],
+  ['👨‍👩‍👧'.repeat(81), 'too_big'],
+])('CA-06 renaming rejects %#', (name, code) => {
+  expect(updateIssues({ version: 1, name })).toEqual([{ path: 'name', code }]);
+});
+
+test.each([
+  [{ name: 'Café' }],
+  [{ version: 0, name: 'Café' }],
+  [{ version: -1, name: 'Café' }],
+  [{ version: 1.5, name: 'Café' }],
+  [{ version: '1', name: 'Café' }],
+  [{ version: Number.MAX_SAFE_INTEGER + 1, name: 'Café' }],
+  [{ version: 1 }],
+  [{ version: 1, name: 'Café', productCount: 0 }],
+  [null],
+])('renaming requires a valid version and name, nothing else %#', (input) => {
+  expect(updateCategorySchema.safeParse(input).success).toBe(false);
+});
+
+test('deletion accepts only the version', () => {
+  expect(deleteCategorySchema.parse({ version: 2 })).toEqual({ version: 2 });
+  for (const input of [
+    {},
+    null,
+    { version: 0 },
+    { version: 1.5 },
+    { version: '2' },
+    { version: 2, name: 'Café' },
+  ])
+    expect(deleteCategorySchema.safeParse(input).success).toBe(false);
+});
+
+test('identity is a 24-character lower-case hexadecimal id', () => {
+  expect(
+    categoryParamsSchema.safeParse({ id: '0123456789abcdef01234567' }).success,
+  ).toBe(true);
+  for (const id of ['x', '0123456789ABCDEF01234567', '0123456789abcdef0123456'])
+    expect(categoryParamsSchema.safeParse({ id }).success).toBe(false);
 });

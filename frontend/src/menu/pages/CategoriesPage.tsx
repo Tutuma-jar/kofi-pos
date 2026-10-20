@@ -10,6 +10,7 @@ import styles from './CategoriesPage.module.css';
 export function CategoriesPage({ onBack }: { onBack?: () => void }) {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [error, setError] = useState('');
+  const [fieldError, setFieldError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -49,6 +50,8 @@ export function CategoriesPage({ onBack }: { onBack?: () => void }) {
   async function save(name: string) {
     setBusy(true);
     setError('');
+    setFieldError('');
+    setNotice('');
     try {
       await menuClient.saveCategory(
         name,
@@ -58,14 +61,23 @@ export function CategoriesPage({ onBack }: { onBack?: () => void }) {
       await load();
       setNotice('Categoría guardada.');
     } catch (reason) {
+      // Duplicate or length rejections belong to the field, not the page.
+      if (reason instanceof MenuError && reason.fields.name) {
+        setFieldError(reason.fields.name);
+        return;
+      }
       setError(
         reason instanceof Error ? reason.message : 'No pudimos guardar.',
       );
       if (reason instanceof MenuError && reason.code === 'CONFLICT') {
-        const latest = (await menuClient.list()).categories;
-        setCategories(latest);
-        if (editing && editing !== 'new')
-          setEditing(latest.find((item) => item.id === editing.id) ?? null);
+        try {
+          const latest = (await menuClient.list()).categories;
+          setCategories(latest);
+          if (editing && editing !== 'new')
+            setEditing(latest.find((item) => item.id === editing.id) ?? null);
+        } catch {
+          /* El conflicto sigue visible y su reintento recarga la lista. */
+        }
       }
     } finally {
       setBusy(false);
@@ -80,6 +92,7 @@ export function CategoriesPage({ onBack }: { onBack?: () => void }) {
       return;
     setBusy(true);
     setError('');
+    setNotice('');
     try {
       await menuClient.deleteCategory(category);
       await load();
@@ -135,10 +148,14 @@ export function CategoriesPage({ onBack }: { onBack?: () => void }) {
           key={editing === 'new' ? 'new' : `${editing.id}-${editing.version}`}
           initial={editing === 'new' ? '' : editing.name}
           busy={busy}
+          serverError={fieldError}
+          onInput={() => setFieldError('')}
           save={(name) => void save(name)}
           cancel={() => {
-            if (window.confirm('¿Descartar los cambios de la categoría?'))
+            if (window.confirm('¿Descartar los cambios de la categoría?')) {
+              setFieldError('');
               setEditing(null);
+            }
           }}
         />
       )}
