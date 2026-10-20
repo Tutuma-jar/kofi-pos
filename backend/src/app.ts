@@ -1,6 +1,7 @@
 import express from 'express';
 import type { Db } from 'mongodb';
 import { authRoutes } from './auth/auth.routes.js';
+import { categoriesRoutes } from './categories/categories.routes.js';
 import { emptySchema } from './auth/sessions.schemas.js';
 import { errorHandler } from './shared/http/error-handler.js';
 import { notFound } from './shared/http/not-found.js';
@@ -57,6 +58,8 @@ export function createApp(options?: {
         demo,
       ),
     );
+    // Before authRoutes: its fallback answers any other /api path with 404.
+    app.use('/api', categoriesRoutes(options.db, sessions, clock));
     app.use('/api', authRoutes(options.db, clock, sessions));
   }
   app.use(notFound);

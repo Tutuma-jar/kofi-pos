@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { ensureAccountIndexes } from './auth/account.model.js';
 import { ensureSessionIndexes } from './auth/session.model.js';
+import { ensureCategoryIndexes } from './categories/categories.model.js';
 import { parseEnv } from './shared/config/env.js';
 import { connectDatabase } from './shared/database/connect-database.js';
 
@@ -11,6 +12,7 @@ try {
   database = await connectDatabase(env.MONGODB_URI);
   await ensureAccountIndexes(database.db);
   await ensureSessionIndexes(database.db);
+  await ensureCategoryIndexes(database.db);
 } catch (error) {
   if (database) await database.client.close();
   console.error(
