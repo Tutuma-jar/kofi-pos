@@ -1,8 +1,10 @@
-/** Contrato provisional de UI para US-006–009. Sin endpoints ni persistencia.
- * IDs/versiones opacos en integración futura; aquí versiones numéricas en memoria.
- * Imágenes: data URL temporal validada por el simulador; no define almacenamiento.
+/** Contrato de UI para US-006–009. IDs opacos (hex de 24) y `version` entera.
+ * TASK-016 (contrato aprobado): `GET/POST /api/products`, `GET /api/products/:id`,
+ * `POST /api/product-images` (binario) y `GET /api/product-images/:id`.
+ * Imágenes: al guardar, data URL local de la imagen nueva; al leer, object URL
+ * de la imagen protegida descargada con autorización, o `null` (marcador neutro).
  * Conteo acordado con backend (TASK-020): grafemas tras trim(), igual en ambos lados.
- * Errores y validación son simulados, no sustituyen validación autoritativa.
+ * La validación del navegador no sustituye la validación autoritativa del backend.
  */
 export type Category = { id: string; version: number; name: string };
 export type Product = {

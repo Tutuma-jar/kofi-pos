@@ -10,6 +10,8 @@ backend/dist/
 .env
 .env.*
 !.env.example
+# Imágenes de producto locales de desarrollo (PRODUCT_IMAGES_DIR por defecto).
+backend/var/
 
 # Contexto y resultados locales de controles; no son otro tracker.
 .opencode/task.local.json

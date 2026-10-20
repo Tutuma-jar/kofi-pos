@@ -1,5 +1,6 @@
-import { MongoServerError, ObjectId, type Db } from 'mongodb';
+import { ObjectId, type Db } from 'mongodb';
 import { ApiError } from '../shared/http/api-error.js';
+import { isDuplicateNameKey } from '../shared/text/catalog-text.js';
 import {
   categoriesCollection,
   categoryDto,
@@ -9,14 +10,7 @@ import { categoryNameKey } from './categories.schemas.js';
 
 const collator = new Intl.Collator('es');
 
-export function isDuplicateCategoryName(error: unknown): boolean {
-  if (!(error instanceof MongoServerError) || error.code !== 11000)
-    return false;
-  const pattern: unknown = (error as { keyPattern?: unknown }).keyPattern;
-  return (
-    typeof pattern === 'object' && pattern !== null && 'nameKey' in pattern
-  );
-}
+export const isDuplicateCategoryName = isDuplicateNameKey;
 
 export function createCategoriesService(
   db: Db,

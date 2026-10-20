@@ -2,10 +2,14 @@ import { createApp } from './app.js';
 import { ensureAccountIndexes } from './auth/account.model.js';
 import { ensureSessionIndexes } from './auth/session.model.js';
 import { ensureCategoryIndexes } from './categories/categories.model.js';
+import { createImageStore } from './products/image-store.js';
+import { ensureProductIndexes } from './products/products.model.js';
+import { createProductsService } from './products/products.service.js';
 import { parseEnv } from './shared/config/env.js';
 import { connectDatabase } from './shared/database/connect-database.js';
 
 const env = parseEnv(process.env);
+const productImages = createImageStore(env.PRODUCT_IMAGES_DIR);
 
 let database;
 try {
@@ -13,6 +17,8 @@ try {
   await ensureAccountIndexes(database.db);
   await ensureSessionIndexes(database.db);
   await ensureCategoryIndexes(database.db);
+  await ensureProductIndexes(database.db);
+  await productImages.prepare();
 } catch (error) {
   if (database) await database.client.close();
   console.error(
@@ -24,8 +30,24 @@ try {
 
 const { client } = database;
 
+// Startup cleanup of orphan images (>24 h); a failure does not stop the server.
+try {
+  await createProductsService(database.db, productImages).cleanupOrphanImages({
+    scanFiles: true,
+  });
+} catch (error) {
+  console.error(
+    'No se pudieron limpiar imágenes huérfanas:',
+    error instanceof Error ? error.message : error,
+  );
+}
+
 // Temporary explicit demo injection, until Gestión de ventas supplies DashboardSource.
-const app = createApp({ db: database.db, dashboardDemo: true });
+const app = createApp({
+  db: database.db,
+  dashboardDemo: true,
+  productImages,
+});
 const server = app.listen(env.PORT, '127.0.0.1', () => {
   console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
 });

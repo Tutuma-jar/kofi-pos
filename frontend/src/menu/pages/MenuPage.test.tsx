@@ -11,6 +11,15 @@ import { AuthContext } from '../../auth/auth-context';
 import { createAuthClient } from '../../auth/api/auth-client';
 import { menuClient } from '../api/menu-client';
 import { MenuPage } from './MenuPage';
+// UI walkthroughs run on the simulated source; the real API client has its own tests.
+vi.mock('../api/menu-client', async () => {
+  const actual =
+    await vi.importActual<typeof import('../api/menu-client')>(
+      '../api/menu-client',
+    );
+  const { createDemoClient } = await import('../api/demo-client');
+  return { ...actual, menuClient: createDemoClient() };
+});
 beforeEach(() => {
   menuClient.setScenario('normal');
   HTMLDialogElement.prototype.showModal = function () {
@@ -58,6 +67,27 @@ describe('Recorridos del catálogo', () => {
     expect(
       screen.getByText('Ningún producto coincide con los filtros'),
     ).toBeTruthy();
+    auth.dispose();
+  });
+  it('CA-09 busca con NFC sin añadir equivalencia de acentos', async () => {
+    const auth = mount();
+    await screen.findByText('Café con leche');
+    const search = screen.getByLabelText('Buscar por nombre');
+    // "Cafe" + U+0301 combining acute is the decomposed form of "Café".
+    fireEvent.change(search, { target: { value: '  CAFÉ ' } });
+    expect(screen.getByText('Café con leche')).toBeTruthy();
+    expect(screen.queryByText('Espresso')).toBeNull();
+    fireEvent.change(search, { target: { value: 'cafe con' } });
+    expect(
+      screen.getByText('Ningún producto coincide con los filtros'),
+    ).toBeTruthy();
+    auth.dispose();
+  });
+  it('no muestra el panel de datos simulados', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    expect(screen.queryByText(/Datos simulados/)).toBeNull();
+    expect(screen.queryByText('Simular sesión finalizada')).toBeNull();
     auth.dispose();
   });
   it('protege borrador al cancelar y restaura el foco', async () => {
