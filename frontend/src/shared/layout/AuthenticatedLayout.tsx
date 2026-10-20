@@ -4,6 +4,29 @@ import type { ReactNode } from 'react';
 import { Button } from '../components/Button';
 import styles from './Layout.module.css';
 
+const destinations = [
+  {
+    to: '/dashboard',
+    label: 'Dashboard',
+    path: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
+  },
+  {
+    to: '/menu',
+    label: 'Administración de Menú',
+    path: 'M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5',
+  },
+  {
+    to: '/sales',
+    label: 'Gestión de ventas',
+    path: 'M5 3h14v18l-3-2-4 2-4-2-3 2z M9 8h6 M9 12h6',
+  },
+  {
+    to: '/history',
+    label: 'Historial y reportes',
+    path: 'M4 8a9 9 0 1 1-1 8 M4 3v5h5 M12 7v5l3 2',
+  },
+];
+
 export function AuthenticatedLayout({
   children,
   title,
@@ -70,41 +93,76 @@ export function AuthenticatedLayout({
   }, [open, narrow]);
   const navigation = (modal: boolean) => (
     <div className={styles.sidebar}>
-      {modal && (
-        <>
-          <Button className={styles.close} ref={closeButton} onClick={close}>
-            Cerrar navegación
+      <div className={styles.brandRow}>
+        <div className={styles.brand}>
+          kofi<span>.</span>
+        </div>
+        {modal && (
+          <Button
+            className={styles.close}
+            ref={closeButton}
+            onClick={close}
+            aria-label="Cerrar navegación"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <path d="m6 6 12 12 M6 18 18 6" />
+            </svg>
           </Button>
-          <h2 className={styles.modalTitle} id="navigation-title">
-            Navegación
-          </h2>
-        </>
-      )}
-      <div className={styles.brand}>kofi</div>
-      <nav aria-label="Principal">
-        <NavLink to="/sales" className={styles.link} onClick={close}>
-          Gestión de ventas
-        </NavLink>
-        <NavLink to="/menu" end className={styles.link} onClick={close}>
-          Administración de Menú
-        </NavLink>
-        <NavLink to="/menu/categories" className={styles.link} onClick={close}>
-          Categorías
-        </NavLink>
-        <NavLink
-          to="/dashboard"
-          className={styles.link}
-          onClick={() => {
-            dialog.current?.close();
-            focusOnClose.current = 'content';
-            setOpen(false);
-          }}
-        >
-          Dashboard
-        </NavLink>
+        )}
+      </div>
+      <p
+        className={styles.sidebarCaption}
+        id={modal ? 'navigation-title' : undefined}
+      >
+        {modal ? 'Navegación' : 'Tu cafetería'}
+      </p>
+      <nav className={styles.navigation} aria-label="Principal">
+        {destinations.map(({ to, label, path }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to !== '/menu'}
+            className={styles.link}
+            onClick={() => {
+              dialog.current?.close();
+              focusOnClose.current = 'content';
+              setOpen(false);
+            }}
+          >
+            <svg
+              className={styles.icon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d={path} />
+            </svg>
+            <span>{label}</span>
+          </NavLink>
+        ))}
       </nav>
       <div className={styles.footer}>
-        <p>{accountLabel}</p>
+        <div className={styles.operator}>
+          <span className={styles.avatar} aria-hidden="true">
+            O
+          </span>
+          <div>
+            <strong>Operador</strong>
+            <p>{accountLabel}</p>
+          </div>
+        </div>
         <Button
           className={styles.logout}
           disabled={logoutDisabled}
@@ -137,6 +195,17 @@ export function AuthenticatedLayout({
           onCancel={(event) => {
             event.preventDefault();
             close();
+          }}
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            if (
+              event.clientX < rect.left ||
+              event.clientX > rect.right ||
+              event.clientY < rect.top ||
+              event.clientY > rect.bottom
+            )
+              close();
           }}
           onKeyDown={(event) => {
             if (event.key !== 'Tab') return;

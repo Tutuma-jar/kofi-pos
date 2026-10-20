@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/auth-context';
 import { Button } from '../../shared/components/Button';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { SalesSummary } from '../components/SalesSummary';
+import { PaymentMethods } from '../components/PaymentMethods';
 import { SoldProducts } from '../components/SoldProducts';
 import { HourlySalesChart } from '../components/HourlySalesChart';
 import { DashboardState } from '../components/DashboardState';
@@ -97,8 +98,8 @@ export function DashboardPage({
       </div>
       {state.phase === 'unauthorized' ? null : hasSales && state.data ? (
         <div className={styles.dataArea} aria-busy={state.refreshing}>
-          <SalesSummary summary={state.data.summary} />
-          <div className={styles.panels}>
+          <div className={styles.overview}>
+            <SalesSummary summary={state.data.summary} />
             <HourlySalesChart
               hourlySales={state.data.hourlySales}
               period={state.data.period}
@@ -106,7 +107,10 @@ export function DashboardPage({
               text={textHours}
               onTextChange={setTextHours}
             />
+          </div>
+          <div className={styles.records}>
             <SoldProducts products={state.data.products} />
+            <PaymentMethods summary={state.data.summary} />
           </div>
         </div>
       ) : previousEmpty ? (

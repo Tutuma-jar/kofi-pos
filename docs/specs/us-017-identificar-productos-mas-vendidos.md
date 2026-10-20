@@ -73,3 +73,7 @@ Tarea de `requirements-analyst` aprobada por el responsable el 2026-10-19 para r
 - Criterios aplicables: CA-01 (C), CA-02, CA-03 (P), CA-04, CA-05 y CA-06 (P).
 - Verificación prevista: la de esta historia.
 - Dependencias: TASK-033 (definición del rango y página integrada); TASK-030 de US-013; TASK-016, TASK-018 y TASK-022 de US-006, US-007 y US-009 para identidad, nombre actual y conservación histórica; TASK-003 y TASK-005 de US-001; fijar la comparación alfabética; autorización de la interfaz de Historial y su registro de entrega.
+
+## Entrega de interfaz relacionada
+
+La autorización y entrega frontend posterior del 2026-10-20 se registran en [US-014](us-014-consultar-historial-ventas.md#interfaz--historial-y-reportes-registro-de-entrega). Incluye ranking simulado de hasta 10 productos con nombres actuales, unidades e ingresos históricos, incluidos inactivos, y estados de carga, vacío y error. No acredita integración ni DoD de esta historia.
