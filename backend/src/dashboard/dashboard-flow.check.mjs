@@ -24,15 +24,13 @@ let events;
 try {
   const now = new Date();
   const productId = new ObjectId();
-  await database.db
-    .collection('accounts')
-    .insertOne({
-      _id: new ObjectId(),
-      username: 'isolated-dashboard',
-      passwordHash: await hashPassword('isolated-test-only'),
-      createdAt: now,
-      updatedAt: now,
-    });
+  await database.db.collection('accounts').insertOne({
+    _id: new ObjectId(),
+    username: 'isolated-dashboard',
+    passwordHash: await hashPassword('isolated-test-only'),
+    createdAt: now,
+    updatedAt: now,
+  });
   await database.db
     .collection(testSource.productsCollection)
     .insertOne({ _id: productId, name: 'Isolated product', active: false });
