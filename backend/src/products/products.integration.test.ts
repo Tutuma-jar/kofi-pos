@@ -37,7 +37,6 @@ import {
   createProductsService,
   ORPHAN_IMAGE_TTL_MS,
   PRODUCT_VERSION_CONFLICT_MESSAGE,
-  updateVersioned,
 } from './products.service.js';
 
 const databaseName = `kofi_products_test_${randomUUID().replaceAll('-', '')}`;
@@ -644,6 +643,12 @@ test('error envelope: media type, query, unknown fields, unknown ids and methods
 
 const patch = (id: string, body: Body, set: Record<string, string> = headers) =>
   request(app).patch(`/api/products/${id}`).set(set).send(body);
+// US-009 (TASK-022): activation shares the version of the edition.
+const activation = (
+  id: string,
+  body: Body,
+  set: Record<string, string> = headers,
+) => request(app).patch(`/api/products/${id}/activation`).set(set).send(body);
 const readImage = (id: string) =>
   request(app).get(`/api/product-images/${id}`).set(headers);
 const stored = (id: string) =>
@@ -838,25 +843,17 @@ test('US-007 CA-03 two sessions saving the same version: only the first valid sa
 
 test('US-007 CA-03 / US-009 CA-05 edition and activation share the version of the product', async () => {
   const id = await createdId();
-  const productId = new ObjectId(id);
-  // Activation shape of TASK-022, through the shared helper.
-  const activate = async (version: number, active: boolean) => {
-    const session = connection.client.startSession();
-    try {
-      await session.withTransaction(() =>
-        updateVersioned(connection.db, session, productId, version, {
-          active,
-          updatedAt: clock(),
-        }),
-      );
-    } finally {
-      await session.endSession();
-    }
-  };
-  await activate(1, false);
+  await activation(id, { version: 1, active: false }).expect(200);
   // An edition of the old version cannot overwrite the deactivation.
   const edit = await patch(id, { version: 1, name: 'Renombrado' });
   expect(edit.status).toBe(409);
+  expect(edit.body).toEqual({
+    error: {
+      code: 'VERSION_CONFLICT',
+      message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+      details: { current: expect.any(Object) },
+    },
+  });
   expect(edit.body.error.details.current).toMatchObject({
     active: false,
     version: 2,
@@ -864,7 +861,15 @@ test('US-007 CA-03 / US-009 CA-05 edition and activation share the version of th
   });
   // Nor can a stale activation overwrite an edition.
   await patch(id, { version: 2, name: 'Renombrado' }).expect(200);
-  await expect(activate(2, true)).rejects.toThrow();
+  const stale = await activation(id, { version: 2, active: true });
+  expect(stale.status).toBe(409);
+  expect(stale.body.error).toMatchObject({
+    code: 'VERSION_CONFLICT',
+    message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+    details: {
+      current: { name: 'Renombrado', active: false, version: 3 },
+    },
+  });
   expect(await stored(id)).toMatchObject({
     name: 'Renombrado',
     active: false,
@@ -1019,4 +1024,331 @@ test('US-007 edition errors: unknown product, media type and session', async () 
     ]);
   }
   expect((await stored(id))?.version).toBe(1);
+});
+
+// --- US-009 (TASK-022): activation ------------------------------------------
+
+test('US-009 CA-01/CA-03 deactivating and reactivating changes only the state', async () => {
+  const imageId = (await upload(jpeg()).expect(201)).body.id as string;
+  const id = await createdId({ imageId });
+  const original = await stored(id);
+  time += 1000;
+  const off = await activation(id, { version: 1, active: false });
+  expect(off.status).toBe(200);
+  expect(off.body).toEqual({
+    id,
+    name: 'Café americano',
+    description: 'Café filtrado de la casa.',
+    priceTenths: 105,
+    categoryId,
+    imageId,
+    active: false,
+    version: 2,
+  });
+  // The saved state is what administration reads back.
+  expect(
+    (await request(app).get(`/api/products/${id}`).set(headers).expect(200))
+      .body,
+  ).toEqual(off.body);
+  expect((await list().expect(200)).body.items).toEqual([off.body]);
+  // Identity, data, category and image are untouched; only the state moves.
+  expect(await stored(id)).toEqual({
+    ...original,
+    active: false,
+    version: 2,
+    updatedAt: clock(),
+  });
+  await readImage(imageId).expect(200);
+  expect(await categoryCounter(categoryId)).toBe(1);
+
+  time += 1000;
+  const on = await activation(id, { version: 2, active: true });
+  expect(on.status).toBe(200);
+  expect(on.body).toEqual({ ...off.body, active: true, version: 3 });
+  expect(
+    (await request(app).get(`/api/products/${id}`).set(headers).expect(200))
+      .body,
+  ).toEqual(on.body);
+  expect(await stored(id)).toEqual({
+    ...original,
+    active: true,
+    version: 3,
+    updatedAt: clock(),
+  });
+  // Reactivated, not registered again.
+  expect(await productCount()).toBe(1);
+  expect(await categoryCounter(categoryId)).toBe(1);
+});
+
+test('US-009 asking for the current state on the current version changes nothing', async () => {
+  const id = await createdId();
+  const before = await stored(id);
+  time += 1000;
+  const same = await activation(id, { version: 1, active: true });
+  expect(same.status).toBe(200);
+  expect(same.body).toMatchObject({ id, active: true, version: 1 });
+  expect(await stored(id)).toEqual(before);
+  // With a stale version it is still a conflict.
+  await activation(id, { version: 1, active: false }).expect(200);
+  const stale = await activation(id, { version: 1, active: false });
+  expect(stale.status).toBe(409);
+  expect(stale.body.error).toMatchObject({
+    code: 'VERSION_CONFLICT',
+    message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+    details: { current: { id, active: false, version: 2 } },
+  });
+  expect((await stored(id))?.version).toBe(2);
+});
+
+test('US-009 CA-02 an inactive product stays in administration with its data and category', async () => {
+  const other = await createCategory('Postres');
+  const ids: Record<string, string> = {};
+  for (const [name, category] of [
+    ['Zumo', categoryId],
+    ['Brownie', other],
+    ['Agua', categoryId],
+    ['Café', other],
+  ] as const)
+    ids[name] = await createdId({ name, categoryId: category });
+  await activation(ids.Zumo!, { version: 1, active: false }).expect(200);
+  await activation(ids.Brownie!, { version: 1, active: false }).expect(200);
+  const items = (await list().expect(200)).body.items as Body[];
+  // Single list: actives first, then inactives, alphabetical inside each.
+  expect(items.map((item) => [item.name, item.active])).toEqual([
+    ['Agua', true],
+    ['Café', true],
+    ['Brownie', false],
+    ['Zumo', false],
+  ]);
+  expect(items.find((item) => item.id === ids.Brownie)).toMatchObject({
+    categoryId: other,
+    description: 'Café filtrado de la casa.',
+    priceTenths: 105,
+    version: 2,
+  });
+  const read = await request(app)
+    .get(`/api/products/${ids.Zumo}`)
+    .set(headers)
+    .expect(200);
+  expect(read.body).toMatchObject({
+    id: ids.Zumo,
+    name: 'Zumo',
+    categoryId,
+    active: false,
+  });
+});
+
+test('US-009 CA-04 there is no permanent deletion of products', async () => {
+  const id = await createdId();
+  await activation(id, { version: 1, active: false }).expect(200);
+  const before = await stored(id);
+  for (const path of [
+    `/api/products/${id}`,
+    `/api/products/${id}/activation`,
+    '/api/products',
+  ]) {
+    const result = await request(app).delete(path).set(headers);
+    expect([result.status, result.body.error.code]).toEqual([404, 'NOT_FOUND']);
+  }
+  // Activation cannot be used to delete either.
+  const deleting = await activation(id, {
+    version: 2,
+    active: false,
+    deleted: true,
+  });
+  expect(deleting.status).toBe(400);
+  expect(await stored(id)).toEqual(before);
+  expect(await productCount()).toBe(1);
+});
+
+test('US-009 CA-05 two sessions changing the state of the same version: only the first applies', async () => {
+  for (let round = 0; round < 10; round++) {
+    const id = await createdId({ name: `Producto ${round}` });
+    const second = await newSession();
+    // Both sessions read v1 and save a deactivation at the same time.
+    const [left, right] = await Promise.all([
+      activation(id, { version: 1, active: false }),
+      activation(id, { version: 1, active: false }, second),
+    ]);
+    expect([left.status, right.status].sort()).toEqual([200, 409]);
+    const winner = left.status === 200 ? left : right;
+    const loser = left.status === 200 ? right : left;
+    expect(winner.body).toMatchObject({ active: false, version: 2 });
+    expect(loser.body).toEqual({
+      error: {
+        code: 'VERSION_CONFLICT',
+        message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+        details: { current: winner.body },
+      },
+    });
+    // A later stale reactivation is rejected without overwriting.
+    const before = await stored(id);
+    const stale = await activation(id, { version: 1, active: true }, second);
+    expect(stale.status).toBe(409);
+    expect(stale.body.error.details.current).toEqual(winner.body);
+    expect(await stored(id)).toEqual(before);
+  }
+  // Reloading the current version allows the change.
+  const id = await createdId({ name: 'Recargado' });
+  await activation(id, { version: 1, active: false }).expect(200);
+  await activation(id, { version: 2, active: true }).expect(200);
+}, 60_000);
+
+test('US-009 CA-05 edition and deactivation racing on the same version: exactly one applies', async () => {
+  for (let round = 0; round < 10; round++) {
+    const id = await createdId({ name: `Producto ${round}` });
+    const second = await newSession();
+    const [edited, deactivated] = await Promise.all([
+      patch(id, { version: 1, name: `Renombrado ${round}` }),
+      activation(id, { version: 1, active: false }, second),
+    ]);
+    expect([edited.status, deactivated.status].sort()).toEqual([200, 409]);
+    const after = await stored(id);
+    expect(after?.version).toBe(2);
+    if (edited.status === 200) {
+      // The edition won: the deactivation did not apply.
+      expect(after).toMatchObject({
+        name: `Renombrado ${round}`,
+        active: true,
+      });
+      expect(deactivated.body.error).toMatchObject({
+        code: 'VERSION_CONFLICT',
+        message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+        details: { current: edited.body },
+      });
+    } else {
+      // The deactivation won: the edition did not apply.
+      expect(after).toMatchObject({
+        name: `Producto ${round}`,
+        active: false,
+      });
+      expect(edited.body.error).toMatchObject({
+        code: 'VERSION_CONFLICT',
+        message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+        details: { current: deactivated.body },
+      });
+    }
+  }
+}, 60_000);
+
+test('US-009 CA-05 the control is per product: distinct products change in parallel', async () => {
+  const ids: string[] = [];
+  for (let index = 0; index < 8; index++)
+    ids.push(await createdId({ name: `Producto ${index}` }));
+  const results = await Promise.all(
+    ids.map((id) => activation(id, { version: 1, active: false })),
+  );
+  expect(results.map((result) => result.status)).toEqual(ids.map(() => 200));
+  for (const id of ids)
+    expect(await stored(id)).toMatchObject({ active: false, version: 2 });
+  // Edition of one product and activation of another do not interfere.
+  const [edited, activated] = await Promise.all([
+    patch(ids[0]!, { version: 2, priceTenths: 300 }),
+    activation(ids[1]!, { version: 2, active: true }),
+  ]);
+  expect([edited.status, activated.status]).toEqual([200, 200]);
+  expect(await stored(ids[0]!)).toMatchObject({
+    priceTenths: 300,
+    active: false,
+    version: 3,
+  });
+  expect(await stored(ids[1]!)).toMatchObject({
+    priceTenths: 105,
+    active: true,
+    version: 3,
+  });
+}, 30_000);
+
+test('US-009 / US-008 an inactive product still prevents deleting its category', async () => {
+  const target = await createCategory('Temporada');
+  const id = await createdId({ categoryId: target });
+  await activation(id, { version: 1, active: false }).expect(200);
+  // Deactivation keeps the reference: TASK-020's deletion contract refuses.
+  expect(await categoryCounter(target)).toBe(1);
+  expect(await removeCategoryIfEmpty(target)).toBe(0);
+  expect(await stored(id)).toMatchObject({
+    categoryId: new ObjectId(target),
+    active: false,
+  });
+  await activation(id, { version: 2, active: true }).expect(200);
+  expect(await categoryCounter(target)).toBe(1);
+  expect(await removeCategoryIfEmpty(target)).toBe(0);
+  await expectCountersMatchProducts();
+});
+
+test('US-009 (catalog contribution) activation keeps the identity and never writes past sales', async () => {
+  const sales = connection.db.collection('fixture_sales');
+  await sales.deleteMany({});
+  try {
+    const id = await createdId();
+    await sales.insertOne({
+      productId: new ObjectId(id),
+      name: 'Café americano',
+      unitPriceTenths: 105,
+      quantity: 2,
+      amountTenths: 210,
+    });
+    const before = await sales.find().toArray();
+    await activation(id, { version: 1, active: false }).expect(200);
+    await activation(id, { version: 2, active: true }).expect(200);
+    expect(await sales.find().toArray()).toEqual(before);
+    expect((await stored(id))?._id.toHexString()).toBe(id);
+  } finally {
+    await sales.deleteMany({});
+  }
+});
+
+test('US-009 activation errors: validation, unknown product, media type, query and session', async () => {
+  const id = await createdId();
+  const before = await stored(id);
+  const invalid: [Body, string, string][] = [
+    [{ active: false }, 'version', 'INVALID_FORMAT'],
+    [{ version: 0, active: false }, 'version', 'INVALID_FORMAT'],
+    [{ version: 1 }, 'active', 'INVALID_FORMAT'],
+    [{ version: 1, active: 'false' }, 'active', 'INVALID_FORMAT'],
+    [{ version: 1, active: false, name: 'x' }, '', 'NOT_ALLOWED'],
+  ];
+  for (const [body, field, code] of invalid) {
+    const rejected = await activation(id, body);
+    expect(rejected.status).toBe(400);
+    expect(rejected.body.error.code).toBe('VALIDATION_ERROR');
+    expect(fieldsOf(rejected)).toEqual([{ field, code }]);
+  }
+  const query = await request(app)
+    .patch(`/api/products/${id}/activation?force=1`)
+    .set(headers)
+    .send({ version: 1, active: false });
+  expect([query.status, query.body.error.code]).toEqual([
+    400,
+    'VALIDATION_ERROR',
+  ]);
+  for (const target of [new ObjectId().toHexString(), 'zzz']) {
+    const missing = await activation(target, { version: 1, active: false });
+    expect([missing.status, missing.body.error.code]).toEqual([
+      404,
+      'NOT_FOUND',
+    ]);
+  }
+  const text = await request(app)
+    .patch(`/api/products/${id}/activation`)
+    .set(headers)
+    .type('text')
+    .send('{}');
+  expect([text.status, text.body.error.code]).toEqual([
+    415,
+    'UNSUPPORTED_MEDIA_TYPE',
+  ]);
+  const other = randomBytes(32).toString('base64url');
+  for (const set of [
+    {},
+    { Authorization: headers.Authorization! },
+    { ...headers, 'X-Tab-Authorization': other },
+  ] as Record<string, string>[]) {
+    const result = await activation(id, { version: 1, active: false }, set);
+    expect([result.status, result.body.error.code]).toEqual([
+      401,
+      'UNAUTHORIZED',
+    ]);
+  }
+  expect(await stored(id)).toEqual(before);
 });

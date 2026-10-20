@@ -75,6 +75,16 @@ export const updateProductSchema = z
   });
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 
+/**
+ * Activation (TASK-022): explicit target state plus the shared optimistic
+ * version. No other field is accepted, so a state change never edits data.
+ */
+export const productActivationSchema = z.strictObject({
+  version: productVersionSchema,
+  active: z.boolean(),
+});
+export type ProductActivationInput = z.infer<typeof productActivationSchema>;
+
 type Issue = ZodError['issues'][number];
 function fieldCode(issue: Issue): string {
   if (issue.code === 'custom') {
@@ -105,4 +115,7 @@ export function parseCreateProduct(body: unknown): CreateProductInput {
 }
 export function parseUpdateProduct(body: unknown): UpdateProductInput {
   return parseProductBody(updateProductSchema, body);
+}
+export function parseProductActivation(body: unknown): ProductActivationInput {
+  return parseProductBody(productActivationSchema, body);
 }

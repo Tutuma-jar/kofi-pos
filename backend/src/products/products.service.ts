@@ -19,6 +19,7 @@ import {
 } from './products.model.js';
 import type {
   CreateProductInput,
+  ProductActivationInput,
   UpdateProductInput,
 } from './products.schemas.js';
 
@@ -87,6 +88,18 @@ export function createProductsService(
 ) {
   const products = productsCollection(db);
   const productImages = productImagesCollection(db);
+
+  /**
+   * Shared answer to a stale save (edition and activation): 409 with the
+   * current version, read after the aborted transaction; 404 if it vanished.
+   */
+  async function versionConflict(productId: ObjectId): Promise<ApiError> {
+    const current = await products.findOne({ _id: productId });
+    if (!current) return notFound();
+    return new ApiError('VERSION_CONFLICT', PRODUCT_VERSION_CONFLICT_MESSAGE, {
+      current: productDto(current),
+    });
+  }
 
   /**
    * Removes images uploaded but never associated for more than 24 h. The
@@ -317,15 +330,8 @@ export function createProductsService(
       } catch (error) {
         if (isDuplicateNameKey(error))
           throw new ApiError('DUPLICATE_NAME', 'Nombre de producto duplicado.');
-        if (error instanceof StaleProductVersion) {
-          const current = await products.findOne({ _id: productId });
-          if (!current) throw notFound();
-          throw new ApiError(
-            'VERSION_CONFLICT',
-            PRODUCT_VERSION_CONFLICT_MESSAGE,
-            { current: productDto(current) },
-          );
-        }
+        if (error instanceof StaleProductVersion)
+          throw await versionConflict(productId);
         throw error;
       } finally {
         await session.endSession();
@@ -347,6 +353,62 @@ export function createProductsService(
           );
         }
       }
+      return productDto(outcome.product);
+    },
+
+    /**
+     * Activation (US-009). Changes only `active` (plus `version` and
+     * `updatedAt`) through the version shared with edition, so a stale
+     * activation or edition never overwrites the other. Category counters and
+     * images are untouched: an inactive product keeps its category reference.
+     * Asking for the current state on the current version is a no-op that
+     * keeps `version` and `updatedAt`.
+     */
+    async setActive(id: string, input: ProductActivationInput) {
+      const productId = new ObjectId(id);
+      const outcome: { product?: Product } = {};
+      const session = db.client.startSession();
+      try {
+        await session.withTransaction(async () => {
+          // The callback may be retried: never keep state of a failed attempt.
+          delete outcome.product;
+          const current = await products.findOne(
+            { _id: productId, version: input.version },
+            { session },
+          );
+          if (current && current.active === input.active) {
+            outcome.product = current;
+            return;
+          }
+          const changes: ProductChanges = {
+            active: input.active,
+            updatedAt: clock(),
+          };
+          const before = await updateVersioned(
+            db,
+            session,
+            productId,
+            input.version,
+            changes,
+          );
+          outcome.product = {
+            ...before,
+            ...changes,
+            version: before.version + 1,
+          };
+        });
+      } catch (error) {
+        if (error instanceof StaleProductVersion)
+          throw await versionConflict(productId);
+        throw error;
+      } finally {
+        await session.endSession();
+      }
+      if (!outcome.product)
+        throw new ApiError(
+          'INTERNAL_ERROR',
+          'No se pudo completar la solicitud.',
+        );
       return productDto(outcome.product);
     },
 
