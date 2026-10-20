@@ -1,7 +1,7 @@
 /** Contrato provisional de UI para US-006–009. Sin endpoints ni persistencia.
  * IDs/versiones opacos en integración futura; aquí versiones numéricas en memoria.
  * Imágenes: data URL temporal validada por el simulador; no define almacenamiento.
- * El conteo por grafemas es provisional y debe acordarse con backend.
+ * Conteo acordado con backend (TASK-020): grafemas tras trim(), igual en ambos lados.
  * Errores y validación son simulados, no sustituyen validación autoritativa.
  */
 export type Category = { id: string; version: number; name: string };
