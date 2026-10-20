@@ -11,6 +11,15 @@ import { AuthContext } from '../../auth/auth-context';
 import { createAuthClient } from '../../auth/api/auth-client';
 import { menuClient } from '../api/menu-client';
 import { MenuPage } from './MenuPage';
+// UI walkthroughs run on the simulated source; the real API client has its own tests.
+vi.mock('../api/menu-client', async () => {
+  const actual =
+    await vi.importActual<typeof import('../api/menu-client')>(
+      '../api/menu-client',
+    );
+  const { createDemoClient } = await import('../api/demo-client');
+  return { ...actual, menuClient: createDemoClient() };
+});
 beforeEach(() => {
   menuClient.setScenario('normal');
   HTMLDialogElement.prototype.showModal = function () {

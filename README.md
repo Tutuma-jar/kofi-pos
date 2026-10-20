@@ -47,7 +47,7 @@ npm run dev:backend
 
 No se crea ninguna cuenta automáticamente ni existe contraseña predeterminada. La provisión es un paso administrativo externo a la aplicación. Con `MONGODB_URI` en el entorno, ejecutar desde la raíz `node --import tsx backend/scripts/provision-account.ts` y suministrar un único objeto JSON por entrada estándar, con `username` y `password`. No pasar secretos por argumentos, URL, comandos guardados o archivos versionados. El script crea una cuenta nueva con scrypt y sal individual; no modifica ni recupera cuentas existentes. Usar una entrada estándar segura, sin eco ni historial, desde el gestor de secretos del operador.
 
-Para desarrollo, `backend/.env` contiene `PORT=3000` y `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Es un archivo local ignorado por Git. El provisionador lee el entorno del proceso, no carga ese archivo automáticamente. Chrome y Edge requieren almacenamiento del sitio y Web Locks; otras plataformas no se acreditan. No considerar almacenamiento o navegación una prueba infalible de identidad de pestaña.
+Para desarrollo, `backend/.env` contiene `PORT=3000` y `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Es un archivo local ignorado por Git. `PRODUCT_IMAGES_DIR` indica dónde el backend guarda las imágenes de producto: es obligatoria con `NODE_ENV=production` y, si falta en desarrollo, se usa `backend/var/product-images`, también ignorada por Git. El provisionador lee el entorno del proceso, no carga ese archivo automáticamente. Chrome y Edge requieren almacenamiento del sitio y Web Locks; otras plataformas no se acreditan. No considerar almacenamiento o navegación una prueba infalible de identidad de pestaña.
 
 ## Comprobaciones técnicas
 
