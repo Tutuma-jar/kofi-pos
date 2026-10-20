@@ -1,20 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../shared/components/Button';
 import { visibleLength } from '../api/menu-client';
 import styles from './Menu.module.css';
 export function CategoryForm({
   initial = '',
   busy,
+  serverError = '',
+  onInput,
   save,
   cancel,
 }: {
   initial?: string;
   busy: boolean;
+  // Server rejection of the name (duplicate or length), shown on the field.
+  serverError?: string;
+  onInput?: () => void;
   save: (name: string) => void;
   cancel: () => void;
 }) {
   const [name, setName] = useState(initial);
-  const [error, setError] = useState('');
+  const [localError, setError] = useState('');
+  const error = localError || serverError;
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (serverError) input.current?.focus();
+  }, [serverError]);
   useEffect(() => {
     if (name === initial) return;
     const unload = (event: BeforeUnloadEvent) => event.preventDefault();
@@ -51,12 +61,17 @@ export function CategoryForm({
       <label htmlFor="category-name">Nombre de categoría</label>
       <input
         id="category-name"
+        ref={input}
         value={name}
         disabled={busy}
         autoFocus
         aria-invalid={!!error}
         aria-describedby="category-name-error"
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+          setError('');
+          onInput?.();
+        }}
       />
       <span id="category-name-error" className={styles.error}>
         {error}
