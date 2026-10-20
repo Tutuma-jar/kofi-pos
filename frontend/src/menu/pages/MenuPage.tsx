@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { useAuth } from '../../auth/auth-context';
 import { Button } from '../../shared/components/Button';
 import { menuClient, MenuError } from '../api/menu-client';
-import type {
-  Catalog,
-  Product,
-  ProductInput,
-  Scenario,
-} from '../api/menu-client';
+import type { Catalog, Product, ProductInput } from '../api/menu-client';
 import { CatalogFilters } from '../components/CatalogFilters';
 import type { Filters } from '../components/CatalogFilters';
 import { ProductList } from '../components/ProductList';
@@ -17,11 +11,14 @@ import { ProductFormDialog } from '../components/ProductFormDialog';
 import { ProductForm } from '../components/ProductForm';
 import { CategoriesPage } from './CategoriesPage';
 import styles from './MenuPage.module.css';
+// Same comparison as the backend name key: trim, NFC and lower case; no accent equivalence.
+const searchKey = (text: string) => text.trim().normalize('NFC').toLowerCase();
 function selectProducts(data: Catalog, filters: Filters) {
+  const search = searchKey(filters.search);
   return data.products
     .filter(
       (p) =>
-        p.name.toLowerCase().includes(filters.search.trim().toLowerCase()) &&
+        searchKey(p.name).includes(search) &&
         (!filters.category || p.categoryId === filters.category) &&
         (!filters.state || p.active === (filters.state === 'active')),
     )
@@ -32,7 +29,6 @@ function selectProducts(data: Catalog, filters: Filters) {
     );
 }
 export function MenuPage() {
-  const { client: auth } = useAuth();
   const [data, setData] = useState<Catalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -49,7 +45,6 @@ export function MenuPage() {
   const [opening, setOpening] = useState(false);
   const dirty = useRef(false);
   const saving = useRef(false);
-  const [scenario, setScenario] = useState<Scenario>('normal');
   async function load() {
     setLoading(true);
     setError('');
@@ -276,35 +271,6 @@ export function MenuPage() {
             />
           </ProductFormDialog>
         ))}
-      <details className={styles.demo}>
-        <summary>Datos simulados · escenarios de demostración</summary>
-        <label>
-          Escenario de Menú
-          <select
-            value={scenario}
-            onChange={(event) => {
-              const value = event.target.value as Scenario;
-              setScenario(value);
-              menuClient.setScenario(value);
-              void load();
-            }}
-          >
-            <option value="normal">Catálogo inicial (restablecer)</option>
-            <option value="empty">Catálogo vacío</option>
-            <option value="no-categories">Sin categorías</option>
-            <option value="connection">Error de conexión</option>
-            <option value="slow">Respuesta demorada</option>
-            <option value="save-error">Error al guardar</option>
-            <option value="conflict">
-              Conflicto en la siguiente operación
-            </option>
-            <option value="image-error">Error al cargar imagen nueva</option>
-          </select>
-        </label>
-        <Button onClick={() => auth.unauthorized()}>
-          Simular sesión finalizada
-        </Button>
-      </details>
     </section>
   );
 }

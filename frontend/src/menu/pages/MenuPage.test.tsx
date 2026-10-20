@@ -69,6 +69,27 @@ describe('Recorridos del catálogo', () => {
     ).toBeTruthy();
     auth.dispose();
   });
+  it('CA-09 busca con NFC sin añadir equivalencia de acentos', async () => {
+    const auth = mount();
+    await screen.findByText('Café con leche');
+    const search = screen.getByLabelText('Buscar por nombre');
+    // "Cafe" + U+0301 combining acute is the decomposed form of "Café".
+    fireEvent.change(search, { target: { value: '  CAFÉ ' } });
+    expect(screen.getByText('Café con leche')).toBeTruthy();
+    expect(screen.queryByText('Espresso')).toBeNull();
+    fireEvent.change(search, { target: { value: 'cafe con' } });
+    expect(
+      screen.getByText('Ningún producto coincide con los filtros'),
+    ).toBeTruthy();
+    auth.dispose();
+  });
+  it('no muestra el panel de datos simulados', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    expect(screen.queryByText(/Datos simulados/)).toBeNull();
+    expect(screen.queryByText('Simular sesión finalizada')).toBeNull();
+    auth.dispose();
+  });
   it('protege borrador al cancelar y restaura el foco', async () => {
     const auth = mount();
     await screen.findByText('Espresso');
