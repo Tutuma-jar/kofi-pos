@@ -14,6 +14,7 @@ export type SessionAuthorization = { token: string; binding: string };
 export function createSessionsService(
   db: Db,
   clock: () => Date = () => new Date(),
+  onRevoked?: (sessionId: string) => void,
 ) {
   const sessions = sessionsCollection(db);
   const filter = (auth: SessionAuthorization, now: Date) => ({
@@ -70,7 +71,7 @@ export function createSessionsService(
     },
     async revoke(auth: SessionAuthorization) {
       const now = clock();
-      requireFound(
+      const session = requireFound(
         await sessions.findOneAndUpdate(
           filter(auth, now),
           {
@@ -79,6 +80,7 @@ export function createSessionsService(
           { returnDocument: 'after' },
         ),
       );
+      onRevoked?.(session._id.toHexString());
     },
   };
 }

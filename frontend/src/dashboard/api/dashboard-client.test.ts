@@ -110,19 +110,20 @@ test('Hoy→Mes→Hoy descarta generaciones antiguas aunque period coincida', as
   expect(h.client.getSnapshot().data?.summary.salesCount).toBe(13);
 });
 
-test('respuesta vieja tras fallo no quita stale; tampoco sobrescribe recuperación', async () => {
+test('ráfagas se agrupan en una lectura pendiente; fallo conserva datos y recuperación los sustituye', async () => {
   const h = harness();
   await resolve(h.pending[0], ok());
   h.client.refresh();
   h.client.refresh();
-  await resolve(h.pending[2], error);
+  expect(h.read).toHaveBeenCalledTimes(2);
   await resolve(h.pending[1], ok('today', true));
+  await resolve(h.pending[2], error);
   expect(h.client.getSnapshot().stale).toBe(true);
-  expect(h.client.getSnapshot().data?.summary.salesCount).toBe(12);
+  expect(h.client.getSnapshot().data?.summary.salesCount).toBe(13);
   h.client.refresh();
   h.client.refresh();
-  await resolve(h.pending[4], ok('today', true));
   await resolve(h.pending[3], error);
+  await resolve(h.pending[4], ok('today', true));
   expect(h.client.getSnapshot().stale).toBe(false);
   expect(h.client.getSnapshot().error).toBeNull();
   expect(h.client.getSnapshot().data?.summary.salesCount).toBe(13);
@@ -151,8 +152,9 @@ test('invalidaciones repetidas reemplazan snapshot, nunca incrementan valores', 
   await resolve(h.pending[0], ok());
   h.emit({ type: 'sales-changed', data: {} });
   h.emit({ type: 'sales-changed', data: {} });
-  await resolve(h.pending[2], ok('today', true));
+  expect(h.read).toHaveBeenCalledTimes(2);
   await resolve(h.pending[1], ok('today', true));
+  await resolve(h.pending[2], ok('today', true));
   expect(h.client.getSnapshot().data).toEqual(data('today', true));
 });
 
@@ -171,6 +173,8 @@ test('conciliación30, latido25, corte60 y relectura al reconectar', async () =>
   expect(h.client.getSnapshot().stream).toBe('reconnecting');
   const count = h.read.mock.calls.length;
   h.emit({ type: 'open' });
+  expect(h.read).toHaveBeenCalledTimes(count);
+  await resolve(h.pending.at(-1), ok());
   expect(h.read).toHaveBeenCalledTimes(count + 1);
 });
 
@@ -317,7 +321,8 @@ test('escenarios fuera de orden, fallo, recuperación y silencio son reproducibl
   expect(client.getSnapshot().period).toBe('today');
   expect(client.getSnapshot().data?.summary.salesCount).toBe(13);
   client.demo?.run('late-failure');
-  await vi.advanceTimersByTimeAsync(1600);
+  // Single flight: 1500ms request, then the queued 150ms failure.
+  await vi.advanceTimersByTimeAsync(1700);
   expect(client.getSnapshot().stale).toBe(true);
   client.demo?.run('recover');
   await vi.advanceTimersByTimeAsync(350);

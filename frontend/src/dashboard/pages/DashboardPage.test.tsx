@@ -11,7 +11,8 @@ import { AuthContext } from '../../auth/auth-context';
 import { createAuthClient } from '../../auth/api/auth-client';
 import type { AuthClient } from '../../auth/api/contract.provisional';
 import { createDemoDashboardClient } from '../api/demo-client';
-import { BASE_TIME } from '../api/fixtures';
+import { BASE_TIME, fixture } from '../api/fixtures';
+import { createRealDashboardClient } from '../api/real-dashboard-client';
 import { DashboardPage } from './DashboardPage';
 
 const authClients: AuthClient[] = [];
@@ -49,6 +50,36 @@ const products = () =>
       name: 'Lista completa de productos vendidos',
     }),
   );
+
+test('backend demonstration indicator is discreet and keeps real page states and selector', async () => {
+  const auth = createAuthClient({
+    initial: { status: 'authenticated', label: 'Test' },
+  });
+  authClients.push(auth);
+  const client = createRealDashboardClient({
+    request: async () => ({
+      kind: 'ok',
+      data: fixture('today', Date.now(), {
+        mode: 'empty',
+        updated: false,
+        renamed: false,
+      }),
+      headers: new Headers({ 'X-Kofi-Dashboard-Mode': 'demo' }),
+    }),
+  });
+  render(
+    <AuthContext value={auth}>
+      <DashboardPage client={client} />
+    </AuthContext>,
+  );
+  expect(screen.getByLabelText('Cargando ventas')).toBeDefined();
+  await settle(0);
+  expect(screen.getByText(/Datos de demostración/)).toBeDefined();
+  expect(
+    screen.getByRole('heading', { name: 'Aún no se realizaron ventas hoy' }),
+  ).toBeDefined();
+  expect(screen.getByLabelText('Este mes')).toBeDefined();
+});
 
 test('Hoy inicial, carga diferenciada y cuatro tarjetas; Mes cambia los tres bloques', async () => {
   mount();
@@ -218,7 +249,7 @@ test('DEV reproduce respuesta vieja tras fallo y recuperación sin reponer vigen
   await settle();
   const control = screen.getByLabelText('Escenario de demostración');
   fireEvent.change(control, { target: { value: 'late-failure' } });
-  await settle(1600);
+  await settle(1700);
   expect(screen.getByRole('status').textContent).toContain('no actualizados');
   fireEvent.change(control, { target: { value: 'recover' } });
   await settle();

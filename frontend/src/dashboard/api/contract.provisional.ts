@@ -28,10 +28,12 @@ export type DashboardError = {
   };
 };
 export type ReadResult =
+  | { kind: 'superseded' }
   | { kind: 'ok'; data: DashboardResponse }
   | { kind: 'error'; status: 400 | 401 | 500; body: DashboardError }
   | { kind: 'connection' };
 export type DashboardEvent =
+  | { type: 'source'; demonstration: boolean }
   | { type: 'sales-changed'; data: Record<string, never> }
   | { type: 'heartbeat' | 'open' | 'closed' | 'unauthorized' | 'clock' };
 export type DashboardPort = {
@@ -42,6 +44,7 @@ export type DashboardPort = {
   description?: () => string;
 };
 export type DashboardSnapshot = {
+  demonstration: boolean;
   period: DashboardPeriod;
   phase: 'loading' | 'ready' | 'error' | 'unauthorized';
   data: DashboardResponse | null;

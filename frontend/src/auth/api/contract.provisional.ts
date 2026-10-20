@@ -16,6 +16,14 @@ export type Scenario =
   'normal' | 'incorrect' | 'connection' | 'close-failed' | 'close-uncertain';
 export type TabLifecycle = 'reload' | 'new' | 'duplicated' | 'restored';
 export type AuthClient = {
+  request?: <T>(
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<HttpResult<T>>;
+  openStream?: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<HttpResult<Response>>;
   subscribe: (listener: () => void) => () => void;
   getSnapshot: () => SessionState;
   login: (input: LoginInput) => Promise<LoginResult>;
@@ -34,7 +42,7 @@ export type AuthClientOptions = {
   onPresence?: () => void;
 };
 export type HttpResult<T> =
-  | { kind: 'ok'; data: T }
+  | { kind: 'ok'; data: T; headers?: Headers }
   | { kind: 'unauthorized'; code?: string; details?: unknown }
   | { kind: 'connection' }
   | { kind: 'error'; status: number; code?: string; details?: unknown };

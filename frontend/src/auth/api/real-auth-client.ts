@@ -8,6 +8,7 @@ import type {
 } from './contract.provisional';
 import {
   createAuthorizedHttpClient,
+  createAuthorizedResponseClient,
   createHttpClient,
   type AuthorizationSnapshot,
 } from './http-client';
@@ -46,6 +47,10 @@ export type RealAuthClient = AuthClient & {
     input: RequestInfo | URL,
     init?: RequestInit,
   ) => Promise<HttpResult<T>>;
+  openStream: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<HttpResult<Response>>;
 };
 function browserStorage(): Storage | undefined {
   try {
@@ -152,6 +157,14 @@ export function createRealAuthClient(
     },
   });
   const raw = createHttpClient(transport, () => {});
+  const authorizedResponse = createAuthorizedResponseClient({
+    transport,
+    origin,
+    authorization: captured,
+    unauthorized: (snapshot) => {
+      if (matches(snapshot)) finish('expired');
+    },
+  });
   // DELETE of a superseded, independently issued token must never target current.
   const revokeOrphan = async (token: string, binding: string) => {
     if (token === authorization?.token) return;
@@ -524,6 +537,20 @@ export function createRealAuthClient(
             result.status >= 500 ||
             !result.code,
         });
+    },
+    openStream: async (input, init) => {
+      if (state.status !== 'authenticated') return { kind: 'unauthorized' };
+      if (now() >= deadline) {
+        finish('expired');
+        return { kind: 'unauthorized' };
+      }
+      const snapshot = captured()!;
+      const result = await authorizedResponse(input, init, 200);
+      if (!matches(snapshot)) {
+        if (result.kind === 'ok') await result.data.body?.cancel();
+        return { kind: 'error', status: 0, code: 'REQUEST_SUPERSEDED' };
+      }
+      return result;
     },
     request: async <T>(input: RequestInfo | URL, init?: RequestInit) => {
       if (state.status !== 'authenticated') return { kind: 'unauthorized' };

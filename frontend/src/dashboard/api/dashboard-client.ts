@@ -23,7 +23,11 @@ export function createDashboardClient(
   let acceptedHour = boliviaTime(port.now()).hour;
   let handledExpiration = '';
   let rejectedExpiration = '';
+  let flight:
+    | { generation: number; period: DashboardPeriod; pending: boolean }
+    | undefined;
   let state: DashboardSnapshot = {
+    demonstration: false,
     period: 'today',
     phase: 'loading',
     data: null,
@@ -48,6 +52,9 @@ export function createDashboardClient(
   }
   function unauthorized() {
     generation++;
+    clearInterval(interval);
+    unsubscribe?.();
+    unsubscribe = undefined;
     publish({
       phase: 'unauthorized',
       data: null,
@@ -57,7 +64,25 @@ export function createDashboardClient(
     });
     onUnauthorized();
   }
-  async function read() {
+  function read() {
+    if (!running || state.phase === 'unauthorized') return;
+    if (flight?.generation === generation && flight.period === state.period) {
+      flight.pending = true;
+      return;
+    }
+    const job = {
+      generation: generation + 1,
+      period: state.period,
+      pending: false,
+    };
+    flight = job;
+    void executeRead().finally(() => {
+      if (flight !== job) return;
+      flight = undefined;
+      if (job.pending && running) read();
+    });
+  }
+  async function executeRead() {
     if (state.phase === 'unauthorized') return;
     const request = ++generation;
     const period = state.period;
@@ -79,6 +104,7 @@ export function createDashboardClient(
       return;
     }
     if (!running || request !== generation || period !== state.period) return;
+    if (result.kind === 'superseded') return;
     if (result.kind === 'ok') {
       if (result.data.period !== period) {
         publish({
@@ -141,13 +167,16 @@ export function createDashboardClient(
   }
   function event(event: DashboardEvent) {
     if (state.phase === 'unauthorized') return;
+    if (event.type === 'source') {
+      publish({ demonstration: event.demonstration });
+      return;
+    }
     if (event.type === 'unauthorized') {
       unauthorized();
       return;
     }
     if (event.type === 'closed') {
       publish({ stream: 'reconnecting', stale: !!state.data });
-      port.reconnect();
       void read();
     } else if (event.type === 'clock') {
       tick();
@@ -209,6 +238,7 @@ export function createDashboardClient(
         running--;
         if (!running) {
           generation++;
+          flight = undefined;
           clearInterval(interval);
           unsubscribe?.();
         }

@@ -22,13 +22,11 @@ try {
 
 const { client } = database;
 
-const server = createApp({ db: database.db }).listen(
-  env.PORT,
-  '127.0.0.1',
-  () => {
-    console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
-  },
-);
+// Temporary explicit demo injection, until Gestión de ventas supplies DashboardSource.
+const app = createApp({ db: database.db, dashboardDemo: true });
+const server = app.listen(env.PORT, '127.0.0.1', () => {
+  console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
+});
 
 server.on('error', (error) => {
   console.error('No se pudo iniciar Express:', error.message);
@@ -38,6 +36,7 @@ server.on('error', (error) => {
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
+    app.locals.dashboardEvents.close();
     server.close(() => {
       void client.close();
     });
