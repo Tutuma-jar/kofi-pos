@@ -187,19 +187,144 @@ test('CA-05 a version conflict maps to the exact category message', async () => 
   });
 });
 
-test('rename and delete are explicitly unavailable without requests', async () => {
+test('CA-03 renames with an exact JSON PATCH carrying the version', async () => {
+  const current = { ...category, version: 3 };
+  const auth = transport(ok({ ...current, name: 'Bebidas', version: 4 }));
+  const client = createRealMenuClient(auth);
+  await expect(client.saveCategory(' Bebidas ', current)).resolves.toBe(
+    undefined,
+  );
+  expect(auth.request).toHaveBeenCalledTimes(1);
+  const [path, init] = auth.request.mock.calls[0]!;
+  expect(path).toBe(`/api/categories/${category.id}`);
+  expect(init).toMatchObject({
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ version: 3, name: ' Bebidas ' }),
+  });
+});
+
+test('CA-04 deletes with an exact JSON DELETE carrying the version; 204 is a success', async () => {
+  const auth = transport(ok(undefined));
+  const client = createRealMenuClient(auth);
+  await expect(
+    client.deleteCategory({ ...category, version: 2 }),
+  ).resolves.toBeUndefined();
+  expect(auth.request).toHaveBeenCalledTimes(1);
+  const [path, init] = auth.request.mock.calls[0]!;
+  expect(path).toBe(`/api/categories/${category.id}`);
+  expect(init).toMatchObject({
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ version: 2 }),
+  });
+});
+
+const unauthorized: HttpResult<unknown> = { kind: 'unauthorized' };
+const offline: HttpResult<unknown> = { kind: 'connection' };
+
+test.each([
+  [error(409, 'DUPLICATE_NAME'), 'VALIDATION_ERROR', menuMessages.duplicate],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'name', code: 'TOO_SHORT' }],
+    }),
+    'VALIDATION_ERROR',
+    menuMessages.length,
+  ],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'name', code: 'TOO_LONG' }],
+    }),
+    'VALIDATION_ERROR',
+    menuMessages.length,
+  ],
+  [error(409, 'VERSION_CONFLICT'), 'CONFLICT', menuMessages.conflict],
+  [error(404, 'NOT_FOUND'), 'CONNECTION_ERROR', menuMessages.missing],
+  [unauthorized, 'CONNECTION_ERROR', menuMessages.session],
+  [offline, 'CONNECTION_ERROR', menuMessages.connection],
+  [error(500, 'INTERNAL_ERROR'), 'CONNECTION_ERROR', menuMessages.connection],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'version', code: 'INVALID_FORMAT' }],
+    }),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+  [new Error('network'), 'CONNECTION_ERROR', menuMessages.connection],
+  [ok(null), 'CONNECTION_ERROR', menuMessages.connection],
+  // Only the same category is a success.
+  [
+    ok({ ...category, id: 'cccccccccccccccccccccccc' }),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+])(
+  'CA-02/CA-05/CA-06 renaming failure %# is communicated as a rejection',
+  async (result, code, message) => {
+    const client = createRealMenuClient(transport(result));
+    await expect(
+      client.saveCategory('Bebidas', category),
+    ).rejects.toMatchObject({ code, message });
+  },
+);
+
+test('CA-05 a renaming conflict carries the exact category message', async () => {
+  const client = createRealMenuClient(
+    transport(
+      error(409, 'VERSION_CONFLICT', {
+        current: { ...category, name: 'Otro', version: 2 },
+      }),
+    ),
+  );
+  await expect(client.saveCategory('Té', category)).rejects.toMatchObject({
+    code: 'CONFLICT',
+    message:
+      'Esta categoría cambió mientras la editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
+  });
+});
+
+test.each([
+  [
+    error(409, 'CATEGORY_NOT_EMPTY'),
+    'CATEGORY_NOT_EMPTY',
+    menuMessages.notEmpty,
+  ],
+  [error(409, 'VERSION_CONFLICT'), 'CONFLICT', menuMessages.conflict],
+  [error(404, 'NOT_FOUND'), 'CONNECTION_ERROR', menuMessages.missing],
+  [unauthorized, 'CONNECTION_ERROR', menuMessages.session],
+  [offline, 'CONNECTION_ERROR', menuMessages.connection],
+  [error(500, 'INTERNAL_ERROR'), 'CONNECTION_ERROR', menuMessages.connection],
+  [
+    error(415, 'UNSUPPORTED_MEDIA_TYPE'),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+  [new Error('network'), 'CONNECTION_ERROR', menuMessages.connection],
+])(
+  'CA-04/CA-05 deletion failure %# is communicated as a rejection',
+  async (result, code, message) => {
+    const client = createRealMenuClient(transport(result));
+    await expect(client.deleteCategory(category)).rejects.toMatchObject({
+      code,
+      message,
+    });
+  },
+);
+
+test('malformed identities are rejected without requests', async () => {
   const auth = transport();
   const client = createRealMenuClient(auth);
-  const unavailable = {
+  const missing = {
     code: 'CONNECTION_ERROR',
-    message: menuMessages.unavailable,
+    message: menuMessages.missing,
   };
-  await expect(client.saveCategory('Otro', category)).rejects.toMatchObject(
-    unavailable,
-  );
-  await expect(client.deleteCategory(category)).rejects.toMatchObject(
-    unavailable,
-  );
+  await expect(
+    client.saveCategory('Otro', { ...category, id: 'x' }),
+  ).rejects.toMatchObject(missing);
+  await expect(
+    client.deleteCategory({ ...category, id: 'x' }),
+  ).rejects.toMatchObject(missing);
   // A malformed identity cannot exist: no request.
   await expect(client.getProduct('x')).rejects.toMatchObject({
     code: 'CONNECTION_ERROR',

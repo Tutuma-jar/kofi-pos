@@ -1,5 +1,6 @@
 import { z, type ZodError } from 'zod';
 import { ApiError } from '../shared/http/api-error.js';
+import { versionSchema } from '../shared/http/version.js';
 import { boundedTextSchema } from '../shared/text/catalog-text.js';
 
 export const PRODUCT_NAME_MAX = 100;
@@ -39,15 +40,9 @@ export const createProductSchema = z.strictObject({
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export const productParamsSchema = z.strictObject({ id: idSchema });
 
-// Optimistic version shared by edition (TASK-018) and activation (TASK-022).
-export const productVersionSchema = z.number().superRefine((value, ctx) => {
-  if (!Number.isSafeInteger(value) || value < 1)
-    ctx.addIssue({
-      code: 'custom',
-      params: { fieldCode: 'INVALID_FORMAT' },
-      input: value,
-    });
-});
+// Optimistic version shared by edition (TASK-018) and activation (TASK-022);
+// the same rule as categories (TASK-020).
+export const productVersionSchema = versionSchema;
 
 /**
  * PATCH (TASK-018): same field rules as the creation, all optional; omitted

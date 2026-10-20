@@ -8,20 +8,21 @@ import type {
 } from './contract.provisional';
 
 /** Menu administration over the common authorized client of auth/api.
- * TASK-020: categories (creation and reading). TASK-016: product creation,
- * administrative reading and local images. TASK-018: product edition with
- * optimistic version control. TASK-022: product activation with the same
- * version. Renaming/deleting categories (TASK-020) are not available yet and
- * fail explicitly, without requests.
+ * TASK-020: categories (creation, reading, renaming and deletion with the
+ * category's optimistic version). TASK-016: product creation, administrative
+ * reading and local images. TASK-018: product edition with optimistic version
+ * control. TASK-022: product activation with the same version.
  */
 export const menuMessages = {
   duplicate: 'Ya existe una categoría con este nombre.',
   length: 'Escribe un nombre de 1 a 80 caracteres.',
   conflict:
     'Esta categoría cambió mientras la editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
+  notEmpty:
+    'No puedes eliminar una categoría con productos asociados, incluidos los inactivos.',
+  missing: 'La categoría ya no está disponible. Actualiza la lista.',
   session: 'Tu sesión terminó. Inicia sesión de nuevo.',
   connection: 'No pudimos completar la operación. Reintenta.',
-  unavailable: 'Esta acción aún no está disponible.',
 } as const;
 
 export const productMessages = {
@@ -154,6 +155,18 @@ export function menuFailure(result: Failure): MenuError {
   return connectionError();
 }
 
+// Renaming and deletion of an existing category (TASK-020): besides the
+// creation answers, a vanished category and a protected deletion.
+export function categoryFailure(result: Failure): MenuError {
+  if (result.kind === 'error') {
+    if (result.status === 404)
+      return new MenuError('CONNECTION_ERROR', menuMessages.missing);
+    if (result.status === 409 && result.code === 'CATEGORY_NOT_EMPTY')
+      return new MenuError('CATEGORY_NOT_EMPTY', menuMessages.notEmpty);
+  }
+  return menuFailure(result);
+}
+
 // API field -> [form field of the UI, message].
 const productFields = new Map<string, [string, string]>([
   ['name', ['name', productMessages.name]],
@@ -236,9 +249,6 @@ export function dataUrlBytes(value: string): Uint8Array<ArrayBuffer> | null {
     return null;
   }
 }
-
-const unavailable = () =>
-  Promise.reject(new MenuError('CONNECTION_ERROR', menuMessages.unavailable));
 
 export function createRealMenuClient(
   auth: MenuTransport,
@@ -433,16 +443,39 @@ export function createRealMenuClient(
         active: data.active,
       };
     },
+    // Creation without `current`; renaming sends the version the operator saw.
     async saveCategory(name, current) {
-      if (current) return unavailable();
-      const data = await send('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
-      if (!validCategory(data)) throw connectionError();
+      if (current && !objectId.test(current.id))
+        throw new MenuError('CONNECTION_ERROR', menuMessages.missing);
+      const data = await send(
+        current ? `/api/categories/${current.id}` : '/api/categories',
+        {
+          method: current ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            current ? { version: current.version, name } : { name },
+          ),
+        },
+        current ? categoryFailure : menuFailure,
+      );
+      // Only a valid body of the same category is a success.
+      if (!validCategory(data) || (current && data.id !== current.id))
+        throw connectionError();
     },
-    deleteCategory: unavailable,
+    // Deletion carries the version in a JSON body; success is 204.
+    async deleteCategory(category) {
+      if (!objectId.test(category.id))
+        throw new MenuError('CONNECTION_ERROR', menuMessages.missing);
+      await send(
+        `/api/categories/${category.id}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ version: category.version }),
+        },
+        categoryFailure,
+      );
+    },
     async setActive(product) {
       if (!objectId.test(product.id))
         throw new MenuError('CONNECTION_ERROR', productMessages.missing);

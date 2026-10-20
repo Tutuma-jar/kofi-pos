@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { versionSchema } from '../shared/http/version.js';
 import {
   boundedTextSchema,
   catalogNameKey,
@@ -18,3 +19,23 @@ export const categoryNameSchema = boundedTextSchema(CATEGORY_NAME_MAX);
 export const createCategorySchema = z.strictObject({
   name: categoryNameSchema,
 });
+
+export const categoryParamsSchema = z.strictObject({
+  id: z.string().regex(/^[a-f0-9]{24}$/),
+});
+
+/**
+ * Renaming (TASK-020): the same name rules as the creation plus the optimistic
+ * version, both mandatory. The own name is accepted (same document).
+ */
+export const updateCategorySchema = z.strictObject({
+  version: versionSchema,
+  name: categoryNameSchema,
+});
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
+// Deletion (TASK-020): only the version the operator saw; nothing else.
+export const deleteCategorySchema = z.strictObject({
+  version: versionSchema,
+});
+export type DeleteCategoryInput = z.infer<typeof deleteCategorySchema>;
