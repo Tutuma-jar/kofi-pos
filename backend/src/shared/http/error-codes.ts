@@ -1,0 +1,11 @@
+export const errorCodes = {
+  VALIDATION_ERROR: 400,
+  INVALID_CREDENTIALS: 401,
+  UNAUTHORIZED: 401,
+  NOT_FOUND: 404,
+  PAYLOAD_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  AUTH_RATE_LIMITED: 429,
+  INTERNAL_ERROR: 500,
+} as const;
+export type ErrorCode = keyof typeof errorCodes;

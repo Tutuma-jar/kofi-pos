@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../auth-context';
 import { Button } from '../../shared/components/Button';
 import { AuthenticatedLayout } from '../../shared/layout/AuthenticatedLayout';
-import { ScenarioPicker } from './ScenarioPicker';
 import styles from './AuthenticatedAccess.module.css';
 
 export function AuthenticatedAccess({
@@ -50,7 +49,7 @@ export function AuthenticatedAccess({
             </h2>
             <p>
               {closing
-                ? 'Espera la confirmación. La operación está suspendida en esta demostración.'
+                ? 'Espera la confirmación. El acceso está suspendido mientras se cierra la sesión.'
                 : session.status === 'close-error' && session.uncertain
                   ? 'No pudimos confirmar el cierre de sesión. No podemos afirmar que el acceso haya sido revocado.'
                   : 'No se completó el cierre. El acceso sigue suspendido en esta pantalla.'}
@@ -67,7 +66,6 @@ export function AuthenticatedAccess({
           </section>
         ) : null
       }
-      footerSlot={bounded ? null : <ScenarioPicker />}
     >
       {children}
     </AuthenticatedLayout>

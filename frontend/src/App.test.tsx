@@ -136,6 +136,45 @@ test('login vacío usa campos requeridos y no inicia sesión', () => {
   expect(client.getSnapshot().status).toBe('anonymous');
 });
 
+test('acceso real retira avisos de demostración y conserva límites de credenciales', () => {
+  mount();
+  expect(screen.queryByText('Punto de venta · Demostración')).toBeNull();
+  expect(screen.queryByText(/No ingreses contraseñas reales/)).toBeNull();
+  expect(screen.getByLabelText<HTMLInputElement>('Usuario').maxLength).toBe(
+    128,
+  );
+  expect(screen.getByLabelText<HTMLInputElement>('Contraseña').maxLength).toBe(
+    1024,
+  );
+});
+
+test('un fallo de comprobación no muestra contenido protegido ni produce un bucle de rutas', () => {
+  mount('/dashboard', { initial: { status: 'connection-error' } });
+  expect(screen.queryByRole('heading', { name: 'Dashboard' })).toBeNull();
+  expect(screen.getByRole('alert').textContent).toContain(
+    'No pudimos comprobar la sesión',
+  );
+  expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy();
+});
+
+test('un fallo inesperado al iniciar sesión libera el formulario sin conceder acceso', async () => {
+  const client = mount();
+  vi.spyOn(client, 'login').mockRejectedValueOnce(
+    new Error('unexpected transport failure'),
+  );
+  fillLogin();
+  await settle();
+  expect(screen.getByRole('alert').textContent).toContain(
+    'No pudimos iniciar sesión',
+  );
+  expect(
+    screen.getByRole<HTMLButtonElement>('button', { name: 'Iniciar sesión' })
+      .disabled,
+  ).toBe(false);
+  expect(screen.getByLabelText<HTMLInputElement>('Contraseña').value).toBe('');
+  expect(client.getSnapshot().status).toBe('anonymous');
+});
+
 test.each<Scenario>(['incorrect', 'connection'])(
   'login distingue %s sin conceder acceso',
   async (scenario) => {

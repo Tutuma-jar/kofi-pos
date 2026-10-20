@@ -1,6 +1,6 @@
-import { createAuthClient } from './auth-client';
+import { createRealAuthClient } from './real-auth-client';
 
-export const demoClient = createAuthClient();
+export const demoClient = createRealAuthClient();
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => demoClient.dispose());

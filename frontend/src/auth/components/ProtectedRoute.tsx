@@ -11,7 +11,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
         <p role="status">Comprobando sesión…</p>
       </main>
     );
-  if (session.status === 'anonymous')
+  if (session.status === 'anonymous' || session.status === 'connection-error')
     return <Navigate to="/login" replace state={{ authRequired: true }} />;
   return children;
 }
