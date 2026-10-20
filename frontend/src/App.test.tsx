@@ -258,6 +258,44 @@ test('menú oculto desmonta controles; al ocultarlo devuelve foco al disparador'
   expect(toggle.getAttribute('aria-expanded')).toBe('false');
 });
 
+test.each([
+  ['/dashboard', 'Dashboard'],
+  ['/sales', 'Gestión de ventas'],
+  ['/menu', 'Administración de Menú'],
+  ['/menu/categories', 'Administración de Menú'],
+  ['/history', 'Historial y reportes'],
+])(
+  'navegación compartida en %s destaca solo su ruta y conserva cierre',
+  (path, label) => {
+    mount(path, {
+      initial: { status: 'authenticated', label: 'Cuenta compartida' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir navegación' }));
+    const nav = screen.getByRole('navigation', { name: 'Principal' });
+    expect(nav.querySelectorAll('[aria-current="page"]').length).toBe(1);
+    expect(
+      within(nav)
+        .getByRole('link', { name: label })
+        .getAttribute('aria-current'),
+    ).toBe('page');
+    expect(within(nav).getAllByRole('link').length).toBe(4);
+    expect(within(nav).queryByRole('link', { name: 'Categorías' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeTruthy();
+  },
+);
+
+test('seleccionar otra ruta cierra navegación y enfoca contenido', () => {
+  mount('/dashboard', {
+    initial: { status: 'authenticated', label: 'Cuenta compartida' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir navegación' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Historial y reportes' }));
+  expect(screen.queryByRole('navigation')).toBeNull();
+  expect(
+    document.getElementById('main-content')?.contains(document.activeElement),
+  ).toBe(true);
+});
+
 test('modal estrecho declara fondo inerte, contiene extremos Tab y permite cancelar con retorno', () => {
   narrow = true;
   mount('/dashboard', {
