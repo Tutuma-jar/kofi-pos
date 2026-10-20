@@ -44,6 +44,8 @@ async function settle(ms = 350) {
   });
 }
 const summary = () => within(screen.getByLabelText('Resumen de ventas'));
+const payments = () =>
+  within(screen.getByRole('region', { name: 'Métodos de pago' }));
 const products = () =>
   within(
     screen.getByRole('region', {
@@ -81,23 +83,28 @@ test('backend demonstration indicator is discreet and keeps real page states and
   expect(screen.getByLabelText('Este mes')).toBeDefined();
 });
 
-test('Hoy inicial, carga diferenciada y cuatro tarjetas; Mes cambia los tres bloques', async () => {
+test('Hoy inicial, resumen P y métodos separados; Mes cambia todos los bloques', async () => {
   mount();
   expect(screen.getByLabelText<HTMLInputElement>('Hoy').checked).toBe(true);
   expect(screen.getByLabelText('Cargando ventas')).toBeDefined();
   expect(screen.queryByText('Aún no se realizaron ventas hoy')).toBeNull();
   await settle();
-  expect(summary().getAllByRole('term')).toHaveLength(4);
+  expect(summary().getAllByRole('term')).toHaveLength(2);
   expect(summary().getByText('12')).toBeDefined();
   expect(summary().getByText('BOB 455.0')).toBeDefined();
-  expect(summary().getByText('7')).toBeDefined();
-  expect(summary().getByText('5')).toBeDefined();
+  expect(payments().getByText('7')).toBeDefined();
+  expect(payments().getByText('5')).toBeDefined();
+  expect(payments().getAllByRole('term')).toHaveLength(2);
+  expect(screen.queryByText('Pedidos registrados')).toBeNull();
+  expect(screen.queryByText('Ventas recientes')).toBeNull();
   expect(products().getByText('BOB 100.0')).toBeDefined();
   fireEvent.click(screen.getByLabelText('Este mes'));
   expect(screen.queryByLabelText('Resumen de ventas')).toBeNull();
   await settle();
   expect(summary().getByText('40')).toBeDefined();
   expect(summary().getByText('BOB 1550.0')).toBeDefined();
+  expect(payments().getByText('23')).toBeDefined();
+  expect(payments().getByText('17')).toBeDefined();
   expect(products().getByText('BOB 300.0')).toBeDefined();
   expect(screen.getByText(/Suma de cada franja/)).toBeDefined();
 });
@@ -110,6 +117,7 @@ test('mensajes exactos de vacío sustituyen las tres secciones; selector sigue o
     screen.getByRole('heading', { name: 'Aún no se realizaron ventas hoy' }),
   ).toBeDefined();
   expect(screen.queryByLabelText('Resumen de ventas')).toBeNull();
+  expect(screen.queryByRole('region', { name: 'Métodos de pago' })).toBeNull();
   expect(screen.queryByRole('img')).toBeNull();
   expect(screen.queryByRole('table')).toBeNull();
   fireEvent.click(screen.getByLabelText('Este mes'));
@@ -219,6 +227,7 @@ test('venta actualiza conjuntamente resumen/productos/horas sin recarga ni mover
   await settle();
   expect(summary().getByText('13')).toBeDefined();
   expect(summary().getByText('BOB 495.0')).toBeDefined();
+  expect(payments().getByText('6')).toBeDefined();
   expect(products().getAllByRole('rowheader')[0]?.textContent).toBe(
     'Americano',
   );

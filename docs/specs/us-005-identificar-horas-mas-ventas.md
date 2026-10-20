@@ -53,6 +53,10 @@ El 2026-10-19 el responsable aprobó la redistribución propuesta por `requireme
 
 El 2026-10-19, tras revisar con `requirements-analyst` las mejoras y preguntas abiertas del Dashboard, el responsable respondió «usa tus sugerencias para cada uno». Se precisa CA-01 con el eje de 24 horas y la línea de hoy hasta la hora en curso, y se añade CA-06 de accesibilidad de los valores del gráfico. El contrato no cambia: `hourlySales` conserva 24 entradas y el cliente omite las horas futuras de hoy. No cambian alcance ni tareas, ni se autoriza implementación.
 
+## Interfaz — adaptación visual a P
+
+La entrega del 2026-10-20, su rama, revisión del gráfico y alternativa textual accesible se registran en [US-003](us-003-consultar-resumen-ventas.md#interfaz--adaptación-visual-a-p-2026-10-20). Se conservan serie de ventas, eje de 24 horas y corte de hoy; no acredita integración o DoD de TASK-014.
+
 ## Tareas técnicas asociadas
 
 Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-014 sustituyó la etiqueta local HOR-BE; la de HOR-FE se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación. Aplican las [condiciones previas compartidas de US-003](us-003-consultar-resumen-ventas.md#condiciones-previas-compartidas), incluida la integración común.

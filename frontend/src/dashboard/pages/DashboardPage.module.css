@@ -5,7 +5,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 0 24px;
+  padding: 16px 0 20px;
+  scrollbar-color: var(--selection) var(--surface);
 }
 .toolbar {
   min-height: 56px;
@@ -16,7 +17,7 @@
 }
 .toolbar h1 {
   margin: 0 auto 0 0;
-  font-size: 30px;
+  font-size: 32px;
 }
 .period {
   display: flex;
@@ -82,7 +83,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 44px;
+  min-height: 28px;
   flex-shrink: 0;
   font-size: 14px;
   color: var(--muted);
@@ -108,61 +109,78 @@
   font-size: 14px;
 }
 .dataArea {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(272px, 1.15fr) minmax(0, 1fr);
   flex: 1;
   min-height: 0;
-  gap: 16px;
+  gap: 20px;
+}
+.overview,
+.records {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  min-height: 0;
+}
+.overview {
+  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 2.05fr);
+}
+.records {
+  grid-template-columns: minmax(0, 1.85fr) minmax(280px, 1fr);
 }
 .metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
   margin: 0;
-  flex-shrink: 0;
-}
-.metric {
   min-width: 0;
-  min-height: 104px;
-  border: 1px solid var(--line);
+  padding: 24px;
   border-radius: 10px;
-  padding: 17px 16px;
-  background: var(--surface);
+  color: var(--surface);
+  background: var(--action);
+  border: 1px solid var(--action);
 }
-.metric dt {
-  color: var(--muted);
-  font-size: 15px;
-  margin-bottom: 10px;
+.metrics dt,
+.metrics .metricNote {
+  color: #dbe7eb;
+  font-size: 14px;
 }
-.metric dd {
-  margin: 0;
-  font-size: 28px;
+.metrics dd {
+  margin: 8px 0 0;
+  font-size: 42px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  color: var(--action);
   white-space: nowrap;
 }
-.metric .longNumber {
-  font-size: 18px;
+.metrics .metricNote {
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: normal;
+  line-height: 1.4;
+}
+.salesMetric {
+  border-top: 1px solid #8295af;
+  padding-top: 18px;
+}
+.salesMetric dd {
+  font-size: 30px;
+}
+.metrics .longNumber {
+  font-size: 20px;
   letter-spacing: 0;
 }
-.panels {
-  display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
-  gap: 16px;
-  flex: 1;
-  min-height: 0;
-}
 .chart,
-.products {
+.products,
+.payments {
   min-width: 0;
   min-height: 0;
   border: 1px solid var(--line);
   background: var(--surface);
   border-radius: 10px;
-  padding: 12px 16px 14px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
 }
@@ -174,8 +192,10 @@
   min-height: 44px;
   flex-shrink: 0;
 }
-.panelHeading h2 {
+.panelHeading h2,
+.payments h2 {
   font-size: 20px;
+  font-weight: 600;
   margin: 0;
 }
 .muted {
@@ -183,11 +203,10 @@
   color: var(--muted);
 }
 .products .panelHeading {
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 12px;
   padding-bottom: 10px;
-  min-height: 54px;
+  min-height: 36px;
 }
 .viewToggle {
   font-size: 13px;
@@ -197,7 +216,7 @@
 .hourlyContent {
   flex: 1;
   min-height: 0;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .plot {
   display: grid;
@@ -268,12 +287,12 @@
 .hourValues {
   display: grid;
   grid-auto-flow: column;
-  grid-template-rows: repeat(12, 18px);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 20px;
+  grid-template-rows: repeat(6, 22px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 24px;
   margin: 0;
   font-size: 14px;
-  line-height: 18px;
+  line-height: 22px;
   font-variant-numeric: tabular-nums;
 }
 .hourValues > div {
@@ -286,6 +305,8 @@
 }
 .hourValues dd {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .productScroll {
   flex: 1;
@@ -309,22 +330,22 @@
 .productTable thead th {
   position: sticky;
   top: 0;
-  background: var(--surface);
-  color: var(--muted);
+  background: #edf1f2;
+  color: var(--action);
   z-index: 1;
-  font-weight: 400;
+  font-weight: 600;
   font-size: 13px;
 }
 .productTable th,
 .productTable td {
   text-align: right;
-  padding: 12px 4px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
 .productTable th:first-child {
   text-align: left;
-  padding-left: 0;
+  padding-left: 12px;
 }
 .productTable tbody th {
   font-weight: 400;
@@ -334,11 +355,61 @@
   white-space: nowrap;
   font-size: 14px;
 }
+.productTable tbody tr:nth-child(even) {
+  background: #f8f8f4;
+}
+.productTable td:last-child {
+  color: var(--action);
+  font-weight: 600;
+}
 .unitsColumn {
   width: 124px;
 }
 .revenueColumn {
   width: 164px;
+}
+.paymentNote {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 8px 0 18px;
+}
+.paymentList {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.paymentList > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+}
+.paymentList > div + div {
+  border-top: 1px solid var(--line);
+}
+.paymentList dt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+}
+.paymentList dd {
+  margin: 0;
+  color: var(--action);
+  font-size: 22px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--action);
+}
+.cashSwatch {
+  background: var(--selection);
 }
 .centralState {
   display: flex;
@@ -371,9 +442,9 @@
 }
 .skeletonCards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  height: 104px;
+  grid-template-columns: 0.95fr 2.05fr;
+  gap: 20px;
+  height: 272px;
   flex-shrink: 0;
 }
 .skeletonCards > div,
@@ -385,8 +456,8 @@
 .skeletonBody {
   flex: 1;
   display: grid;
-  grid-template-columns: 1.04fr 0.96fr;
-  gap: 16px;
+  grid-template-columns: 1.85fr 1fr;
+  gap: 20px;
 }
 .srOnly {
   position: absolute;
@@ -403,18 +474,41 @@
   .toolbar {
     flex-wrap: wrap;
   }
-  .metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .overview,
+  .records {
+    gap: 18px;
   }
-  .panels {
-    grid-template-columns: minmax(0, 1fr);
+  .dataArea {
+    grid-template-rows: 300px 320px;
     flex: none;
   }
+  .metrics {
+    padding: 20px;
+  }
+  .incomeMetric dd {
+    font-size: 36px;
+  }
+}
+@media (max-width: 760px) {
+  .dataArea {
+    display: flex;
+    flex-direction: column;
+  }
+  .overview,
+  .records {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .chart {
-    min-height: 352px;
+    height: 300px;
   }
   .products {
-    height: 400px;
+    height: 360px;
+  }
+  .metrics .longNumber {
+    font-size: 20px;
+  }
+  .hourValues {
+    column-gap: 16px;
   }
 }
 @media (max-width: 560px) {
@@ -436,18 +530,21 @@
   .clock {
     margin-left: 0;
   }
-  .metric {
-    padding: 14px 10px;
-  }
-  .metric dd {
-    font-size: 22px;
-  }
-  .metric .longNumber {
-    font-size: 14px;
-  }
   .hourValues {
     column-gap: 12px;
-    font-size: 12px;
+    font-size: 13px;
+    grid-template-rows: repeat(12, 18px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    line-height: 18px;
+  }
+  .textChart {
+    height: 364px;
+  }
+  .plot {
+    grid-template-rows: minmax(0, 1fr) 40px;
+  }
+  .xAxis span:nth-child(even) {
+    top: 23px;
   }
   .chart,
   .products {
@@ -455,20 +552,31 @@
     padding-right: 10px;
   }
   .unitsColumn {
-    width: 75px;
+    width: 60px;
   }
   .revenueColumn {
-    width: 140px;
+    width: 122px;
+  }
+  .products .panelHeading {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .productTable th,
+  .productTable td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .productTable th:first-child {
+    padding-left: 4px;
+  }
+  .panelHeading h2,
+  .payments h2 {
+    font-size: 19px;
   }
 }
 @media (max-height: 649px) {
-  .panels {
+  .dataArea {
     flex: none;
-  }
-  .chart {
-    min-height: 352px;
-  }
-  .products {
-    height: 400px;
+    grid-template-rows: 300px 320px;
   }
 }
