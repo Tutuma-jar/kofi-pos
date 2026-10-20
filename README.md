@@ -1,12 +1,12 @@
 # Kofi
 
-Base técnica de un POS web. Las funcionalidades de las US todavía no están implementadas: consulta el [tracker](docs/progress/tracker.md), el [producto](docs/ai-context/product.md) y el [alcance fundacional autorizado](docs/specs/technical-bootstrap.md).
+POS web en desarrollo. Acceso tiene implementación local conectada a Express y MongoDB; los límites de identidad de pestaña y la evidencia se registran en la [entrega de Acceso](docs/progress/access-module-integration.md). Consultar el [tracker](docs/progress/tracker.md) para el estado oficial, no asumir el resto del POS implementado.
 
 ## Requisitos
 
 - Node **24.19.0** (`.node-version`); engines admite versiones compatibles de la rama 24 desde esa versión.
 - npm **11.17.0**, sin modificar instalaciones globales.
-- Docker con Docker Compose para el MongoDB local del backend (replica set de un nodo, necesario para transacciones). El frontend no lo necesita.
+- Docker con Docker Compose para MongoDB local (replica set de un nodo, necesario para transacciones). El acceso real requiere frontend, API y MongoDB; las pruebas unitarias de frontend no requieren Docker.
 
 ## Instalación
 
@@ -38,10 +38,16 @@ npm run dev:backend
 
 `db:up` inicia [backend/compose.yaml](backend/compose.yaml) y espera a que el replica set `rs0` esté listo; la primera vez lo inicializa. Los datos persisten en el volumen `kofi_mongo-data`. `npm run db:down --workspace @kofi/backend` detiene el contenedor sin borrar el volumen. El backend no arranca sin `MONGODB_URI` válido o si MongoDB no es replica set.
 
-- React: <http://127.0.0.1:5173>. Muestra solo contenido técnico, sin página funcional o diseño definitivo.
-- Express: <http://127.0.0.1:3000>. No tiene endpoints de negocio: `/api` devuelve **404**, no indica un fallo de arranque.
+- React: <http://127.0.0.1:5173>. Login y pantallas existentes; Vite redirige `/api` a Express en 3000 para usar el mismo origen. No usar secretos en parámetros de URL.
+- Express: <http://127.0.0.1:3000>. API de sesiones en `/api/sessions`; `/api` sin ruta concreta devuelve **404**, no indica un fallo de arranque.
 - Puertos fijos en Vite para evitar cambiar de puerto silenciosamente. Express admite `PORT` entre 1 y 65535; opcionalmente copiar `backend/.env.example` a `backend/.env`. Nunca guardar credenciales en Git.
-- Los servidores escuchan solo en loopback y usan HTTP local. Esto no constituye despliegue ni resuelve HTTPS, origen común, proxy, sesiones o contratos de API de las futuras US.
+- Los servidores escuchan solo en loopback y usan HTTP local. En producción se requiere HTTPS y proxy de `/api` en el mismo origen; el proxy de Vite es únicamente de desarrollo.
+
+### Cuenta externa y Acceso
+
+No se crea ninguna cuenta automáticamente ni existe contraseña predeterminada. La provisión es un paso administrativo externo a la aplicación. Con `MONGODB_URI` en el entorno, ejecutar desde la raíz `node --import tsx backend/scripts/provision-account.ts` y suministrar un único objeto JSON por entrada estándar, con `username` y `password`. No pasar secretos por argumentos, URL, comandos guardados o archivos versionados. El script crea una cuenta nueva con scrypt y sal individual; no modifica ni recupera cuentas existentes. Usar una entrada estándar segura, sin eco ni historial, desde el gestor de secretos del operador.
+
+Para desarrollo, `backend/.env` contiene `PORT=3000` y `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Es un archivo local ignorado por Git. El provisionador lee el entorno del proceso, no carga ese archivo automáticamente. Chrome y Edge requieren almacenamiento del sitio y Web Locks; otras plataformas no se acreditan. No considerar almacenamiento o navegación una prueba infalible de identidad de pestaña.
 
 ## Comprobaciones técnicas
 
@@ -53,7 +59,7 @@ npm test
 npm run build
 ```
 
-`npm test` ejecuta únicamente el montaje React con Vitest/Testing Library/jsdom y el humo de Express con Vitest/Supertest. No prueba ventas, autenticación, datos ni criterios de las US. En el backend incluye también la validación de configuración de entorno.
+`npm test` ejecuta pruebas React/cliente HTTP con Vitest/Testing Library/jsdom y pruebas unitarias de Express, credenciales y configuración. No sustituye MongoDB real, navegador real ni prueba ventas.
 
 Con MongoDB local levantado, las pruebas de integración del backend usan una base temporal que se elimina al terminar. No forman parte de `npm test` ni de la CI:
 
@@ -111,6 +117,6 @@ se exige un revisor humano adicional como parte de esta configuración inicial.
 
 ## Límites y próximos pasos
 
-No hay login, sesiones, Dashboard, catálogo, ventas, modelos, almacenamiento de imágenes, infraestructura operativa ni prototipo de pestaña. El backend ya tiene preparados `mongodb`, `zod`, la conexión a MongoDB local y la prueba de transacciones ([preparación del backend](docs/ai-context/architecture.md#11-preparación-del-backend-autorizada)); React Router y Playwright se instalarán cuando exista trabajo autorizado que los necesite. La primera CI remota verifica exclusivamente el bootstrap, no requisitos de las US ni despliegue.
+Acceso incorpora sesiones opacas revocables y presencia, con protección conservadora de pestaña y limitaciones explícitas de restauración/duplicación nativas. Dashboard es el destino de entrada; no se implementan aquí indicadores, catálogo real, ventas ni almacenamiento de imágenes. React Router ya está instalado; no se añade Playwright. La CI remota previa no acredita estos cambios locales ni los requisitos de las US.
 
-El control rápido de OpenCode sigue comprobando configuración y documentación. No ejecuta estos scripts ni acredita las US; el principal selecciona y ejecuta las comprobaciones técnicas por separado, conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing). Las funcionalidades requieren autorización posterior.
+El control rápido de OpenCode sigue comprobando configuración y documentación. No acredita por sí mismo las US; el principal selecciona y ejecuta las comprobaciones técnicas conforme a [documentación](docs/ai-context/documentation.md#7-procedimiento-de-testing).

@@ -1,25 +1,17 @@
-/**
- * Supuestos provisionales de UI; no endpoints, DTO reales ni seguridad aprobados.
- * Login: el escenario decide el resultado con datos de demostración, nunca
- * credenciales reales. No hay autenticación ni autorización reales.
- * Presencia cada 30 s y finalización a los 120 s se simulan en auth/api/;
- * el reloj del cliente no tiene autoridad sobre una sesión de servidor.
- * Recarga/nueva/duplicada/restaurada son fixtures de ciclo de pestaña:
- * una recarga REAL todavía pierde la sesión simulada en memoria.
- * Cierre confirmado, error conocido y resultado incierto son distintos;
- * suspender la interacción local no equivale a revocar la sesión.
- * HTTP usa transporte inyectado; un 401 notifica a auth sin definir
- * almacenamiento, token ni mecanismo de vinculación de autorización.
+/** UI compatibility contract, shared by explicit fixtures and real-auth-client.
+ * Real HTTP DTOs are exported by real-auth-client. The production instance never
+ * falls back to fixtures. Tab ownership is best effort, not cryptographic identity.
  */
 export type SessionState =
   | { status: 'checking' }
+  | { status: 'connection-error' }
   | { status: 'anonymous'; reason?: 'required' | 'expired' | 'closed' }
   | { status: 'authenticated'; label: string }
   | { status: 'closing'; label: string }
   | { status: 'close-error'; label: string; uncertain: boolean };
 export type LoginInput = { username: string; password: string };
 export type LoginResult =
-  'accepted' | 'incorrect' | 'connection' | 'superseded';
+  'accepted' | 'incorrect' | 'rate-limited' | 'connection' | 'superseded';
 export type Scenario =
   'normal' | 'incorrect' | 'connection' | 'close-failed' | 'close-uncertain';
 export type TabLifecycle = 'reload' | 'new' | 'duplicated' | 'restored';
@@ -43,9 +35,9 @@ export type AuthClientOptions = {
 };
 export type HttpResult<T> =
   | { kind: 'ok'; data: T }
-  | { kind: 'unauthorized' }
+  | { kind: 'unauthorized'; code?: string; details?: unknown }
   | { kind: 'connection' }
-  | { kind: 'error'; status: number };
+  | { kind: 'error'; status: number; code?: string; details?: unknown };
 export type HttpTransport = (
   input: RequestInfo | URL,
   init?: RequestInit,

@@ -16,11 +16,11 @@ Permitir al operador finalizar manualmente la sesión desde un punto de acceso c
 
 ## Criterios de aceptación
 
-| ID | Comportamiento observable |
-| --- | --- |
-| CA-01 | El menú hamburguesa compartido incluye la opción de cerrar sesión en todas las pantallas del sistema con sesión iniciada. |
+| ID    | Comportamiento observable                                                                                                                                                                                                                    |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CA-01 | El menú hamburguesa compartido incluye la opción de cerrar sesión en todas las pantallas del sistema con sesión iniciada.                                                                                                                    |
 | CA-02 | Al confirmar el servidor el cierre manual, la sesión actual queda invalidada sin esperar los dos minutos de ausencia de señales y se muestra la pantalla de inicio de sesión. Las demás sesiones de la cuenta compartida permanecen activas. |
-| CA-03 | Para volver a operar después del cierre, es necesario iniciar sesión nuevamente. |
+| CA-03 | Para volver a operar después del cierre, es necesario iniciar sesión nuevamente.                                                                                                                                                             |
 
 ### Verificación prevista de los criterios
 
@@ -47,6 +47,10 @@ Posteriormente, el 2026-10-18, respondió «si» a «¿Apruebas estas tareas par
 La autorización posterior del 2026-10-18 para permitir sesiones simultáneas en US-001 elimina la exclusividad de la cuenta. Se adecúa esta historia y sus tareas para cerrar solo la sesión actual, sin finalizar las demás. No se añade una acción de cierre global ni se autoriza implementación.
 
 El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-006 asume la conexión del cierre y su verificación integrada y TASK-007 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
+
+## Implementación conjunta de Acceso autorizada
+
+El responsable autorizó el 2026-10-19 resolver US-001/US-002 como un módulo integrado en la rama actual, incluidas las dependencias internas y ajustes mínimos de componentes, sin nuevas ramas ni push. El cierre ya tiene endpoint real, revocación persistente individual, cliente y menú conectados. La [evidencia conjunta](../progress/access-module-integration.md) contiene comprobaciones HTTP/MongoDB y recorridos Chrome/Edge, manejo de fallos/incertidumbre y pendientes reales. No se cambia la DoD ni se considera completa la garantía nativa de pestaña de US-001.
 
 ## Tareas técnicas asociadas
 

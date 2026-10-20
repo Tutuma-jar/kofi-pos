@@ -1,4 +1,6 @@
 import { createApp } from './app.js';
+import { ensureAccountIndexes } from './auth/account.model.js';
+import { ensureSessionIndexes } from './auth/session.model.js';
 import { parseEnv } from './shared/config/env.js';
 import { connectDatabase } from './shared/database/connect-database.js';
 
@@ -7,7 +9,10 @@ const env = parseEnv(process.env);
 let database;
 try {
   database = await connectDatabase(env.MONGODB_URI);
+  await ensureAccountIndexes(database.db);
+  await ensureSessionIndexes(database.db);
 } catch (error) {
+  if (database) await database.client.close();
   console.error(
     'No se pudo conectar con MongoDB:',
     error instanceof Error ? error.message : error,
@@ -17,9 +22,13 @@ try {
 
 const { client } = database;
 
-const server = createApp().listen(env.PORT, '127.0.0.1', () => {
-  console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
-});
+const server = createApp({ db: database.db }).listen(
+  env.PORT,
+  '127.0.0.1',
+  () => {
+    console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
+  },
+);
 
 server.on('error', (error) => {
   console.error('No se pudo iniciar Express:', error.message);

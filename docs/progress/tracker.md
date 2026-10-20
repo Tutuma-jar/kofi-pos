@@ -4,13 +4,13 @@ Fuente oficial del estado del trabajo aprobado. Consultar el [formato y las regl
 
 ## Historias y tareas
 
-- [ ] US-001 — Iniciar sesión — Pendiente — [Especificación](../specs/us-001-iniciar-sesion.md)
-  - [ ] TASK-001 — Validar credenciales e integrar el inicio de sesión — Pendiente
-  - [ ] TASK-002 — Gestionar sesiones simultáneas y presencia — Pendiente
-  - [ ] TASK-003 — Proteger operaciones — Pendiente
-  - [ ] TASK-005 — Mantener la pestaña autorizada y proteger pantallas — Pendiente
-- [ ] US-002 — Cerrar sesión — Pendiente — [Especificación](../specs/us-002-cerrar-sesion.md)
-  - [ ] TASK-006 — Finalizar manualmente la sesión e integrar el cierre — Pendiente
+- [ ] US-001 — Iniciar sesión — En desarrollo — [Especificación](../specs/us-001-iniciar-sesion.md)
+  - [ ] TASK-001 — Validar credenciales e integrar el inicio de sesión — En progreso
+  - [ ] TASK-002 — Gestionar sesiones simultáneas y presencia — En progreso
+  - [ ] TASK-003 — Proteger operaciones — En progreso
+  - [ ] TASK-005 — Mantener la pestaña autorizada y proteger pantallas — Bloqueado: garantías nativas de duplicación/restauración pendientes
+- [ ] US-002 — Cerrar sesión — En desarrollo — [Especificación](../specs/us-002-cerrar-sesion.md)
+  - [ ] TASK-006 — Finalizar manualmente la sesión e integrar el cierre — En progreso
 - [ ] US-003 — Consultar el resumen de ventas — Pendiente — [Especificación](../specs/us-003-consultar-resumen-ventas.md)
   - [ ] TASK-008 — Obtener e integrar el resumen del período — Pendiente
   - [ ] TASK-010 — Habilitar e integrar la actualización compartida tras registrar ventas — Pendiente

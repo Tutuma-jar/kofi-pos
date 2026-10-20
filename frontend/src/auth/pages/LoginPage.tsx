@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { useAuth } from '../auth-context';
-import { ScenarioPicker } from '../components/ScenarioPicker';
 import { Button } from '../../shared/components/Button';
 import styles from './Access.module.css';
 
@@ -21,6 +20,16 @@ export function LoginPage() {
       <div className={styles.loading} role="status">
         Comprobando sesión…
       </div>
+    );
+  if (session.status === 'connection-error')
+    return (
+      <main className={styles.loading}>
+        <p role="alert">
+          No pudimos comprobar la sesión. Revisa la conexión y permite el
+          almacenamiento del sitio en Chrome o Edge actualizado.
+        </p>
+        <Button onClick={() => window.location.reload()}>Reintentar</Button>
+      </main>
     );
   if (session.status !== 'anonymous')
     return <Navigate to="/dashboard" replace />;
@@ -42,7 +51,7 @@ export function LoginPage() {
             Accede al punto de venta con la cuenta de tu equipo.
           </p>
         </div>
-        <p className={styles.caption}>Punto de venta · Demostración</p>
+        <p className={styles.caption}>Punto de venta</p>
       </aside>
       <section className={styles.work} aria-labelledby="login-heading">
         <form
@@ -76,6 +85,23 @@ export function LoginPage() {
                   );
                 if (result === 'connection')
                   setError('No pudimos conectar. Intenta nuevamente.');
+                if (String(result) === 'rate-limited')
+                  setError(
+                    'Demasiados intentos. Espera un momento e intenta nuevamente.',
+                  );
+                if (String(result) === 'unsupported')
+                  setError(
+                    'No pudimos proteger esta pestaña. Usa Chrome o Edge actualizado y permite el almacenamiento del sitio.',
+                  );
+                if (String(result) === 'error')
+                  setError('No pudimos iniciar sesión. Intenta nuevamente.');
+              })
+              .catch(() => {
+                setPending(false);
+                inFlight.current = false;
+                const password = form.elements.namedItem('password');
+                if (password instanceof HTMLInputElement) password.value = '';
+                setError('No pudimos iniciar sesión. Intenta nuevamente.');
               });
           }}
         >
@@ -102,6 +128,7 @@ export function LoginPage() {
             <input
               name="username"
               autoComplete="username"
+              maxLength={128}
               required
               readOnly={pending}
               aria-describedby={error ? 'login-error' : undefined}
@@ -113,6 +140,7 @@ export function LoginPage() {
               name="password"
               type="password"
               autoComplete="current-password"
+              maxLength={1024}
               required
               readOnly={pending}
               aria-describedby={error ? 'login-error' : undefined}
@@ -131,11 +159,7 @@ export function LoginPage() {
               Comprobando los datos de acceso…
             </p>
           )}
-          <p className={styles.caption}>
-            Demostración con datos simulados. No ingreses contraseñas reales.
-          </p>
         </form>
-        <ScenarioPicker />
       </section>
     </main>
   );
