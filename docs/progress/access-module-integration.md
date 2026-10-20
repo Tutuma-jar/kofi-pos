@@ -59,7 +59,7 @@ Antes de levantar servicios se comprobó 27017 sin escucha, un contenedor ajeno 
 
 La conexión real mediante `connectDatabase` confirmó base `kofi`, puerto **27017**, replica set **rs0** y `isWritablePrimary: true`. No se usó 27018. Configuración local ignorada: `PORT=3000`, `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Vite sirve 5173 y proxy `/api` a 3000. HTTPS y proxy de producción quedan para despliegue; HTTP solo loopback.
 
-No se provisionó ninguna cuenta de desarrollo real ni se inventaron credenciales. El provisionador administrativo offline recibe JSON por stdin, usa el scrypt existente y crea una cuenta nueva; no es endpoint, registro público ni administrador de usuarios. El operador debe proporcionar la cuenta compartida por un canal seguro antes de usar el login local. Ver [instrucciones](../../README.md#cuenta-externa-y-acceso).
+No se provisionó ninguna cuenta de desarrollo real ni se inventaron credenciales. El provisionador administrativo offline recibe JSON por stdin, usa el scrypt existente y crea una cuenta nueva; no es endpoint, registro público ni administrador de usuarios. El operador debe proporcionar la cuenta compartida por un canal seguro antes de usar el login local. Ver [instrucciones](../development.md#cuenta-externa-y-acceso).
 
 Las pruebas usan exclusivamente bases UUID generadas y cuentas efímeras; el cleanup comprueba el nombre exacto antes de eliminar su base. MongoDB y su volumen de desarrollo quedan disponibles, no se desmontan al acabar.
 
