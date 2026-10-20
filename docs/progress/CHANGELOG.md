@@ -2,6 +2,12 @@
 
 ## Sin publicar
 
+### 2026-10-20
+
+#### Cambios importantes
+
+- Registrada en [US-006](../specs/us-006-registrar-productos.md#interfaz--administración-del-menú-registro-de-entrega) la entrega de interfaz de Administración del menú a partir de la entrega de Frontend ya integrada (`feat/ui-menu-administracion`, `ae51a80`, PR #6), enlazada desde US-007 a US-009. Habilita la conexión de TASK-016, TASK-018, TASK-020 y TASK-022 en `frontend/src/menu/api/`. Contrato provisional resumido; cierre visual incompleto (solo Impeccable, sin Emil, React Best Practices ni capturas) y ajustes conocidos registrados: panel de escenarios de demostración en `MenuPage`, `setScenario` en `MenuClient` y sustitución de `menuClient` pendiente de TASK-016. Typecheck, lint, build y 137 pruebas del workspace frontend correctos sobre `develop` `27a1388`; sin revisión renderizada nueva. No acredita criterios integrados ni DoD; tracker intacto.
+
 ### 2026-10-19
 
 #### Cambios importantes
