@@ -55,6 +55,10 @@ El 2026-10-19 el responsable aprobó la redistribución propuesta por `requireme
 
 El 2026-10-19, tras revisar con `requirements-analyst` las mejoras y preguntas abiertas del Dashboard, el responsable respondió «usa tus sugerencias para cada uno». Se aprueban el formato de importes común (CA-02), la confirmación del desempate por `productId` dentro de una misma venta (CA-03), la nueva CA-07 sobre renombrado con el Dashboard abierto y el enlace a US-014 y US-015 en lugar de la futura especificación de historial. No cambian alcance ni tareas, ni se autoriza implementación.
 
+## Interfaz — adaptación visual a P
+
+La entrega del 2026-10-20, su rama, revisión de la tabla y evidencia de scroll con 60 productos se registran en [US-003](us-003-consultar-resumen-ventas.md#interfaz--adaptación-visual-a-p-2026-10-20). No cambia el orden recibido ni acredita integración o DoD de TASK-012.
+
 ## Tareas técnicas asociadas
 
 Las siguientes tareas de `requirements-analyst` están aprobadas para registro documental. TASK-012 sustituyó la etiqueta local PROD-BE; la de PROD-FE se retiró el 2026-10-19. Su estado se consulta únicamente en el [tracker](../progress/tracker.md). Este registro no autoriza implementación. Aplican las [condiciones previas compartidas de US-003](us-003-consultar-resumen-ventas.md#condiciones-previas-compartidas), incluida la integración común.

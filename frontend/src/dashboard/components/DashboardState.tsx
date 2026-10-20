@@ -17,7 +17,7 @@ export function DashboardState({
         aria-busy="true"
       >
         <div className={styles.skeletonCards}>
-          {[0, 1, 2, 3].map((index) => (
+          {[0, 1].map((index) => (
             <div key={index} />
           ))}
         </div>

@@ -33,7 +33,10 @@ export const HourlySalesChart = memo(function HourlySalesChart({
     )
     .join(' ');
   return (
-    <section className={styles.chart} aria-labelledby="hours-title">
+    <section
+      className={`${styles.chart} ${text ? styles.textChart : ''}`}
+      aria-labelledby="hours-title"
+    >
       <div className={styles.panelHeading}>
         <h2 id="hours-title">Ventas por hora</h2>
         <Button

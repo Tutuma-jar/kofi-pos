@@ -8,22 +8,26 @@ export const SalesSummary = memo(function SalesSummary({
 }: {
   summary: DashboardResponse['summary'];
 }) {
-  const metrics = [
-    ['Ventas', String(summary.salesCount)],
-    ['Ingresos', money(summary.revenueTenths)],
-    ['Ventas en efectivo', String(summary.cashSalesCount)],
-    ['Ventas con QR', String(summary.qrSalesCount)],
-  ];
+  const income = money(summary.revenueTenths);
   return (
     <dl className={styles.metrics} aria-label="Resumen de ventas">
-      {metrics.map(([label, value]) => (
-        <div key={label} className={styles.metric}>
-          <dt>{label}</dt>
-          <dd className={value && value.length > 13 ? styles.longNumber : ''}>
-            {value}
-          </dd>
-        </div>
-      ))}
+      <div className={styles.incomeMetric}>
+        <dt>Ingresos registrados</dt>
+        <dd className={income.length > 13 ? styles.longNumber : ''}>
+          {income}
+        </dd>
+        <dd className={styles.metricNote}>Bolivianos · efectivo y QR</dd>
+      </div>
+      <div className={styles.salesMetric}>
+        <dt>Ventas realizadas</dt>
+        <dd
+          className={
+            String(summary.salesCount).length > 13 ? styles.longNumber : ''
+          }
+        >
+          {summary.salesCount}
+        </dd>
+      </div>
     </dl>
   );
 });
