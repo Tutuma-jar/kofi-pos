@@ -1,0 +1,30 @@
+# Blueprint de Render: un único proceso Express sirve /api y la SPA (mismo origen).
+# Node se toma de .node-version. MONGODB_URI se introduce en el panel; nunca aquí.
+services:
+  - type: web
+    name: kofi-pos
+    runtime: node
+    plan: free
+    region: virginia
+    branch: develop
+    autoDeploy: true
+    # npm exacto del proyecto (engine-strict); devDependencies hacen falta para compilar.
+    buildCommand: npx --yes npm@11.17.0 ci --include=dev && npm run build
+    startCommand: npm run start --workspace @kofi/backend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      # Render antepone un proxy; así req.ip es la IP real del cliente.
+      - key: TRUST_PROXY
+        value: '1'
+      # Relativas a backend/ (directorio de trabajo del script start).
+      - key: FRONTEND_DIST_DIR
+        value: ../frontend/dist
+      # Plan free sin disco persistente: las imágenes se pierden al redesplegar o reiniciar.
+      - key: PRODUCT_IMAGES_DIR
+        value: var/product-images
+      - key: MONGODB_URI
+        sync: false
