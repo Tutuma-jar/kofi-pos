@@ -9,9 +9,10 @@ import type {
 
 /** Menu administration over the common authorized client of auth/api.
  * TASK-020: categories (creation and reading). TASK-016: product creation,
- * administrative reading and local images. Renaming/deleting categories
- * (TASK-020), product edition (TASK-018) and activation (TASK-022) are not
- * available yet and fail explicitly, without requests.
+ * administrative reading and local images. TASK-018: product edition with
+ * optimistic version control. Renaming/deleting categories (TASK-020) and
+ * activation (TASK-022) are not available yet and fail explicitly, without
+ * requests.
  */
 export const menuMessages = {
   duplicate: 'Ya existe una categoría con este nombre.',
@@ -34,6 +35,8 @@ export const productMessages = {
   imageRejected:
     'La imagen no cumple los requisitos: JPEG, PNG o WebP sin animación, hasta 5 MB y 4.096 px por lado. El producto no cambió.',
   missing: 'El producto ya no está disponible. Actualiza la lista.',
+  conflict:
+    'Este producto cambió mientras lo editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
 } as const;
 
 export type MenuTransport = {
@@ -159,10 +162,15 @@ const productFields = new Map<string, [string, string]>([
   ['categoryId', ['categoryId', productMessages.category]],
 ]);
 
-// Product creation rejections, keyed by the form fields of the UI.
+// Product creation and edition rejections, keyed by the form fields of the UI.
 export function productFailure(result: Failure): MenuError {
   if (result.kind === 'unauthorized') return sessionError();
   if (result.kind !== 'error') return connectionError();
+  // The UI reloads the current version and discards the unsaved changes.
+  if (result.status === 409 && result.code === 'VERSION_CONFLICT')
+    return new MenuError('CONFLICT', productMessages.conflict);
+  if (result.status === 404)
+    return new MenuError('CONNECTION_ERROR', productMessages.missing);
   if (result.status === 409 && result.code === 'DUPLICATE_NAME')
     return new MenuError('VALIDATION_ERROR', productMessages.duplicate, {
       name: productMessages.duplicate,
@@ -375,27 +383,44 @@ export function createRealMenuClient(
       return toProduct(data);
     },
     async saveProduct(input, current) {
-      // Edition belongs to TASK-018.
-      if (current) return unavailable();
+      // Edition keeps an unchanged image (the object URL read) by omitting
+      // imageId; null removes it and a new data URL is uploaded first.
       const imageId =
-        input.image === null ? null : await uploadImage(input.image);
+        input.image === null
+          ? null
+          : current && input.image === current.image
+            ? undefined
+            : await uploadImage(input.image);
+      const fields = {
+        name: input.name,
+        description: input.description,
+        priceTenths: input.priceTenths,
+        categoryId: input.categoryId,
+      };
       const data = await send(
-        '/api/products',
+        current ? `/api/products/${current.id}` : '/api/products',
         {
-          method: 'POST',
+          method: current ? 'PATCH' : 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: input.name,
-            description: input.description,
-            priceTenths: input.priceTenths,
-            categoryId: input.categoryId,
-            imageId,
-          }),
+          body: JSON.stringify(
+            current
+              ? {
+                  version: current.version,
+                  ...fields,
+                  ...(imageId !== undefined && { imageId }),
+                }
+              : { ...fields, imageId },
+          ),
         },
         productFailure,
       );
-      // Only a valid 201 body is a success; anything else is not saved here.
-      if (!validProduct(data) || data.imageId !== imageId)
+      // Only a valid body of the same product is a success; anything else is
+      // not saved here.
+      if (
+        !validProduct(data) ||
+        (current && data.id !== current.id) ||
+        (imageId !== undefined && data.imageId !== imageId)
+      )
         throw connectionError();
       return {
         id: data.id,
@@ -404,7 +429,7 @@ export function createRealMenuClient(
         description: data.description,
         priceTenths: data.priceTenths,
         categoryId: data.categoryId,
-        image: input.image,
+        image: imageId === undefined ? current!.image : input.image,
         active: data.active,
       };
     },

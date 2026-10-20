@@ -36,6 +36,8 @@ import {
 import {
   createProductsService,
   ORPHAN_IMAGE_TTL_MS,
+  PRODUCT_VERSION_CONFLICT_MESSAGE,
+  updateVersioned,
 } from './products.service.js';
 
 const databaseName = `kofi_products_test_${randomUUID().replaceAll('-', '')}`;
@@ -636,4 +638,385 @@ test('error envelope: media type, query, unknown fields, unknown ids and methods
     code: 'NOT_ALLOWED',
   });
   expect(await productCount()).toBe(0);
+});
+
+// --- US-007 (TASK-018): edition -------------------------------------------
+
+const patch = (id: string, body: Body, set: Record<string, string> = headers) =>
+  request(app).patch(`/api/products/${id}`).set(set).send(body);
+const readImage = (id: string) =>
+  request(app).get(`/api/product-images/${id}`).set(headers);
+const stored = (id: string) =>
+  productsCollection(connection.db).findOne({ _id: new ObjectId(id) });
+const createdId = async (overrides: Body = {}) =>
+  (await create(overrides).expect(201)).body.id as string;
+// The deletion contract of TASK-020: only with a zero counter, in a transaction.
+async function removeCategoryIfEmpty(id: string) {
+  const session = connection.client.startSession();
+  try {
+    let deleted = 0;
+    await session.withTransaction(async () => {
+      deleted = (
+        await categoriesCollection(connection.db).deleteOne(
+          { _id: new ObjectId(id), productCount: 0 },
+          { session },
+        )
+      ).deletedCount;
+    });
+    return deleted;
+  } finally {
+    await session.endSession();
+  }
+}
+async function expectCountersMatchProducts() {
+  for (const category of await categoriesCollection(connection.db)
+    .find()
+    .toArray())
+    expect(category.productCount).toBe(
+      await productsCollection(connection.db).countDocuments({
+        categoryId: category._id,
+      }),
+    );
+  for (const product of await productsCollection(connection.db)
+    .find()
+    .toArray())
+    expect(
+      await categoriesCollection(connection.db).findOne({
+        _id: product.categoryId,
+      }),
+    ).not.toBeNull();
+}
+
+test('US-007 CA-01 edits every field under the same identity and shows the saved data', async () => {
+  const id = await createdId();
+  const other = await createCategory('Postres');
+  const before = await stored(id);
+  const updated = await patch(id, {
+    version: 1,
+    name: '  Café de olla ',
+    description: 'Con canela y piloncillo.',
+    priceTenths: 125,
+    categoryId: other,
+  });
+  expect(updated.status).toBe(200);
+  expect(updated.body).toEqual({
+    id,
+    name: 'Café de olla',
+    description: 'Con canela y piloncillo.',
+    priceTenths: 125,
+    categoryId: other,
+    imageId: null,
+    active: true,
+    version: 2,
+  });
+  const read = await request(app).get(`/api/products/${id}`).set(headers);
+  expect(read.body).toEqual(updated.body);
+  expect((await list().expect(200)).body.items).toEqual([updated.body]);
+  const after = await stored(id);
+  expect(after).toMatchObject({
+    _id: before?._id,
+    nameKey: 'café de olla',
+    createdAt: before?.createdAt,
+  });
+  expect(after?.updatedAt).toEqual(clock());
+  // Reassignment moves the reference without editing either category.
+  expect(await categoryCounter(categoryId)).toBe(0);
+  expect(await categoryCounter(other)).toBe(1);
+  const categories = await categoriesCollection(connection.db).find().toArray();
+  expect(categories.map((category) => category.version)).toEqual([1, 1]);
+  // A save without effective changes is still a save: the version advances.
+  const same = await patch(id, { version: 2, name: 'Café de olla' }).expect(
+    200,
+  );
+  expect(same.body.version).toBe(3);
+});
+
+test('US-007 CA-02 the own name is no duplicate; another product name is, active or inactive', async () => {
+  const id = await createdId({ name: 'Café' });
+  const other = await createdId({ name: 'Brownie' });
+  await productsCollection(connection.db).updateOne(
+    { _id: new ObjectId(other) },
+    { $set: { active: false } },
+  );
+  await patch(id, { version: 1, name: '  CAFÉ ' }).expect(200);
+  expect((await stored(id))?.name).toBe('CAFÉ');
+  const before = await stored(id);
+  for (const name of ['Brownie', ' brownie ', 'BROWNIE']) {
+    const duplicate = await patch(id, { version: 2, name });
+    expect(duplicate.status).toBe(409);
+    expect(duplicate.body).toEqual({
+      error: { code: 'DUPLICATE_NAME', message: expect.any(String) },
+    });
+  }
+  expect(await stored(id)).toEqual(before);
+  // Accents are kept: a different compared name.
+  await patch(id, { version: 2, name: 'Cafe' }).expect(200);
+});
+
+test('US-007 CA-02 renaming against a simultaneous creation of the same name admits exactly one', async () => {
+  for (let round = 0; round < 10; round++) {
+    const id = await createdId({ name: `Mocha ${round}` });
+    const [renamed, created] = await Promise.all([
+      patch(id, { version: 1, name: `Latte ${round}` }),
+      create({ name: ` LATTE ${round} ` }),
+    ]);
+    const statuses = [renamed.status, created.status];
+    expect(statuses.filter((status) => status < 300)).toHaveLength(1);
+    expect(statuses.filter((status) => status === 409)).toHaveLength(1);
+    expect(
+      await productsCollection(connection.db).countDocuments({
+        nameKey: `latte ${round}`,
+      }),
+    ).toBe(1);
+    if (renamed.status === 409) expect((await stored(id))?.version).toBe(1);
+  }
+  await expectCountersMatchProducts();
+}, 120_000);
+
+test('US-007 CA-02 invalid edits are rejected with the US-006 rules and change nothing', async () => {
+  const id = await createdId();
+  const before = await stored(id);
+  const invalid: [Body, string, string][] = [
+    [{ version: 1, name: '   ' }, 'name', 'TOO_SHORT'],
+    [{ version: 1, name: 'ñ'.repeat(101) }, 'name', 'TOO_LONG'],
+    [{ version: 1, description: '' }, 'description', 'TOO_SHORT'],
+    [{ version: 1, priceTenths: 0 }, 'priceTenths', 'OUT_OF_RANGE'],
+    [{ version: 1, priceTenths: 10.5 }, 'priceTenths', 'INVALID_FORMAT'],
+    [{ version: 1, categoryId: null }, 'categoryId', 'INVALID_FORMAT'],
+    [
+      { version: 1, categoryId: new ObjectId().toHexString() },
+      'categoryId',
+      'NOT_ALLOWED',
+    ],
+    [{ name: 'Sin versión' }, 'version', 'INVALID_FORMAT'],
+    [{ version: 1 }, '', 'REQUIRED'],
+  ];
+  for (const [body, field, code] of invalid) {
+    const rejected = await patch(id, body);
+    expect(rejected.status).toBe(400);
+    expect(rejected.body.error.code).toBe('VALIDATION_ERROR');
+    expect(fieldsOf(rejected)).toEqual([{ field, code }]);
+  }
+  // Activation belongs to TASK-022: not editable here.
+  const active = await patch(id, { version: 1, active: false });
+  expect(active.status).toBe(400);
+  expect(fieldsOf(active)).toContainEqual({ field: '', code: 'NOT_ALLOWED' });
+  expect(await stored(id)).toEqual(before);
+  expect(await categoryCounter(categoryId)).toBe(1);
+});
+
+test('US-007 CA-03 two sessions saving the same version: only the first valid save applies', async () => {
+  const id = await createdId();
+  const second = await newSession();
+  const [left, right] = await Promise.all([
+    patch(id, { version: 1, name: 'Café de olla' }),
+    patch(id, { version: 1, name: 'Café tostado', priceTenths: 120 }, second),
+  ]);
+  expect([left.status, right.status].sort()).toEqual([200, 409]);
+  const winner = left.status === 200 ? left : right;
+  const loser = left.status === 200 ? right : left;
+  expect(winner.body.version).toBe(2);
+  expect(loser.body).toEqual({
+    error: {
+      code: 'VERSION_CONFLICT',
+      message: PRODUCT_VERSION_CONFLICT_MESSAGE,
+      details: { current: winner.body },
+    },
+  });
+  expect(PRODUCT_VERSION_CONFLICT_MESSAGE).toBe(
+    'Este producto cambió mientras lo editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
+  );
+  // A stale save made later is rejected too, without overwriting.
+  const before = await stored(id);
+  const stale = await patch(id, { version: 1, description: 'Pisado' });
+  expect(stale.status).toBe(409);
+  expect(stale.body.error.details.current).toEqual(winner.body);
+  expect(await stored(id)).toEqual(before);
+  // Reloading the current version allows applying the changes again.
+  await patch(id, { version: 2, description: 'Reaplicado' }).expect(200);
+}, 30_000);
+
+test('US-007 CA-03 / US-009 CA-05 edition and activation share the version of the product', async () => {
+  const id = await createdId();
+  const productId = new ObjectId(id);
+  // Activation shape of TASK-022, through the shared helper.
+  const activate = async (version: number, active: boolean) => {
+    const session = connection.client.startSession();
+    try {
+      await session.withTransaction(() =>
+        updateVersioned(connection.db, session, productId, version, {
+          active,
+          updatedAt: clock(),
+        }),
+      );
+    } finally {
+      await session.endSession();
+    }
+  };
+  await activate(1, false);
+  // An edition of the old version cannot overwrite the deactivation.
+  const edit = await patch(id, { version: 1, name: 'Renombrado' });
+  expect(edit.status).toBe(409);
+  expect(edit.body.error.details.current).toMatchObject({
+    active: false,
+    version: 2,
+    name: 'Café americano',
+  });
+  // Nor can a stale activation overwrite an edition.
+  await patch(id, { version: 2, name: 'Renombrado' }).expect(200);
+  await expect(activate(2, true)).rejects.toThrow();
+  expect(await stored(id)).toMatchObject({
+    name: 'Renombrado',
+    active: false,
+    version: 3,
+  });
+});
+
+test('US-007 CA-04 the control is per product: distinct products save in parallel', async () => {
+  const ids: string[] = [];
+  for (let index = 0; index < 8; index++)
+    ids.push(await createdId({ name: `Producto ${index}` }));
+  const results = await Promise.all(
+    ids.map((id, index) => patch(id, { version: 1, priceTenths: 200 + index })),
+  );
+  expect(results.map((result) => result.status)).toEqual(ids.map(() => 200));
+  for (const [index, id] of ids.entries())
+    expect(await stored(id)).toMatchObject({
+      priceTenths: 200 + index,
+      version: 2,
+    });
+}, 30_000);
+
+test('US-007 reassignment against a concurrent category deletion never leaves an orphan', async () => {
+  for (let round = 0; round < 15; round++) {
+    const target = await createCategory(`Destino ${round}`);
+    const id = await createdId({ name: `Producto ${round}` });
+    const [edited, deleted] = await Promise.all([
+      patch(id, { version: 1, categoryId: target }),
+      removeCategoryIfEmpty(target),
+    ]);
+    if (edited.status === 200) {
+      expect(deleted).toBe(0);
+      expect(await categoryCounter(target)).toBe(1);
+      expect((await stored(id))?.categoryId.toHexString()).toBe(target);
+    } else {
+      expect(edited.status).toBe(400);
+      expect(fieldsOf(edited)).toEqual([
+        { field: 'categoryId', code: 'NOT_ALLOWED' },
+      ]);
+      expect(deleted).toBe(1);
+      const unchanged = await stored(id);
+      expect(unchanged?.categoryId.toHexString()).toBe(categoryId);
+      expect(unchanged?.version).toBe(1);
+    }
+  }
+  await expectCountersMatchProducts();
+}, 120_000);
+
+test('US-007 CA-06 a failed new image keeps the previous image and data; a retry succeeds', async () => {
+  const first = (await upload(png()).expect(201)).body.id as string;
+  const id = await createdId({ imageId: first });
+  const taken = (await upload(jpeg()).expect(201)).body.id as string;
+  await createdId({ name: 'Otro', imageId: taken });
+  const before = await stored(id);
+  for (const imageId of [new ObjectId().toHexString(), taken]) {
+    const failed = await patch(id, {
+      version: 1,
+      name: 'Nuevo nombre',
+      imageId,
+    });
+    expect(failed.status).toBe(400);
+    expect(fieldsOf(failed)).toEqual([
+      { field: 'imageId', code: 'NOT_ALLOWED' },
+    ]);
+    expect(await stored(id)).toEqual(before);
+    await readImage(first).expect(200);
+  }
+  // Retry with a fresh upload: replaces the image, the old one is removed.
+  const second = (await upload(webpLossy()).expect(201)).body.id as string;
+  const replaced = await patch(id, {
+    version: 1,
+    name: 'Nuevo nombre',
+    imageId: second,
+  }).expect(200);
+  expect(replaced.body).toMatchObject({ imageId: second, version: 2 });
+  await readImage(first).expect(404);
+  await readImage(second).expect(200);
+  expect(await readdir(imagesDir)).not.toContain(first);
+  // Omitted image: kept.
+  await patch(id, { version: 2, priceTenths: 99 }).expect(200);
+  expect((await stored(id))?.imageId?.toHexString()).toBe(second);
+  // CA-01 removing the image returns to the neutral marker.
+  const removed = await patch(id, { version: 3, imageId: null }).expect(200);
+  expect(removed.body.imageId).toBeNull();
+  await readImage(second).expect(404);
+  expect(await readdir(imagesDir)).not.toContain(second);
+  expect(
+    await productImagesCollection(connection.db).countDocuments({
+      productId: new ObjectId(id),
+    }),
+  ).toBe(0);
+});
+
+test('US-007 CA-05 (catalog contribution) editing keeps the identity and never writes past sales', async () => {
+  const sales = connection.db.collection('fixture_sales');
+  await sales.deleteMany({});
+  try {
+    const id = await createdId();
+    await sales.insertOne({
+      productId: new ObjectId(id),
+      name: 'Café americano',
+      unitPriceTenths: 105,
+      quantity: 2,
+      amountTenths: 210,
+    });
+    const before = await sales.find().toArray();
+    await patch(id, {
+      version: 1,
+      name: 'Café de especialidad',
+      priceTenths: 150,
+    }).expect(200);
+    expect(await sales.find().toArray()).toEqual(before);
+    const items = (await list().expect(200)).body.items as Body[];
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ id, name: 'Café de especialidad' });
+  } finally {
+    await sales.deleteMany({});
+  }
+});
+
+test('US-007 edition errors: unknown product, media type and session', async () => {
+  const id = await createdId();
+  const unknown = await patch(new ObjectId().toHexString(), {
+    version: 1,
+    name: 'x',
+  });
+  expect([unknown.status, unknown.body.error.code]).toEqual([404, 'NOT_FOUND']);
+  const malformed = await patch('zzz', { version: 1, name: 'x' });
+  expect([malformed.status, malformed.body.error.code]).toEqual([
+    404,
+    'NOT_FOUND',
+  ]);
+  const text = await request(app)
+    .patch(`/api/products/${id}`)
+    .set(headers)
+    .type('text')
+    .send('{}');
+  expect([text.status, text.body.error.code]).toEqual([
+    415,
+    'UNSUPPORTED_MEDIA_TYPE',
+  ]);
+  const other = randomBytes(32).toString('base64url');
+  for (const set of [
+    {},
+    { Authorization: headers.Authorization! },
+    { ...headers, 'X-Tab-Authorization': other },
+  ] as Record<string, string>[]) {
+    const result = await patch(id, { version: 1, name: 'x' }, set);
+    expect([result.status, result.body.error.code]).toEqual([
+      401,
+      'UNAUTHORIZED',
+    ]);
+  }
+  expect((await stored(id))?.version).toBe(1);
 });
