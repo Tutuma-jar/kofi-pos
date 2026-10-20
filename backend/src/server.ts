@@ -47,9 +47,11 @@ const app = createApp({
   db: database.db,
   dashboardDemo: true,
   productImages,
+  trustProxy: env.TRUST_PROXY,
+  frontendDir: env.FRONTEND_DIST_DIR,
 });
-const server = app.listen(env.PORT, '127.0.0.1', () => {
-  console.log(`Kofi: Express técnico en http://127.0.0.1:${env.PORT}`);
+const server = app.listen(env.PORT, env.HOST, () => {
+  console.log(`Kofi: Express en http://${env.HOST}:${env.PORT}`);
 });
 
 server.on('error', (error) => {

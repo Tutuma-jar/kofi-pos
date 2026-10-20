@@ -41,13 +41,32 @@ npm run dev:backend
 - React: <http://127.0.0.1:5173>. Login y pantallas existentes; Vite redirige `/api` a Express en 3000 para usar el mismo origen. No usar secretos en parámetros de URL.
 - Express: <http://127.0.0.1:3000>. API de sesiones en `/api/sessions`; `/api` sin ruta concreta devuelve **404**, no indica un fallo de arranque.
 - Puertos fijos en Vite para evitar cambiar de puerto silenciosamente. Express admite `PORT` entre 1 y 65535; opcionalmente copiar `backend/.env.example` a `backend/.env`. Nunca guardar credenciales en Git.
-- Los servidores escuchan solo en loopback y usan HTTP local. En producción se requiere HTTPS y proxy de `/api` en el mismo origen; el proxy de Vite es únicamente de desarrollo.
+- En desarrollo los servidores escuchan solo en loopback y usan HTTP local; el proxy de Vite es únicamente de desarrollo. `HOST`, `TRUST_PROXY` y `FRONTEND_DIST_DIR` solo se definen al desplegar (ver [Despliegue en Render](#despliegue-en-render)).
 
 ### Cuenta externa y Acceso
 
 No se crea ninguna cuenta automáticamente ni existe contraseña predeterminada. La provisión es un paso administrativo externo a la aplicación. Con `MONGODB_URI` en el entorno, ejecutar desde la raíz `node --import tsx backend/scripts/provision-account.ts` y suministrar un único objeto JSON por entrada estándar, con `username` y `password`. No pasar secretos por argumentos, URL, comandos guardados o archivos versionados. El script crea una cuenta nueva con scrypt y sal individual; no modifica ni recupera cuentas existentes. Usar una entrada estándar segura, sin eco ni historial, desde el gestor de secretos del operador.
 
 Para desarrollo, `backend/.env` contiene `PORT=3000` y `MONGODB_URI=mongodb://127.0.0.1:27017/kofi?replicaSet=rs0`. Es un archivo local ignorado por Git. `PRODUCT_IMAGES_DIR` indica dónde el backend guarda las imágenes de producto: es obligatoria con `NODE_ENV=production` y, si falta en desarrollo, se usa `backend/var/product-images`, también ignorada por Git. El provisionador lee el entorno del proceso, no carga ese archivo automáticamente. Chrome y Edge requieren almacenamiento del sitio y Web Locks; otras plataformas no se acreditan. No considerar almacenamiento o navegación una prueba infalible de identidad de pestaña.
+
+## Despliegue en Render
+
+[render.yaml](render.yaml) define un único Web Service: Express sirve `/api` y la SPA compilada en el mismo origen, y Render termina HTTPS. Plan free, región Virginia, despliegue automático de `develop`.
+
+1. Crear un cluster MongoDB Atlas (M0 basta; ya es replica set) con un usuario de lectura/escritura y acceso de red para Render.
+2. En Render, **New → Blueprint**, elegir este repositorio y la rama `develop`.
+3. Introducir `MONGODB_URI` en el panel cuando lo pida (`sync: false`), con el nombre de la base en la ruta, por ejemplo `.../kofi?retryWrites=true&w=majority`. Nunca versionarla.
+4. Crear la cuenta de acceso con el provisionador de [Cuenta externa y Acceso](#cuenta-externa-y-acceso), con `MONGODB_URI` de Atlas en el entorno del proceso.
+
+Variables de despliegue, además de `MONGODB_URI` y `PRODUCT_IMAGES_DIR`:
+
+| Variable            | Valor en Render                                      | Por defecto                          |
+| ------------------- | ---------------------------------------------------- | ------------------------------------ |
+| `HOST`              | `0.0.0.0`                                            | `127.0.0.1`                          |
+| `TRUST_PROXY`       | `1` (proxy de Render; `req.ip` es la IP del cliente) | `0`                                  |
+| `FRONTEND_DIST_DIR` | `../frontend/dist`, relativa a `backend/`            | sin definir: Express no sirve la SPA |
+
+El plan free se suspende tras 15 minutos sin tráfico, así que la primera petición tarda en responder, y no tiene disco persistente: las imágenes de producto se pierden al redesplegar o reiniciar. Para conservarlas hace falta un plan de pago con disco montado en `PRODUCT_IMAGES_DIR`.
 
 ## Comprobaciones técnicas
 
