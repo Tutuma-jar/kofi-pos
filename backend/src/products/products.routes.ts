@@ -6,7 +6,11 @@ import type { createSessionsService } from '../auth/sessions.service.js';
 import { ApiError } from '../shared/http/api-error.js';
 import type { ImageStore } from './image-store.js';
 import { IMAGE_MAX_BYTES, imageContentTypes } from './product-images.js';
-import { parseCreateProduct, productParamsSchema } from './products.schemas.js';
+import {
+  parseCreateProduct,
+  parseUpdateProduct,
+  productParamsSchema,
+} from './products.schemas.js';
 import { createProductsService } from './products.service.js';
 
 function productId(req: Request): string {
@@ -62,6 +66,13 @@ export function productsRoutes(
     emptySchema.parse(req.query);
     const input = parseCreateProduct(req.body);
     res.status(201).json(await service.create(input));
+  });
+  // Edition (TASK-018): `version` in the body; stale -> 409 VERSION_CONFLICT.
+  router.patch('/products/:id', protect, json, async (req, res) => {
+    const id = productId(req);
+    emptySchema.parse(req.query);
+    const input = parseUpdateProduct(req.body);
+    res.json(await service.update(id, input));
   });
   router.post('/product-images', protect, binary, raw, async (req, res) => {
     emptySchema.parse(req.query);

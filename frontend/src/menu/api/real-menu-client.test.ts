@@ -8,7 +8,7 @@ import {
   validCategoryList,
   type ProductDto,
 } from './real-menu-client';
-import type { Category, ProductInput } from './contract.provisional';
+import type { Category, Product, ProductInput } from './contract.provisional';
 
 const category: Category = {
   id: '0123456789abcdef01234567',
@@ -187,7 +187,7 @@ test('CA-05 a version conflict maps to the exact category message', async () => 
   });
 });
 
-test('rename, delete, product edition and activation are explicitly unavailable without requests', async () => {
+test('rename, delete and activation are explicitly unavailable without requests', async () => {
   const auth = transport();
   const client = createRealMenuClient(auth);
   const unavailable = {
@@ -200,9 +200,6 @@ test('rename, delete, product edition and activation are explicitly unavailable 
   await expect(client.deleteCategory(category)).rejects.toMatchObject(
     unavailable,
   );
-  await expect(
-    client.saveProduct(input, { ...product, image: null }),
-  ).rejects.toMatchObject(unavailable);
   await expect(client.setActive({} as never)).rejects.toMatchObject(
     unavailable,
   );
@@ -613,4 +610,122 @@ test('dataUrlBytes decodes base64 data URLs only', () => {
   expect(dataUrlBytes('data:image/png,AQID')).toBeNull();
   expect(dataUrlBytes('blob:kofi/1')).toBeNull();
   expect(dataUrlBytes('data:image/png;base64,***')).toBeNull();
+});
+
+// US-007 (TASK-018): edition over PATCH /api/products/:id.
+const savedImage = 'blob:kofi/saved';
+const current: Product = {
+  id: product.id,
+  version: 3,
+  name: product.name,
+  description: product.description,
+  priceTenths: product.priceTenths,
+  categoryId: product.categoryId,
+  image: savedImage,
+  active: true,
+};
+
+test.each([
+  ['unchanged image', savedImage, [], undefined],
+  ['removed image', null, [], null],
+  ['new image', dataUrl, [ok({ id: imageId, width: 1, height: 1 })], imageId],
+] as const)(
+  'US-007 CA-01 edition with %s sends an exact PATCH with the version and keeps the identity',
+  async (_, image, uploads, sentImageId) => {
+    const auth = transport(
+      ...uploads,
+      ok({
+        ...product,
+        version: 4,
+        name: 'Café de olla',
+        imageId: sentImageId === undefined ? imageId : sentImageId,
+      }),
+    );
+    const client = createRealMenuClient(auth);
+    const saved = await client.saveProduct(
+      { ...input, name: 'Café de olla', image },
+      current,
+    );
+    expect(saved).toEqual({
+      ...current,
+      version: 4,
+      name: 'Café de olla',
+      image,
+    });
+    expect(auth.request).toHaveBeenCalledTimes(uploads.length + 1);
+    const [path, init] = auth.request.mock.calls[uploads.length]!;
+    expect(path).toBe(`/api/products/${product.id}`);
+    expect(init).toMatchObject({
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(JSON.parse(String(init?.body))).toEqual({
+      version: 3,
+      name: 'Café de olla',
+      description: 'Café filtrado de la casa.',
+      priceTenths: 105,
+      categoryId: category.id,
+      ...(sentImageId !== undefined && { imageId: sentImageId }),
+    });
+  },
+);
+
+test('US-007 CA-03 a stale save maps to the exact product conflict message', async () => {
+  const client = createRealMenuClient(
+    transport(
+      error(409, 'VERSION_CONFLICT', { current: { ...product, version: 4 } }),
+    ),
+  );
+  await expect(
+    client.saveProduct({ ...input, image: savedImage }, current),
+  ).rejects.toMatchObject({
+    code: 'CONFLICT',
+    message:
+      'Este producto cambió mientras lo editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
+  });
+});
+
+test.each([
+  [error(409, 'DUPLICATE_NAME'), 'VALIDATION_ERROR', productMessages.duplicate],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'priceTenths', code: 'OUT_OF_RANGE' }],
+    }),
+    'VALIDATION_ERROR',
+    productMessages.fields,
+  ],
+  [
+    error(400, 'VALIDATION_ERROR', {
+      fields: [{ field: 'imageId', code: 'NOT_ALLOWED' }],
+    }),
+    'IMAGE_ERROR',
+    productMessages.imageFailed,
+  ],
+  [error(404, 'NOT_FOUND'), 'CONNECTION_ERROR', productMessages.missing],
+  [
+    ok({ ...product, id: 'cccccccccccccccccccccccc' }),
+    'CONNECTION_ERROR',
+    menuMessages.connection,
+  ],
+])(
+  'US-007 CA-02/CA-06 a rejected edition is communicated and never a saved product %#',
+  async (result, code, message) => {
+    const client = createRealMenuClient(transport(result));
+    await expect(
+      client.saveProduct({ ...input, image: savedImage }, current),
+    ).rejects.toMatchObject({ code, message });
+  },
+);
+
+test('US-007 CA-06 a failed upload of the new image sends no PATCH', async () => {
+  const auth = transport(error(500, 'INTERNAL_ERROR'));
+  const client = createRealMenuClient(auth);
+  await expect(
+    client.saveProduct({ ...input, image: dataUrl }, current),
+  ).rejects.toMatchObject({
+    code: 'IMAGE_ERROR',
+    message: productMessages.imageFailed,
+  });
+  expect(auth.request).toHaveBeenCalledTimes(1);
+  expect(auth.request.mock.calls[0]?.[0]).toBe('/api/product-images');
 });

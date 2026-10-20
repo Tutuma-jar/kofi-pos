@@ -1,5 +1,8 @@
-import { ObjectId, type Db } from 'mongodb';
-import { reserveCategoryReference } from '../categories/categories.references.js';
+import { ObjectId, type ClientSession, type Db } from 'mongodb';
+import {
+  releaseCategoryReference,
+  reserveCategoryReference,
+} from '../categories/categories.references.js';
 import { ApiError } from '../shared/http/api-error.js';
 import {
   catalogNameKey,
@@ -14,12 +17,68 @@ import {
   type Product,
   type ProductImage,
 } from './products.model.js';
-import type { CreateProductInput } from './products.schemas.js';
+import type {
+  CreateProductInput,
+  UpdateProductInput,
+} from './products.schemas.js';
 
 export const ORPHAN_IMAGE_TTL_MS = 24 * 60 * 60 * 1000;
+// US-007, shared rule of concurrency. Diagnostic for the API; the UI shows
+// its own copy of the same text.
+export const PRODUCT_VERSION_CONFLICT_MESSAGE =
+  'Este producto cambió mientras lo editabas. Revisa la versión actual y vuelve a aplicar tus cambios.';
 const collator = new Intl.Collator('es');
 
 const notFound = () => new ApiError('NOT_FOUND', 'Recurso no encontrado.');
+
+// Internal signal: aborts the transaction, then becomes VERSION_CONFLICT.
+class StaleProductVersion extends Error {}
+
+export type ProductChanges = Partial<
+  Pick<
+    Product,
+    | 'name'
+    | 'nameKey'
+    | 'description'
+    | 'priceTenths'
+    | 'categoryId'
+    | 'imageId'
+    | 'active'
+  >
+> & { updatedAt: Date };
+
+/**
+ * Shared optimistic control of a product (edition TASK-018, activation
+ * TASK-022). Call only inside the caller's `session.withTransaction`. Applies
+ * the changes only to the expected version and increments it, so the first
+ * valid save of a version wins and any later one on that version is rejected
+ * without overwriting it. Filters by identity only: no global lock. Returns
+ * the document before the change, so the caller can adjust references.
+ */
+export async function updateVersioned(
+  db: Db,
+  session: ClientSession,
+  id: ObjectId,
+  expectedVersion: number,
+  changes: ProductChanges,
+): Promise<Product> {
+  const products = productsCollection(db);
+  const before = await products.findOneAndUpdate(
+    { _id: id, version: expectedVersion },
+    { $set: changes, $inc: { version: 1 } },
+    { session, returnDocument: 'before' },
+  );
+  if (before) return before;
+  const exists = await products.findOne(
+    { _id: id },
+    { session, projection: { _id: 1 } },
+  );
+  if (!exists) throw notFound();
+  throw new StaleProductVersion();
+}
+
+const sameId = (left: ObjectId | null, right: ObjectId | null) =>
+  left === null || right === null ? left === right : left.equals(right);
 
 export function createProductsService(
   db: Db,
@@ -174,6 +233,121 @@ export function createProductsService(
       const product = await products.findOne({ _id: new ObjectId(id) });
       if (!product) throw notFound();
       return productDto(product);
+    },
+
+    /**
+     * Edition (US-007). The versioned write, the category reference change
+     * and the image claim share one transaction, so any rejection (stale
+     * version, duplicate name, missing category, unavailable image) leaves
+     * the product, counters and images untouched. The unique `nameKey` index
+     * alone decides duplicates; keeping the own name matches the same
+     * document. The replaced image file is removed after the commit.
+     */
+    async update(id: string, input: UpdateProductInput) {
+      const productId = new ObjectId(id);
+      const { version, ...fields } = input;
+      const changes: ProductChanges = { updatedAt: clock() };
+      if (fields.name !== undefined) {
+        changes.name = fields.name;
+        changes.nameKey = catalogNameKey(fields.name);
+      }
+      if (fields.description !== undefined)
+        changes.description = fields.description;
+      if (fields.priceTenths !== undefined)
+        changes.priceTenths = fields.priceTenths;
+      const nextCategory =
+        fields.categoryId === undefined
+          ? undefined
+          : new ObjectId(fields.categoryId);
+      if (nextCategory) changes.categoryId = nextCategory;
+      const nextImage =
+        fields.imageId === undefined
+          ? undefined
+          : fields.imageId === null
+            ? null
+            : new ObjectId(fields.imageId);
+      if (nextImage !== undefined) changes.imageId = nextImage;
+
+      const outcome: { product?: Product; releasedImage?: ObjectId } = {};
+      const session = db.client.startSession();
+      try {
+        await session.withTransaction(async () => {
+          // The callback may be retried: never keep state of a failed attempt.
+          delete outcome.product;
+          delete outcome.releasedImage;
+          const before = await updateVersioned(
+            db,
+            session,
+            productId,
+            version,
+            changes,
+          );
+          if (nextCategory && !nextCategory.equals(before.categoryId)) {
+            await releaseCategoryReference(db, session, before.categoryId);
+            await reserveCategoryReference(db, session, nextCategory);
+          }
+          if (nextImage !== undefined && !sameId(nextImage, before.imageId)) {
+            if (nextImage) {
+              const claimed = await productImages.updateOne(
+                { _id: nextImage, productId: null },
+                { $set: { productId } },
+                { session },
+              );
+              if (claimed.matchedCount === 0)
+                throw new ApiError(
+                  'VALIDATION_ERROR',
+                  'Imagen no disponible.',
+                  { fields: [{ field: 'imageId', code: 'NOT_ALLOWED' }] },
+                );
+            }
+            if (before.imageId) {
+              await productImages.deleteOne(
+                { _id: before.imageId, productId },
+                { session },
+              );
+              outcome.releasedImage = before.imageId;
+            }
+          }
+          outcome.product = {
+            ...before,
+            ...changes,
+            version: before.version + 1,
+          };
+        });
+      } catch (error) {
+        if (isDuplicateNameKey(error))
+          throw new ApiError('DUPLICATE_NAME', 'Nombre de producto duplicado.');
+        if (error instanceof StaleProductVersion) {
+          const current = await products.findOne({ _id: productId });
+          if (!current) throw notFound();
+          throw new ApiError(
+            'VERSION_CONFLICT',
+            PRODUCT_VERSION_CONFLICT_MESSAGE,
+            { current: productDto(current) },
+          );
+        }
+        throw error;
+      } finally {
+        await session.endSession();
+      }
+      if (!outcome.product)
+        throw new ApiError(
+          'INTERNAL_ERROR',
+          'No se pudo completar la solicitud.',
+        );
+      // Best effort: a leftover file without metadata is removed by the
+      // startup cleanup; it is never readable once its metadata is gone.
+      if (outcome.releasedImage) {
+        try {
+          await images.remove(outcome.releasedImage);
+        } catch (error) {
+          console.error(
+            'No se pudo eliminar la imagen reemplazada:',
+            error instanceof Error ? error.message : error,
+          );
+        }
+      }
+      return productDto(outcome.product);
     },
 
     // Only images associated with a product are readable.

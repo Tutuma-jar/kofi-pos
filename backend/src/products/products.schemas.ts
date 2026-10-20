@@ -39,6 +39,42 @@ export const createProductSchema = z.strictObject({
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export const productParamsSchema = z.strictObject({ id: idSchema });
 
+// Optimistic version shared by edition (TASK-018) and activation (TASK-022).
+export const productVersionSchema = z.number().superRefine((value, ctx) => {
+  if (!Number.isSafeInteger(value) || value < 1)
+    ctx.addIssue({
+      code: 'custom',
+      params: { fieldCode: 'INVALID_FORMAT' },
+      input: value,
+    });
+});
+
+/**
+ * PATCH (TASK-018): same field rules as the creation, all optional; omitted
+ * means unchanged and `imageId: null` removes the image. `version` is
+ * mandatory and at least one editable field must be present. `active` is not
+ * editable here (TASK-022 owns activation): rejected as an unknown field.
+ */
+export const updateProductSchema = z
+  .strictObject({
+    version: productVersionSchema,
+    name: productNameSchema.optional(),
+    description: productDescriptionSchema.optional(),
+    priceTenths: priceTenthsSchema.optional(),
+    categoryId: idSchema.optional(),
+    imageId: idSchema.nullable().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (Object.keys(value).every((key) => key === 'version'))
+      ctx.addIssue({
+        code: 'custom',
+        path: [],
+        params: { fieldCode: 'REQUIRED' },
+        input: value,
+      });
+  });
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+
 type Issue = ZodError['issues'][number];
 function fieldCode(issue: Issue): string {
   if (issue.code === 'custom') {
@@ -53,8 +89,8 @@ function fieldCode(issue: Issue): string {
 }
 
 // Same envelope as the shared handler, plus OUT_OF_RANGE for the price.
-export function parseCreateProduct(body: unknown): CreateProductInput {
-  const result = createProductSchema.safeParse(body);
+function parseProductBody<T>(schema: z.ZodType<T>, body: unknown): T {
+  const result = schema.safeParse(body);
   if (!result.success)
     throw new ApiError('VALIDATION_ERROR', 'Solicitud inválida.', {
       fields: result.error.issues.map((issue) => ({
@@ -63,4 +99,10 @@ export function parseCreateProduct(body: unknown): CreateProductInput {
       })),
     });
   return result.data;
+}
+export function parseCreateProduct(body: unknown): CreateProductInput {
+  return parseProductBody(createProductSchema, body);
+}
+export function parseUpdateProduct(body: unknown): UpdateProductInput {
+  return parseProductBody(updateProductSchema, body);
 }

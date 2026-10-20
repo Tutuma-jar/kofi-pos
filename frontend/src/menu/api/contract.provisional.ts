@@ -1,6 +1,8 @@
 /** Contrato de UI para US-006–009. IDs opacos (hex de 24) y `version` entera.
  * TASK-016 (contrato aprobado): `GET/POST /api/products`, `GET /api/products/:id`,
  * `POST /api/product-images` (binario) y `GET /api/product-images/:id`.
+ * TASK-018 (contrato aprobado): `PATCH /api/products/:id` con `version`; sin
+ * `imageId` conserva la imagen, `null` la quita; 409 `VERSION_CONFLICT`.
  * Imágenes: al guardar, data URL local de la imagen nueva; al leer, object URL
  * de la imagen protegida descargada con autorización, o `null` (marcador neutro).
  * Conteo acordado con backend (TASK-020): grafemas tras trim(), igual en ambos lados.
