@@ -77,6 +77,10 @@ El 2026-10-18, el responsable aprobó todas las recomendaciones de la base técn
 
 El 2026-10-19 el responsable aprobó la redistribución propuesta por `requirements-analyst` con las recomendaciones del principal «Apruebo la propuesta del analista con tus recomendaciones de la tabla (1 a 8)»: Frontend no recibe tareas y las tareas técnicas de backend asumen contrato, conexión de la interfaz y verificación integrada. En esta historia TASK-001 y TASK-003 se amplían, TASK-002 se precisa, TASK-005 se reescribe como tarea backend sobre la capa de acceso del cliente conservando su ID y TASK-004 se retira. Criterios y alcance no cambian; las tareas retiradas conservan su ID sin reutilizarlo.
 
+## Implementación independiente de credenciales de TASK-001
+
+Por aprobación explícita del responsable se implementó la [verificación interna de credenciales](../progress/access-credentials-implementation.md) en `feat/task-001-auth-credentials`, desde `origin/develop` actualizado `af11071fe594d95f3e4928a6758082704d8ece6b`. Incluye scrypt asíncrono versionado, Zod estricto, lectura de cuenta externa e intentos acotados. No emite autorización ni expone un endpoint parcial: la sesión y la integración quedan pendientes de TASK-002 y de la validación de pestaña. No acredita CA-01/02 integrados ni DoD; ver resultados y límites en el registro enlazado y estado oficial en el tracker.
+
 ## Tareas técnicas asociadas
 
 Las siguientes tareas de `requirements-analyst` fueron aprobadas para su registro. Sus identificadores oficiales sustituyeron las etiquetas locales BE-1, BE-2, BE-3, FE-1 y FE-2; desde el 2026-10-19 todas son de backend. Su estado se consulta únicamente en el [tracker](../progress/tracker.md).
