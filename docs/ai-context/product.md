@@ -111,9 +111,15 @@ Este módulo consulta ventas ya registradas; no prepara ventas en curso, cobra, 
 
 Los detalles aprobados se definen en [US-014 — Consultar el historial de ventas por fecha](../specs/us-014-consultar-historial-ventas.md), [US-015 — Consultar el detalle de una venta](../specs/us-015-consultar-detalle-venta.md), [US-016 — Consultar el resumen del período](../specs/us-016-consultar-resumen-periodo.md) y [US-017 — Identificar los productos más vendidos](../specs/us-017-identificar-productos-mas-vendidos.md). Un único filtro por rango de fechas en horario de Bolivia aplica a la lista, el resumen y el ranking; sin tiempo real, anulaciones, devoluciones, exportación ni comparación entre períodos. Estas historias no representan funcionalidades implementadas ni autorizan su interfaz.
 
+### 3.6. Bienvenida
+
+Pantalla simple que muestra «Hello world».
+
+Su propósito y contenido más allá de ese texto no están definidos. Es una página aparte y protegida, sin entrada en el menú, que no sustituye al Dashboard como pantalla de entrada. Los detalles aprobados se definen en [US-018 — Ver la pantalla de Bienvenida](../specs/us-018-ver-pantalla-bienvenida.md), sin tareas técnicas. No administra productos del catálogo ni sustituye a Administración del menú o Gestión de ventas y no representa una funcionalidad implementada.
+
 ## 4. Alcance inicial
 
-El MVP incluye los cinco módulos descritos, incluido inicio de sesión. Debe permitir administrar el menú, preparar una venta en curso, registrarla después del pago y consultar resultados básicos desde una aplicación web.
+El MVP incluye los cinco módulos descritos de 3.1 a 3.5, incluido inicio de sesión; Bienvenida (3.6) queda fuera hasta que se defina. Debe permitir administrar el menú, preparar una venta en curso, registrarla después del pago y consultar resultados básicos desde una aplicación web.
 
 Se prioriza un sistema funcional y sencillo. Los requisitos detallados y los criterios de aceptación de cada funcionalidad se aprobarán mediante sus especificaciones antes de implementarla.
 
