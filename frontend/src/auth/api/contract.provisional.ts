@@ -3,7 +3,8 @@
  * falls back to fixtures. Tab ownership is best effort, not cryptographic identity.
  */
 export type SessionState =
-  | { status: 'checking' }
+  // A label marks revalidation of an already authenticated session, not bootstrap.
+  | { status: 'checking'; label?: string }
   | { status: 'connection-error' }
   | { status: 'anonymous'; reason?: 'required' | 'expired' | 'closed' }
   | { status: 'authenticated'; label: string }
