@@ -229,6 +229,10 @@ export function MenuPage() {
               setNotice('');
             }}
           />
+        </>
+      )}
+      <div className={styles.update}>
+        {data && (
           <p
             ref={summary}
             tabIndex={-1}
@@ -238,13 +242,12 @@ export function MenuPage() {
             {products.length} de {data.products.length} productos
             {filtered ? ' · Filtros aplicados' : ''}
           </p>
-          <p className={styles.help}>
-            Los productos inactivos no están disponibles para nuevas ventas; se
-            conservan en el catálogo y el historial.
-          </p>
-        </>
-      )}
-      <div className={styles.update}>
+        )}
+        <Button disabled={loading} onClick={() => void load()}>
+          Actualizar lista
+        </Button>
+      </div>
+      <div className={styles.feedback}>
         <span role="status">
           {opening
             ? 'Cargando producto…'
@@ -260,9 +263,6 @@ export function MenuPage() {
             Deshacer cambio de {undo.name}
           </Button>
         )}
-        <Button disabled={loading} onClick={() => void load()}>
-          Actualizar lista
-        </Button>
       </div>
       {error && <MenuState message={error} retry={() => void load()} />}
       {operationError && (
