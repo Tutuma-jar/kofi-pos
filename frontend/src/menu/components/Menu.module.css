@@ -7,6 +7,9 @@
   gap: 16px;
   margin: 24px 0 12px;
 }
+.filters > button {
+  justify-self: start;
+}
 .filters label,
 .form label,
 .categoryForm label,
@@ -72,6 +75,9 @@
   gap: 12px;
   align-items: flex-start;
 }
+.product > div {
+  min-width: 0;
+}
 .product strong {
   font-size: 17px;
   font-weight: 600;
@@ -80,6 +86,20 @@
   margin: 4px 0 0;
   color: var(--muted);
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.thumbnailWrap {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.referenceLabel {
+  color: var(--muted);
+  font-size: 14px;
 }
 .thumbnail,
 .placeholder {
@@ -126,6 +146,10 @@
   border: 1px solid var(--line);
   background: var(--surface);
   margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+.state button {
+  max-width: 100%;
 }
 .state p {
   margin-top: 0;
@@ -190,6 +214,34 @@
   min-height: 8px;
   margin: 4px 0 14px;
 }
+.conflict {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--page);
+  overflow-wrap: anywhere;
+}
+.conflict h3 {
+  margin: 0 0 12px;
+}
+.conflict dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 8px 16px;
+}
+.conflict dt {
+  font-weight: 600;
+}
+.conflict dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.form small {
+  display: block;
+  color: var(--muted);
+  margin-top: 6px;
+}
 .imageField {
   margin-top: 24px;
 }
@@ -232,20 +284,54 @@
   clip-path: inset(50%);
 }
 @media (max-width: 1000px) {
-  .table th:first-child {
-    width: 31%;
+  .table,
+  .table tbody {
+    display: block;
   }
-  .table th:last-child {
-    width: 19%;
+  .table {
+    font-size: 16px;
   }
-  .table td,
-  .table th {
-    padding: 12px 8px;
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
-  .placeholder,
-  .thumbnail {
-    width: 30px;
-    height: 30px;
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .table td:first-child,
+  .table td:last-child {
+    grid-column: 1 / -1;
+  }
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .table td:first-child::before,
+  .table td:last-child::before {
+    display: none;
+  }
+  .actions button {
+    font-size: 16px;
+    padding: 9px 12px;
   }
 }
 @media (max-width: 650px) {
@@ -253,30 +339,24 @@
   .twoColumns {
     grid-template-columns: 1fr;
   }
-  .table {
-    font-size: 13px;
-  }
-  .product {
-    display: block;
-  }
-  .product strong {
-    font-size: 15px;
-  }
-  .product p {
-    font-size: 13px;
-  }
   .price {
     white-space: normal;
-  }
-  .actions button {
-    font-size: 12px;
-    padding: 5px;
   }
   .dialog {
     max-height: calc(100dvh - 20px);
   }
   .formBody {
     padding: 16px;
+  }
+  .formFooter {
+    padding: 16px;
+    flex-wrap: wrap;
+  }
+  .formFooter button {
+    flex: 1 1 140px;
+  }
+  .conflict dl {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (prefers-reduced-motion: reduce) {

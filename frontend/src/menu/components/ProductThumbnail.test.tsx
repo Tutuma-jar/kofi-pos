@@ -29,6 +29,7 @@ test('labels reference photos without modifying the product', () => {
     'Fotografía de referencia',
   );
   expect(product.image).toBeNull();
+  expect(screen.getByText('Referencia')).toBeTruthy();
 });
 
 test('own images take priority and failed images show a neutral placeholder', () => {
@@ -38,6 +39,7 @@ test('own images take priority and failed images show a neutral placeholder', ()
   const image = container.querySelector('img')!;
   expect(image.getAttribute('src')).toBe('blob:own-photo');
   expect(image.getAttribute('alt')).toBe('');
+  expect(screen.queryByText('Referencia')).toBeNull();
   fireEvent.error(image);
   expect(screen.getByLabelText('Sin imagen')).toBeTruthy();
   rerender(

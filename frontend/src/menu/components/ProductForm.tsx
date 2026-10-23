@@ -29,7 +29,10 @@ export function ProductForm({
   onSaved: () => void;
   onCancel: () => void;
   onCategories: () => void;
-  onConflict: (product: Product) => void;
+  onConflict: (
+    product: Product,
+    draft: ProductInput & { priceText: string },
+  ) => void;
   onDirty: (dirty: boolean) => void;
   onBusy?: (busy: boolean) => void;
   conflictMessage?: string;
@@ -50,7 +53,7 @@ export function ProductForm({
         : ''),
   );
   const [errors, setErrors] = useState<Fields>({});
-  const [message, setMessage] = useState(conflictMessage);
+  const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
   const [imageInvalid, setImageInvalid] = useState(false);
@@ -93,11 +96,33 @@ export function ProductForm({
         if (error.code === 'CONFLICT' && product) {
           try {
             const latest = await menuClient.getProduct(product.id);
-            onDirty(false);
-            onConflict(latest);
+            // Keep local edits, but adopt remote changes to untouched fields.
+            // In particular, never try uploading an obsolete image object URL.
+            const recovered = {
+              name: input.name === product.name ? latest.name : input.name,
+              description:
+                input.description === product.description
+                  ? latest.description
+                  : input.description,
+              categoryId:
+                input.categoryId === product.categoryId
+                  ? latest.categoryId
+                  : input.categoryId,
+              image: input.image === product.image ? latest.image : input.image,
+              priceTenths:
+                next.priceTenths === product.priceTenths
+                  ? latest.priceTenths
+                  : next.priceTenths,
+              priceText:
+                next.priceTenths === product.priceTenths
+                  ? (latest.priceTenths / 10).toFixed(1)
+                  : price,
+            };
+            onDraft(recovered);
+            onConflict(latest, recovered);
           } catch {
             setMessage(
-              'No se pudo recuperar la versión actual. Cierra y vuelve a abrir el producto.',
+              'No se pudo consultar la versión actual. Tus cambios siguen aquí. Reintenta guardar para volver a consultarla.',
             );
           }
         }
@@ -118,6 +143,63 @@ export function ProductForm({
       }}
     >
       <div className={styles.formBody}>
+        {conflictMessage && product && (
+          <section className={styles.conflict} aria-labelledby="conflict-title">
+            <h3 id="conflict-title">El producto cambió en otra sesión</h3>
+            <p role="alert">
+              Conservamos tus cambios. Compara la versión actual antes de
+              guardar; guardar tus cambios reemplazará los valores actuales.
+            </p>
+            <dl>
+              <dt>Nombre actual</dt>
+              <dd>{product.name}</dd>
+              <dt>Descripción actual</dt>
+              <dd>{product.description || 'Sin descripción'}</dd>
+              <dt>Precio actual</dt>
+              <dd>BOB {(product.priceTenths / 10).toFixed(1)}</dd>
+              <dt>Categoría actual</dt>
+              <dd>
+                {categories.find(
+                  (category) => category.id === product.categoryId,
+                )?.name ?? 'Categoría no disponible'}
+              </dd>
+              <dt>Imagen actual</dt>
+              <dd>
+                {product.image ? (
+                  <img
+                    className={styles.preview}
+                    src={product.image}
+                    alt="Imagen de la versión actual"
+                  />
+                ) : (
+                  'Sin imagen propia'
+                )}
+              </dd>
+            </dl>
+            <p>Tus valores se mantienen en los campos de abajo.</p>
+            <Button
+              disabled={busy || imageBusy}
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    '¿Descartar tus cambios y usar la versión actual?',
+                  )
+                )
+                  return;
+                setInput(product);
+                setPrice((product.priceTenths / 10).toFixed(1));
+                setErrors({});
+                onDraft({
+                  ...product,
+                  priceText: (product.priceTenths / 10).toFixed(1),
+                });
+                onDirty(false);
+              }}
+            >
+              Usar versión actual
+            </Button>
+          </section>
+        )}
         <fieldset disabled={busy || imageBusy}>
           <label htmlFor="product-name">Nombre</label>
           <input
@@ -154,12 +236,15 @@ export function ProductForm({
                 inputMode="decimal"
                 value={price}
                 aria-invalid={!!errors.price}
-                aria-describedby="price-error"
+                aria-describedby="price-help price-error"
                 onChange={(e) => {
                   setPrice(e.target.value);
                   onDirty(true);
                 }}
               />
+              <small id="price-help">
+                Por ejemplo: 22 o 22,5. Hasta un decimal.
+              </small>
               <span id="price-error" className={styles.error}>
                 {errors.price}
               </span>
@@ -225,7 +310,11 @@ export function ProductForm({
           variant="primary"
           disabled={busy || imageBusy || imageInvalid}
         >
-          {busy ? 'Guardando…' : 'Guardar producto'}
+          {busy
+            ? 'Guardando…'
+            : conflictMessage
+              ? 'Guardar mis cambios'
+              : 'Guardar producto'}
         </Button>
       </footer>
     </form>

@@ -1,5 +1,6 @@
 import type { Category } from '../api/menu-client';
 import styles from './Menu.module.css';
+import { Button } from '../../shared/components/Button';
 export type Filters = { search: string; category: string; state: string };
 export function CatalogFilters({
   categories,
@@ -46,6 +47,13 @@ export function CatalogFilters({
           <option value="inactive">Inactivos</option>
         </select>
       </label>
+      {(filters.search || filters.category || filters.state) && (
+        <Button
+          onClick={() => onChange({ search: '', category: '', state: '' })}
+        >
+          Limpiar filtros
+        </Button>
+      )}
     </div>
   );
 }

@@ -7,21 +7,23 @@ export function ProductList({
   products,
   categories,
   pending,
+  busy = false,
   edit,
   toggle,
 }: {
   products: Product[];
   categories: Category[];
   pending: string[];
+  busy?: boolean;
   edit: (product: Product) => void;
   toggle: (product: Product) => void;
 }) {
   return (
     <div className={styles.tableWrap}>
-      <table className={styles.table}>
+      <table className={styles.table} role="table">
         <caption className={styles.sr}>Productos del menú</caption>
-        <thead>
-          <tr>
+        <thead role="rowgroup">
+          <tr role="row">
             <th scope="col">Producto</th>
             <th scope="col">Categoría</th>
             <th scope="col">Precio</th>
@@ -29,10 +31,10 @@ export function ProductList({
             <th scope="col">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {products.map((product) => (
-            <tr key={product.id}>
-              <td>
+            <tr key={product.id} role="row" data-product-id={product.id}>
+              <td role="cell">
                 <div className={styles.product}>
                   <ProductThumbnail product={product} />
                   <div>
@@ -41,34 +43,34 @@ export function ProductList({
                   </div>
                 </div>
               </td>
-              <td>
+              <td role="cell" data-label="Categoría">
                 {
                   categories.find((item) => item.id === product.categoryId)
                     ?.name
                 }
               </td>
-              <td className={styles.price}>
+              <td role="cell" data-label="Precio" className={styles.price}>
                 {formatPrice(product.priceTenths)}
               </td>
-              <td>
+              <td role="cell" data-label="Estado">
                 <span
                   className={product.active ? styles.active : styles.inactive}
                 >
                   {product.active ? 'Activo' : 'Inactivo'}
                 </span>
               </td>
-              <td>
+              <td role="cell" data-label="Acciones">
                 <div className={styles.actions}>
                   <Button
                     aria-label={`Editar ${product.name}`}
-                    disabled={pending.includes(product.id)}
+                    disabled={busy || pending.includes(product.id)}
                     onClick={() => edit(product)}
                   >
                     Editar
                   </Button>
                   <Button
                     aria-label={`${product.active ? 'Desactivar' : 'Reactivar'} ${product.name}`}
-                    disabled={pending.includes(product.id)}
+                    disabled={busy || pending.includes(product.id)}
                     onClick={() => toggle(product)}
                   >
                     {pending.includes(product.id)
