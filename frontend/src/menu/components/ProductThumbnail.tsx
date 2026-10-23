@@ -22,15 +22,20 @@ export function ProductThumbnail({ product }: { product: Product }) {
   const [failedSource, setFailedSource] = useState<string | null>(null);
   if (source && source !== failedSource) {
     return (
-      <img
-        className={styles.thumbnail}
-        src={source}
-        alt={product.image ? '' : `Fotografía de referencia: ${product.name}`}
-        title={product.image ? undefined : 'Fotografía de referencia'}
-        loading="lazy"
-        decoding="async"
-        onError={() => setFailedSource(source)}
-      />
+      <span className={styles.thumbnailWrap}>
+        <img
+          className={styles.thumbnail}
+          src={source}
+          alt={product.image ? '' : `Fotografía de referencia: ${product.name}`}
+          title={product.image ? undefined : 'Fotografía de referencia'}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailedSource(source)}
+        />
+        {!product.image && (
+          <span className={styles.referenceLabel}>Referencia</span>
+        )}
+      </span>
     );
   }
   return (

@@ -9,7 +9,7 @@ import {
 import { MemoryRouter } from 'react-router';
 import { AuthContext } from '../../auth/auth-context';
 import { createAuthClient } from '../../auth/api/auth-client';
-import { menuClient } from '../api/menu-client';
+import { menuClient, MenuError } from '../api/menu-client';
 import { MenuPage } from './MenuPage';
 // UI walkthroughs run on the simulated source; the real API client has its own tests.
 vi.mock('../api/menu-client', async () => {
@@ -18,7 +18,7 @@ vi.mock('../api/menu-client', async () => {
       '../api/menu-client',
     );
   const { createDemoClient } = await import('../api/demo-client');
-  return { ...actual, menuClient: createDemoClient() };
+  return { ...actual, menuClient: createDemoClient(10) };
 });
 beforeEach(() => {
   menuClient.setScenario('normal');
@@ -47,6 +47,173 @@ function mount() {
   return client;
 }
 describe('Recorridos del catálogo', () => {
+  it('limpia los filtros desde el vacío y recupera el recuento', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    const total = (await menuClient.list()).products.length;
+    fireEvent.change(screen.getByLabelText('Buscar por nombre'), {
+      target: { value: 'inexistente' },
+    });
+    expect(
+      screen.getByText(`0 de ${total} productos · Filtros aplicados`),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByText('Mostrar todos los productos'));
+    expect(screen.getByText('Espresso')).toBeTruthy();
+    expect(screen.getByText(`${total} de ${total} productos`)).toBeTruthy();
+    expect(
+      (screen.getByLabelText('Buscar por nombre') as HTMLInputElement).value,
+    ).toBe('');
+    auth.dispose();
+  });
+  it('conserva el borrador ante conflicto, protege la salida y guarda sobre la versión actual', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    fireEvent.click(screen.getByLabelText('Editar Espresso'));
+    await screen.findByRole('dialog', {}, { timeout: 3000 });
+    fireEvent.change(screen.getByLabelText('Nombre'), {
+      target: { value: 'Espresso propio' },
+    });
+    fireEvent.change(screen.getByLabelText('Precio (BOB)'), {
+      target: { value: '17,5' },
+    });
+    menuClient.setScenario('conflict');
+    fireEvent.click(screen.getByText('Guardar producto'));
+    await screen.findByText('El producto cambió en otra sesión');
+    expect((screen.getByLabelText('Nombre') as HTMLInputElement).value).toBe(
+      'Espresso propio',
+    );
+    expect(
+      (screen.getByLabelText('Precio (BOB)') as HTMLInputElement).value,
+    ).toBe('17,5');
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    fireEvent.click(screen.getByText('Cancelar'));
+    expect(confirm).toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    fireEvent.click(screen.getByText('Guardar mis cambios'));
+    await screen.findByText('Espresso propio');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByText('BOB 17.5')).toBeTruthy();
+    auth.dispose();
+  });
+  it('permite elegir la versión actual tras un conflicto sin perderla silenciosamente', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    fireEvent.click(screen.getByLabelText('Editar Espresso'));
+    await screen.findByRole('dialog');
+    fireEvent.change(screen.getByLabelText('Nombre'), {
+      target: { value: 'Cambio local' },
+    });
+    menuClient.setScenario('conflict');
+    fireEvent.click(screen.getByText('Guardar producto'));
+    await screen.findByText('El producto cambió en otra sesión');
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    fireEvent.click(screen.getByText('Usar versión actual'));
+    expect((screen.getByLabelText('Nombre') as HTMLInputElement).value).toBe(
+      'Cambio local',
+    );
+    confirm.mockReturnValue(true);
+    fireEvent.click(screen.getByText('Usar versión actual'));
+    expect((screen.getByLabelText('Nombre') as HTMLInputElement).value).toBe(
+      'Espresso',
+    );
+    fireEvent.click(screen.getByText('Cancelar'));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    auth.dispose();
+  });
+  it('adopta los cambios remotos de campos intactos sin perder la edición local', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    const original = (await menuClient.list()).products.find(
+      (product) => product.name === 'Espresso',
+    )!;
+    fireEvent.click(screen.getByLabelText('Editar Espresso'));
+    await screen.findByRole('dialog');
+    fireEvent.change(screen.getByLabelText('Nombre'), {
+      target: { value: 'Nombre local' },
+    });
+    vi.spyOn(menuClient, 'saveProduct').mockRejectedValueOnce(
+      new MenuError('CONFLICT', 'Cambió en otra sesión'),
+    );
+    vi.spyOn(menuClient, 'getProduct').mockResolvedValueOnce({
+      ...original,
+      version: original.version + 1,
+      description: 'Descripción remota',
+      priceTenths: 145,
+      image: 'blob:imagen-remota',
+    });
+    fireEvent.click(screen.getByText('Guardar producto'));
+    await screen.findByText('El producto cambió en otra sesión');
+    expect((screen.getByLabelText('Nombre') as HTMLInputElement).value).toBe(
+      'Nombre local',
+    );
+    expect(
+      (screen.getByLabelText('Descripción') as HTMLTextAreaElement).value,
+    ).toBe('Descripción remota');
+    expect(
+      (screen.getByLabelText('Precio (BOB)') as HTMLInputElement).value,
+    ).toBe('14.5');
+    expect(
+      screen.getByAltText('Vista previa del producto').getAttribute('src'),
+    ).toBe('blob:imagen-remota');
+    auth.dispose();
+  });
+  it('no invierte un cambio que sí se guardó cuando se perdió su confirmación', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    const setActive = menuClient.setActive.bind(menuClient);
+    const activate = vi
+      .spyOn(menuClient, 'setActive')
+      .mockImplementationOnce(async (product) => {
+        await setActive(product);
+        throw new MenuError('CONNECTION_ERROR', 'Se perdió la respuesta');
+      });
+    fireEvent.click(screen.getByLabelText('Desactivar Espresso'));
+    fireEvent.click(
+      await screen.findByText('Reintentar cambio de estado de Espresso'),
+    );
+    await screen.findByLabelText('Reactivar Espresso');
+    expect(activate).toHaveBeenCalledTimes(1);
+    auth.dispose();
+  });
+  it('reintenta abrir el producto en lugar de limitarse a recargar el catálogo', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    const get = vi
+      .spyOn(menuClient, 'getProduct')
+      .mockRejectedValueOnce(new Error('Sin conexión al abrir'));
+    fireEvent.click(screen.getByLabelText('Editar Espresso'));
+    fireEvent.click(await screen.findByText('Reintentar abrir Espresso'));
+    await screen.findByRole('dialog');
+    expect(get).toHaveBeenCalledTimes(2);
+    auth.dispose();
+  });
+  it('reintenta el estado deseado y permite deshacer aunque la fila salga del filtro', async () => {
+    const auth = mount();
+    await screen.findByText('Espresso');
+    fireEvent.change(screen.getByLabelText('Estado'), {
+      target: { value: 'active' },
+    });
+    const activate = vi
+      .spyOn(menuClient, 'setActive')
+      .mockRejectedValueOnce(
+        new MenuError('CONNECTION_ERROR', 'No se guardó el estado'),
+      );
+    fireEvent.click(screen.getByLabelText('Desactivar Espresso'));
+    fireEvent.click(
+      await screen.findByText('Reintentar cambio de estado de Espresso'),
+    );
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Desactivar Espresso')).toBeNull(),
+    );
+    const undo = await screen.findByText('Deshacer cambio de Espresso');
+    await waitFor(() =>
+      expect((undo as HTMLButtonElement).disabled).toBe(false),
+    );
+    fireEvent.click(undo);
+    await screen.findByLabelText('Desactivar Espresso');
+    expect(activate).toHaveBeenCalledTimes(3);
+    auth.dispose();
+  });
   it('ordena activos e inactivos, busca y filtra', async () => {
     const auth = mount();
     await screen.findByText('Café con leche');

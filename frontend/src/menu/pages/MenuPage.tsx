@@ -33,6 +33,18 @@ export function MenuPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [operationError, setOperationError] = useState<{
+    message: string;
+    label: string;
+    retry: () => void;
+  } | null>(null);
+  const [conflictMessage, setConflictMessage] = useState('');
+  const [undo, setUndo] = useState<{
+    id: string;
+    name: string;
+    active: boolean;
+  } | null>(null);
+  const [undoing, setUndoing] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     search: '',
     category: '',
@@ -45,6 +57,7 @@ export function MenuPage() {
   const [opening, setOpening] = useState(false);
   const dirty = useRef(false);
   const saving = useRef(false);
+  const summary = useRef<HTMLParagraphElement>(null);
   async function load() {
     setLoading(true);
     setError('');
@@ -94,35 +107,57 @@ export function MenuPage() {
     dirty.current = false;
     setEditing(null);
     setDraft(undefined);
+    setConflictMessage('');
   }
   async function edit(product: Product) {
     setOpening(true);
-    setError('');
+    setOperationError(null);
+    setNotice('');
     try {
       setEditing(await menuClient.getProduct(product.id));
+      setDraft(undefined);
+      setConflictMessage('');
     } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : 'No se pudo cargar el producto.',
-      );
+      setOperationError({
+        message:
+          reason instanceof Error
+            ? reason.message
+            : 'No se pudo cargar el producto.',
+        label: `Reintentar abrir ${product.name}`,
+        retry: () => void edit(product),
+      });
     } finally {
       setOpening(false);
     }
   }
   async function toggle(product: Product) {
+    const previousFocus = document.activeElement;
+    const focusedProduct = previousFocus
+      ?.closest('[data-product-id]')
+      ?.getAttribute('data-product-id');
     setPending((ids) => [...ids, product.id]);
-    setError('');
+    setOperationError(null);
+    setNotice('');
+    setUndo(null);
     try {
       await menuClient.setActive(product);
       setNotice(`${product.name}: ${product.active ? 'inactivo' : 'activo'}.`);
+      setUndo({ id: product.id, name: product.name, active: product.active });
       await load();
+      if (focusedProduct === product.id) {
+        requestAnimationFrame(() => {
+          if (!previousFocus?.isConnected) summary.current?.focus();
+        });
+      }
     } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : 'No se pudo cambiar el estado. Reintenta la acción.',
-      );
+      setOperationError({
+        message:
+          reason instanceof Error
+            ? reason.message
+            : 'No se pudo cambiar el estado. Reintenta la acción.',
+        label: `Reintentar cambio de estado de ${product.name}`,
+        retry: () => void changeActivation(product.id, !product.active),
+      });
       if (reason instanceof MenuError && reason.code === 'CONFLICT') {
         try {
           setData(await menuClient.list());
@@ -134,7 +169,33 @@ export function MenuPage() {
       setPending((ids) => ids.filter((id) => id !== product.id));
     }
   }
+  async function changeActivation(id: string, active: boolean) {
+    setUndoing(true);
+    setOperationError(null);
+    try {
+      // Fetch the current version so a retry/undo never inverts a stale state.
+      const current = await menuClient.getProduct(id);
+      if (current.active !== active) await toggle(current);
+      else {
+        setNotice(`${current.name}: ${active ? 'activo' : 'inactivo'}.`);
+        setUndo(null);
+        await load();
+      }
+    } catch (reason) {
+      setOperationError({
+        message:
+          reason instanceof Error
+            ? reason.message
+            : 'No se pudo consultar el producto.',
+        label: 'Reintentar cambio de estado',
+        retry: () => void changeActivation(id, active),
+      });
+    } finally {
+      setUndoing(false);
+    }
+  }
   const products = data ? selectProducts(data, filters) : [];
+  const filtered = !!(filters.search || filters.category || filters.state);
   return (
     <section className={styles.page}>
       <header className={styles.header}>
@@ -149,6 +210,8 @@ export function MenuPage() {
             disabled={!data?.categories.length || opening}
             onClick={() => {
               setDraft(undefined);
+              setConflictMessage('');
+              setNotice('');
               setEditing('new');
             }}
           >
@@ -157,11 +220,29 @@ export function MenuPage() {
         </div>
       </header>
       {data && (
-        <CatalogFilters
-          categories={data.categories}
-          filters={filters}
-          onChange={setFilters}
-        />
+        <>
+          <CatalogFilters
+            categories={data.categories}
+            filters={filters}
+            onChange={(next) => {
+              setFilters(next);
+              setNotice('');
+            }}
+          />
+          <p
+            ref={summary}
+            tabIndex={-1}
+            className={styles.summary}
+            aria-live="polite"
+          >
+            {products.length} de {data.products.length} productos
+            {filtered ? ' · Filtros aplicados' : ''}
+          </p>
+          <p className={styles.help}>
+            Los productos inactivos no están disponibles para nuevas ventas; se
+            conservan en el catálogo y el historial.
+          </p>
+        </>
       )}
       <div className={styles.update}>
         <span role="status">
@@ -171,11 +252,26 @@ export function MenuPage() {
               ? 'Actualizando catálogo…'
               : notice}
         </span>
+        {undo && (
+          <Button
+            disabled={undoing || loading || pending.length > 0}
+            onClick={() => void changeActivation(undo.id, undo.active)}
+          >
+            Deshacer cambio de {undo.name}
+          </Button>
+        )}
         <Button disabled={loading} onClick={() => void load()}>
           Actualizar lista
         </Button>
       </div>
       {error && <MenuState message={error} retry={() => void load()} />}
+      {operationError && (
+        <MenuState
+          message={operationError.message}
+          retry={operationError.retry}
+          retryLabel={operationError.label}
+        />
+      )}
       {loading && !data && <MenuState message="Cargando productos…" />}
       {data && (
         <>
@@ -185,7 +281,7 @@ export function MenuPage() {
           {!data.categories.length && (
             <Link to="/menu/categories">Crear categoría</Link>
           )}
-          {!data.products.length ? (
+          {!data.categories.length ? null : !data.products.length ? (
             <>
               <MenuState message="Aún no hay productos. Agrega el primero para empezar a vender." />
               <Button
@@ -196,12 +292,22 @@ export function MenuPage() {
               </Button>
             </>
           ) : !products.length ? (
-            <MenuState message="Ningún producto coincide con los filtros" />
+            <div>
+              <MenuState message="Ningún producto coincide con los filtros" />
+              <Button
+                onClick={() =>
+                  setFilters({ search: '', category: '', state: '' })
+                }
+              >
+                Mostrar todos los productos
+              </Button>
+            </div>
           ) : (
             <ProductList
               products={products}
               categories={data.categories}
               pending={pending}
+              busy={undoing}
               edit={(p) => void edit(p)}
               toggle={(p) => void toggle(p)}
             />
@@ -246,26 +352,25 @@ export function MenuPage() {
               onBusy={(value) => {
                 saving.current = value;
               }}
-              conflictMessage={
-                notice.startsWith('Este producto cambió') ? notice : ''
-              }
+              conflictMessage={conflictMessage}
               onCategories={() => setCategoriesOpen(true)}
               onCancel={close}
               onSaved={() => {
                 setEditing(null);
                 setDraft(undefined);
+                setConflictMessage('');
                 setNotice('Producto guardado.');
                 void load();
               }}
-              onConflict={(current) => {
-                setDraft(undefined);
+              onConflict={(current, localDraft) => {
+                setDraft(localDraft);
                 setEditing(current);
                 void menuClient
                   .list()
                   .then(setData)
                   .catch(() => undefined);
-                setNotice(
-                  'Este producto cambió mientras lo editabas. Revisa la versión actual y vuelve a aplicar tus cambios.',
+                setConflictMessage(
+                  'Conservamos tus cambios para compararlos con la versión actual.',
                 );
               }}
             />
