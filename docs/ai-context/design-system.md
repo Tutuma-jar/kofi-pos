@@ -1,5 +1,8 @@
 # Kofi — Sistema de diseño
 
+> Política retirada el 2026-10-22: este documento es una referencia histórica opcional. Sus restricciones, aprobaciones, secuencias obligatorias y límites de etapa ya no rigen el trabajo de los agentes. El contexto y las instrucciones se proporcionan manualmente en cada encargo.
+
+
 ## 1. Objetivo
 
 Guiar interfaces claras y consistentes para el contexto definido en [product.md](product.md). La variante **P · Bruma y lino, información primero** es la referencia de **colores, fuentes y criterios de jerarquía**, no una plantilla de página. Cada módulo debe resolver su composición según su funcionalidad. Esta elección no selecciona una biblioteca ni autoriza implementar la aplicación.

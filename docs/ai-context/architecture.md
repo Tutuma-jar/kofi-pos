@@ -1,5 +1,8 @@
 # Kofi — Arquitectura y organización
 
+> Política retirada el 2026-10-22: este documento es una referencia histórica opcional. Sus restricciones, aprobaciones, secuencias obligatorias y límites de etapa ya no rigen el trabajo de los agentes. El contexto y las instrucciones se proporcionan manualmente en cada encargo.
+
+
 ## 1. Decisiones aprobadas
 
 | Área | Decisión |

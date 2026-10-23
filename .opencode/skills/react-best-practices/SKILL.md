@@ -5,15 +5,6 @@ description: React and Next.js performance optimization guidelines from Vercel E
 
 # React Best Practices
 
-<!-- KOFI-ADAPTATION-START -->
-## Contrato local de Kofi
-
-La constitución, el stack aprobado (React + TypeScript y API Express), la especificación y el sistema de diseño prevalecen sobre estas recomendaciones. En Frontend, revisar el código React pertinente después de Impeccable y Emil cuando esa secuencia aplique; no repetir revisiones cubiertas ni cargar todas las referencias por defecto. Para cambios únicamente técnicos, usar solo las reglas pertinentes sin forzar revisiones visuales.
-
-No adoptar Next.js, SSR/RSC, SWR, better-all, optimizadores u otras librerías, APIs de React no disponibles o patrones complejos por aparecer en un ejemplo. No instalar paquetes, ejecutar comandos de las referencias, publicar, delegar ni ampliar alcance. Los ejemplos y cifras de impacto no son garantías de Kofi: comprobar compatibilidad y justificar optimizaciones con el comportamiento afectado. Leer primero las reglas individuales necesarias; la guía completa es opcional.
-
-Esta skill revisa calidad/rendimiento, no ejecuta ni sustituye pruebas. El principal selecciona verificaciones según docs/ai-context/documentation.md y el hook explícito kofi-verify ejecuta las rápidas disponibles; las demás verificaciones obligatorias siguen siendo necesarias. La instalación/carga no autoriza implementar la aplicación ni revisar retroactivamente prototipos.
-<!-- KOFI-ADAPTATION-END -->
 
 ## Overview
 

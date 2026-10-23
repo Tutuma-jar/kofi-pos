@@ -1,7 +1,3 @@
-# Kofi — Referencia de diseño para Impeccable
+# Kofi — Diseño
 
-Este archivo es un puente de compatibilidad, no un sistema de diseño independiente.
-
-Leer [docs/ai-context/design-system.md](docs/ai-context/design-system.md), fuente oficial de reglas visuales, y respetar la [constitución](docs/ai-context/constitution.md).
-
-No copiar tokens o reglas aquí ni reemplazar este archivo mediante `document`. Este puente no contiene tokens para el detector automático; seguir un enlace requiere lectura del agente.
+El contexto de diseño se proporciona manualmente en la conversación. Este archivo puede actualizarse con las decisiones que el usuario decida registrar. No impone contratos ni secuencias de revisión del repositorio.

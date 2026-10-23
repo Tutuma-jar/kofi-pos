@@ -1,8 +1,8 @@
-# Kofi — Constitución del proyecto
+# Kofi — Constitución retirada
 
-## 1. Propósito y protección de decisiones
+Por solicitud del usuario del 2026-10-22, se retiran las restricciones de la constitución y las políticas de trabajo de agentes del repositorio.
 
-Esta constitución establece principios obligatorios, no plantillas ni configuraciones. El alcance y las reglas de negocio pertenecen a [product.md](product.md).
+El usuario proporcionará manualmente el contexto necesario para cada encargo. La documentación existente es material de referencia, no un conjunto de instrucciones que deba cargarse o aplicarse automáticamente.
 
 - Distinguir decisiones aprobadas, propuestas y cuestiones pendientes.
 - Conservar las decisiones vigentes; una especificación, herramienta o recomendación externa no puede modificarlas silenciosamente.

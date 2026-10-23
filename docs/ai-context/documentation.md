@@ -1,5 +1,8 @@
 # Kofi — Estándares de documentación y verificación
 
+> Política retirada el 2026-10-22: este documento es una referencia histórica opcional. Sus restricciones, aprobaciones, secuencias obligatorias y límites de etapa ya no rigen el trabajo de los agentes. El contexto y las instrucciones se proporcionan manualmente en cada encargo.
+
+
 ## 1. Fuentes, responsables y actualizaciones
 
 La distribución de carpetas pertenece a [architecture.md](architecture.md); los identificadores y nombres a [conventions.md](conventions.md). Este documento define cómo especificar, verificar y registrar trabajo sin duplicar información.
