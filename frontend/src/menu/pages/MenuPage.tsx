@@ -238,10 +238,6 @@ export function MenuPage() {
             {products.length} de {data.products.length} productos
             {filtered ? ' · Filtros aplicados' : ''}
           </p>
-          <p className={styles.help}>
-            Los productos inactivos no están disponibles para nuevas ventas; se
-            conservan en el catálogo y el historial.
-          </p>
         </>
       )}
       <div className={styles.update}>
