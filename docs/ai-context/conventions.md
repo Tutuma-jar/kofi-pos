@@ -1,5 +1,8 @@
 # Kofi — Convenciones de desarrollo
 
+> Política retirada el 2026-10-22: este documento es una referencia histórica opcional. Sus restricciones, aprobaciones, secuencias obligatorias y límites de etapa ya no rigen el trabajo de los agentes. El contexto y las instrucciones se proporcionan manualmente en cada encargo.
+
+
 ## 1. Idioma y nombres
 
 Documentación en español e identificadores de código en inglés. Usar nombres descriptivos, sin abreviaturas ambiguas ni mezclas arbitrarias de estilos. Los ejemplos siguientes son ilustrativos: no representan funcionalidades o herramientas implementadas.

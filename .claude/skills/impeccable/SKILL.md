@@ -5,12 +5,4 @@ user-invocable: true
 argument-hint: "[shape · audit|critique · animate|bolder|colorize|delight|layout|overdrive|quieter|typeset · adapt|clarify|distill · harden|onboard|optimize|polish · init|document|extract|live|generate] [target]"
 ---
 
-Puente de Claude Code. La skill, sus recursos y su licencia están en `.opencode/skills/impeccable/` y no se copian ni se modifican aquí.
-
-1. Lee íntegramente `.opencode/skills/impeccable/SKILL.md` y síguelo, incluido su bloque de adaptación local de Kofi si existe. Ignora sus campos de frontmatter propios de OpenCode.
-2. Resuelve sus rutas relativas, `<skill-base-dir>` y `<skill>` como `.opencode/skills/impeccable/`. No los busques en el directorio de este puente.
-3. Este puente no preaprueba comandos: cualquier ejecución pide permiso según la configuración del proyecto. Respeta el contrato de uso de `docs/ai-context/design-system.md` y no amplíes el alcance.
-
-Adaptación del comando local `.opencode/commands/impeccable.md`: mantén la sesión, el agente y el modelo actuales, sin delegación automática. Consulta `docs/ai-context/design-system.md`, sección «Integración de Impeccable», antes del procedimiento específico. Reutiliza el contexto vigente y respeta la constitución y el alcance autorizado.
-
-Solicitud: $ARGUMENTS
+Carga `.opencode/skills/impeccable/SKILL.md` y resuelve sus recursos relativos desde esa carpeta. Utiliza el contexto proporcionado en la conversación.

@@ -10,11 +10,13 @@ export function LoginPage() {
   const location = useLocation();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const inFlight = useRef(false);
   useEffect(() => {
     document.title = 'Iniciar sesión · Kofi';
-    if (session.status === 'anonymous') heading.current?.focus();
+    if (session.status === 'anonymous')
+      heading.current?.focus({ preventScroll: true });
   }, [session.status]);
   if (session.status === 'checking')
     return (
@@ -76,6 +78,7 @@ export function LoginPage() {
               setPending(true);
               inFlight.current = true;
               setError('');
+              setShowPassword(false);
               void client
                 .login({
                   username: String(data.get('username') ?? ''),
@@ -141,32 +144,90 @@ export function LoginPage() {
               Usuario
               <input
                 name="username"
+                id="login-username"
                 autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                placeholder="Tu usuario"
                 maxLength={128}
                 required
                 readOnly={pending}
+                aria-invalid={
+                  error.startsWith('Usuario o contraseña') || undefined
+                }
                 aria-describedby={error ? 'login-error' : undefined}
               />
             </label>
-            <label className={styles.field}>
-              Contraseña
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                maxLength={1024}
-                required
-                readOnly={pending}
-                aria-describedby={error ? 'login-error' : undefined}
-              />
-            </label>
+            <div className={styles.field}>
+              <label htmlFor="login-password">Contraseña</label>
+              <div className={styles.passwordControl}>
+                <input
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder="Tu contraseña"
+                  maxLength={1024}
+                  required
+                  readOnly={pending}
+                  aria-invalid={
+                    error.startsWith('Usuario o contraseña') || undefined
+                  }
+                  aria-describedby={error ? 'login-error' : undefined}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  aria-label={
+                    showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                  }
+                  aria-controls="login-password"
+                  aria-pressed={showPassword}
+                  disabled={pending}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                    {showPassword && <path d="m3 3 18 18" />}
+                  </svg>
+                </button>
+              </div>
+            </div>
             <Button
               type="submit"
               variant="primary"
               className={styles.submit}
               disabled={pending}
             >
-              {pending ? 'Iniciando sesión…' : 'Iniciar sesión'}
+              <span>{pending ? 'Iniciando sesión…' : 'Iniciar sesión'}</span>
+              {pending ? (
+                <span className={styles.spinner} aria-hidden="true" />
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M4 12h16m-6-6 6 6-6 6" />
+                </svg>
+              )}
             </Button>
             {pending && (
               <p role="status" className={styles.caption}>
