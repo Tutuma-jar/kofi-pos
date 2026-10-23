@@ -33,7 +33,7 @@ export function AuthenticatedAccess({
     <AuthenticatedLayout
       title={title}
       bounded={bounded}
-      accountLabel={'label' in session ? session.label : ''}
+      accountLabel={'label' in session ? (session.label ?? '') : ''}
       onLogout={() => {
         if (beforeLogout && !beforeLogout()) return;
         void client.logout();

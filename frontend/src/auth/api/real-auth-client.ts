@@ -311,8 +311,11 @@ export function createRealAuthClient(
     }
     const snapshot = captured()!;
     const started = now();
+    const revalidating = state.status === 'authenticated';
     stop();
-    publish({ status: 'checking' });
+    publish(
+      revalidating ? { status: 'checking', label } : { status: 'checking' },
+    );
     schedule();
     const controller = new AbortController();
     // Settle even when an injected transport (or body reader) ignores abort.
