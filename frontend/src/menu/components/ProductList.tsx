@@ -2,6 +2,7 @@ import { Button } from '../../shared/components/Button';
 import { formatPrice } from '../api/menu-client';
 import type { Category, Product } from '../api/menu-client';
 import styles from './Menu.module.css';
+import { ProductThumbnail } from './ProductThumbnail';
 export function ProductList({
   products,
   categories,
@@ -33,31 +34,7 @@ export function ProductList({
             <tr key={product.id}>
               <td>
                 <div className={styles.product}>
-                  {product.image ? (
-                    <img
-                      className={styles.thumbnail}
-                      src={product.image}
-                      alt=""
-                    />
-                  ) : (
-                    <span
-                      className={styles.placeholder}
-                      aria-label="Sin imagen"
-                    >
-                      <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4"
-                          fill="none"
-                          stroke="currentColor"
-                        />
-                      </svg>
-                    </span>
-                  )}
+                  <ProductThumbnail product={product} />
                   <div>
                     <strong>{product.name}</strong>
                     <p>{product.description}</p>

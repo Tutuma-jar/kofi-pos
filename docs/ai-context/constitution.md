@@ -4,4 +4,159 @@ Por solicitud del usuario del 2026-10-22, se retiran las restricciones de la con
 
 El usuario proporcionará manualmente el contexto necesario para cada encargo. La documentación existente es material de referencia, no un conjunto de instrucciones que deba cargarse o aplicarse automáticamente.
 
-El alcance de cada trabajo se determina por la conversación vigente, sin las etapas, excepciones, aprobaciones adicionales, restricciones por perfil ni controles de cierre anteriores.
+- Distinguir decisiones aprobadas, propuestas y cuestiones pendientes.
+- Conservar las decisiones vigentes; una especificación, herramienta o recomendación externa no puede modificarlas silenciosamente.
+- Consultar al responsable del proyecto ante contradicciones o ambigüedades, sin resolverlas por suposición.
+- Obtener aprobación explícita antes de cambiar el alcance, la arquitectura aprobada o esta constitución, indicando motivo e impacto.
+
+## 2. Simplicidad y mantenibilidad
+
+- Priorizar facilidad de uso, rapidez operativa y claridad.
+- Elegir la solución más sencilla que satisfaga los requisitos aprobados.
+- Evitar sobreingeniería, abstracciones anticipadas y funcionalidades hipotéticas.
+- Separar responsabilidades y mantener cambios acotados al objetivo de la tarea.
+- Favorecer código legible y patrones consistentes; justificar dependencias y abstracciones nuevas.
+- Proteger credenciales y datos sensibles: no incorporarlos al repositorio, documentación o registros.
+
+## 3. Arquitectura, convenciones y diseño
+
+- Respetar los límites técnicos y la organización definidos en [architecture.md](architecture.md), fuente única del stack y la estructura completa.
+- Agregar carpetas o capas solo ante responsabilidades concretas; evaluar mantenibilidad, seguridad y coste operativo.
+- Seguir [conventions.md](conventions.md) sin mezclar estilos arbitrariamente.
+- Aplicar [design-system.md](design-system.md), priorizando accesibilidad, consistencia y eficiencia de uso.
+- No convertir decisiones técnicas o visuales pendientes en estándares implícitos.
+
+## 4. Desarrollo mediante SDD
+
+1. Comprobar que la necesidad pertenece al alcance del producto.
+2. Definir una historia o especificación con objetivo, límites y criterios de aceptación verificables.
+3. Resolver las decisiones bloqueantes y obtener aprobación antes de implementar.
+4. Dividir el trabajo en tareas proporcionadas, con responsabilidad concreta, dependencias y resultado verificable.
+5. Implementar únicamente lo aprobado y verificar su comportamiento.
+6. Documentar resultados reales y actualizar el estado cuando corresponda.
+
+Las historias describen necesidades y beneficios, no solo actividades de programación. Las tareas no deben ser excesivamente grandes ni fragmentarse por archivo, función o import. Cada tarea de implementación se vincula a su historia aprobada.
+
+Los criterios deben ser claros, específicos, observables y considerar validaciones, límites y errores cuando correspondan. Cada criterio debe tener una comprobación automática o manual justificada, sin pruebas redundantes.
+
+## 5. Trazabilidad y Definition of Done
+
+Mantener trazabilidad mediante identificadores y enlaces:
+
+**Historia → Tareas → Implementación → Validaciones → Documentación → Estado completado.**
+
+- Diferenciar tarea terminada, historia terminada y cambios integrados.
+- No declarar trabajo completado por haber escrito código ni con verificaciones obligatorias pendientes o errores bloqueantes conocidos.
+- Comprobar el alcance, los criterios aplicables y la documentación relevante antes de completar una tarea.
+- Comprobar las tareas necesarias, todos los criterios obligatorios y la integración antes de completar una historia.
+- No considerar cambios integrados hasta incorporarlos a la rama de destino y superar sus verificaciones obligatorias.
+
+Las listas detalladas de DoD y las evidencias requeridas se mantienen en [documentation.md](documentation.md).
+
+## 6. Política de verificación
+
+- Verificar proporcionalmente al riesgo y al comportamiento afectado, sin porcentajes arbitrarios de cobertura.
+- Priorizar cálculos, cantidades, validaciones de pedidos, ventas, integridad, persistencia y contratos entre aplicaciones.
+- Separar la selección de pruebas, su ejecución rápida y la verificación completa de integración. Los mecanismos de automatización deben tener responsabilidades delimitadas y no duplicar comprobaciones innecesariamente.
+- Agrupar cambios coherentes, ejecutar primero comprobaciones específicas y ampliar según el riesgo. No ejecutar suites completas después de cada edición.
+- Reutilizar resultados solo mientras sus entradas y dependencias relevantes sigan sin cambios; no sustituir controles obligatorios de integración por resultados locales.
+- Permitir como máximo dos intentos automáticos consecutivos para el mismo fallo. Si persiste, detenerse e informar; no ocultar errores ni completar trabajo pendiente.
+- No invocar subagentes para comprobaciones mecánicas; utilizar herramientas locales.
+- Cuando exista CI configurada, superar sus verificaciones obligatorias aplicables antes de integrar cambios; los éxitos locales no las sustituyen. Su activación y los cambios relevantes de alcance requieren aprobación. Configurar un workflow no acredita su ejecución ni habilita protección de ramas automáticamente.
+
+El procedimiento detallado, los niveles y las responsabilidades de herramientas están en [documentation.md](documentation.md#7-procedimiento-de-testing).
+
+## 7. Documentación y seguimiento
+
+- Mantener una fuente por responsabilidad y enlazar en lugar de copiar contenido.
+- Registrar especificaciones, criterios y tareas según [documentation.md](documentation.md); no utilizar `AGENTS.md` como bitácora.
+- Usar [tracker.md](../progress/tracker.md) como única fuente de estado de historias y tareas aprobadas.
+- Actualizar el tracker en hitos verificados, no tras cada edición; no inventar avances ni eliminar pendientes sin autorización.
+- Documentar cambios relevantes, decisiones y resultados reales; no producir registros adicionales por modificaciones triviales.
+- Mantener el historial significativo en [CHANGELOG.md](../progress/CHANGELOG.md), separado del estado del trabajo.
+
+## 8. Control de versiones
+
+- Seguir las convenciones de ramas y Conventional Commits de [conventions.md](conventions.md).
+- Mantener cambios coherentes y evitar mezclar funcionalidades no relacionadas.
+- Vincular tareas cuando corresponda y preparar PR con el formato de [documentation.md](documentation.md).
+- Excluir secretos y archivos temporales; no realizar commits ni pushes sin autorización explícita.
+- Para Backend, un encargo de implementación explícitamente autorizado de una TASK, y para Frontend, que no recibe tareas, un encargo de un módulo o página dentro de su excepción, con historia y alcance definidos, incluye crear/reutilizar su rama y generar un commit ordinario tras las verificaciones aplicables, salvo una limitación expresa del usuario. Las ramas nuevas parten de `origin/develop` después de un fetch correcto, no de una copia local potencialmente desactualizada. Esta autorización acotada no incluye push, integración, reescritura de historial, cambios ajenos o eludir controles; el principal conserva selección de pruebas, aprobaciones y DoD. No se extiende a perfiles de análisis/documentación ni autoriza implementación por el solo registro de una US.
+
+## 9. Agentes, hooks y skills
+
+- Requerir autorización para usar subagentes, con objetivos, contexto y entregables delimitados. Revisar sus resultados: delegar no sustituye verificar.
+- No delegar aprobaciones de producto o arquitectura. Coordinar modificaciones sobre los mismos archivos.
+- No invocar todos los subagentes por tarea, encadenar delegaciones innecesarias ni repetir revisiones equivalentes.
+- Los seis perfiles y sus responsabilidades se describen en [documentation.md](documentation.md#8-subagentes).
+- Aprobar configuración y efectos de hooks antes de habilitarlos; mantenerlos acotados, comprensibles y no recursivos.
+- No introducir acciones destructivas, instalaciones, publicaciones o cambios ocultos mediante automatizaciones, ni eludir aprobaciones.
+- Permitir skills internas y externas como Impeccable tras revisar alcance, instrucciones, dependencias y compatibilidad, y autorizar su incorporación y uso.
+- Las skills deben respetar la constitución, la arquitectura, las especificaciones y el sistema de diseño. Ante un conflicto, consultar antes de continuar.
+
+## 10. Eficiencia de contexto y ejecución
+
+- Utilizar `AGENTS.md` como entrada y consultar solo las secciones relevantes para la tarea.
+- Reutilizar decisiones y contexto vigentes; evitar cargas completas del repositorio y lecturas repetitivas sin necesidad.
+- Mantener respuestas y reportes concisos; resumir pruebas exitosas y conservar evidencia útil de fallos.
+- Usar herramientas locales para comprobaciones mecánicas y análisis de IA solo cuando aporte valor.
+- Aprovechar caché y ejecución incremental cuando sean fiables, sin ocultar errores relevantes por ahorrar tiempo.
+- No desarrollar sistemas complejos de monitoreo de tokens.
+
+## 11. Etapa actual
+
+La etapa actual es de planificación y actualización documental autorizada. Las rutas y responsabilidades futuras no equivalen a implementaciones disponibles.
+
+Se autoriza como excepción la integración local de Impeccable para OpenCode, sus recursos necesarios y las referencias al AI Context, sin activar hooks. Esta autorización no aprueba una identidad visual ni habilita cambios de producto o arquitectura de la aplicación.
+
+También se autoriza la instalación local de Taste Skill (`design-taste-frontend`) como herramienta complementaria de carga explícita para webs públicas. No sustituye Impeccable ni se aplica al POS o sus dashboards; no autoriza ejecutar scripts, añadir dependencias, activar automatizaciones o generar interfaces como efecto de la instalación. Su contrato está en [design-system.md](design-system.md#6-taste-skill-complementaria-y-de-uso-explícito).
+
+La solicitud del usuario del 2026-10-18 autoriza también instalar localmente la skill principal de Emil Kowalski, `emil-design-eng`, con su licencia MIT, sin modificar sus instrucciones originales ni instalar las demás skills de su catálogo. Complementa las herramientas existentes para diseño y movimiento cuando corresponda al trabajo autorizado; instalarla no ejecuta revisiones, modifica interfaces, añade dependencias ni activa automatizaciones. Su contrato está en [design-system.md](design-system.md#4-integración-de-emil-design-engineering).
+
+También se autoriza el laboratorio visual aislado `design-lab/` para explorar dashboards con Impeccable según su [especificación](../specs/dashboard-design-lab.md), incluidas A–H, la variante I de Casa de café con redistribución expresamente permitida, J como prueba de color y K–L como pantallas clara y nocturna separadas con `#8999A9` sobre I. Sus prototipos HTML, CSS y JavaScript, fuentes y servidor local sin dependencias no son implementación de la aplicación ni aprobación del sistema visual definitivo.
+
+Por elección posterior del usuario el 2026-10-18, P pasa a ser la referencia de colores, fuentes y criterios de jerarquía del sistema de diseño, no una plantilla rígida. Cada módulo puede adaptar disposición, densidad, componentes e imágenes funcionales a su tarea dentro del alcance autorizado. `emil-design-eng` debe revisar cada página al terminar su diseño con Impeccable, conforme al [contrato de diseño](design-system.md#4-integración-de-emil-design-engineering). La elección no autoriza implementar la aplicación, rediseñar los prototipos existentes ni activar hooks o automatizaciones; los cambios de identidad compartida o alcance siguen requiriendo aprobación.
+
+Como excepción experimental confirmada por el usuario el 2026-10-18, la variante Q puede aplicar recursos de landing pages, fotografías de referencia con licencia y animaciones al dashboard, partiendo de P. El motivo es comparar expresividad con utilidad; el impacto aceptado es menor densidad y mayor recorrido vertical. La excepción se limita a Q, conserva P y las anteriores, paleta y funciones de muestra, y exige movimiento reducido. No extiende Taste Skill al resto del POS ni cambia el estándar de diseño. Alcance y verificación en la [especificación del laboratorio](../specs/dashboard-design-lab.md#variante-q-autorizada--la-casa-en-movimiento).
+
+La aprobación explícita del usuario de la Fase B el 2026-10-18 autoriza una excepción acotada: configurar los seis subagentes previstos en OpenCode V2, una única Skill de Testing y los cuatro controles de requisitos, documentación, alcance y testing; probar exclusivamente esta configuración con herramientas existentes y activar localmente el pre-commit documental. Los límites de tarea serán explícitos, sin equiparar inactividad o cada edición a una finalización. Esta excepción no aprueba código funcional, herramientas de pruebas del POS, dependencias nuevas, CI, cambios de historias o estados del tracker, ni commits o pushes. El contrato operativo está en [documentación](documentation.md#9-cuatro-controles-y-skills) y las rutas en arquitectura.
+
+Por decisión posterior explícita del usuario el 2026-10-18 se retira la skill `testing` del proyecto: el principal conserva la selección por criterios/riesgo en el procedimiento documental y el hook ejecuta las comprobaciones rápidas disponibles. También se autoriza integrar localmente `react-best-practices` desde la rama solicitada de Vercel para revisión técnica pertinente de React después de Impeccable y Emil, según su [contrato](design-system.md#7-react-best-practices). No sustituye pruebas ni habilita Next.js, otras dependencias, más agentes, implementación de aplicación o cambios funcionales de historias. Se permite actualizar únicamente las referencias operativas a la skill retirada en las especificaciones existentes, conservando criterios, tareas, aprobaciones y estados.
+
+La autorización explícita «ok autorizo» del responsable el 2026-10-18 permite una única entrega de [arranque técnico mínimo](../specs/technical-bootstrap.md): crear frontend/backend y workspaces, instalar las dependencias aprobadas necesarias, configurar desarrollo/build/tipos/calidad y comprobar el montaje React y arranque Express sin servicios externos. Esta excepción admite código y pruebas de humo exclusivamente técnicos, no implementa TASK-001 a TASK-032 ni inicia o completa historias del tracker. No incluye funcionalidades, prototipos de pestaña, MongoDB real, infraestructura, CI, hooks nuevos, commits ni pushes. La implementación funcional posterior y cualquier ampliación requieren autorización separada.
+
+La aprobación explícita «si» del responsable el 2026-10-18 autoriza posteriormente la CI técnica inicial de GitHub Actions y sus referencias documentales: verificar comandos existentes del bootstrap en PR hacia `develop`, push a `develop` y ejecución manual. Se permite configurar el workflow y probar localmente su selección y comandos; ajustar npm solo dentro del runner efímero no cambia instalaciones del usuario. Esta excepción no incluye nuevas dependencias de aplicación, funcionalidades, servicios externos, datos reales, despliegues, modificación de protecciones/permisos del repositorio GitHub, commits o pushes. La ejecución remota queda pendiente de publicar el workflow mediante una autorización posterior.
+
+La autorización posterior «hazlo» permite publicar la base y CI en el remoto GitHub existente, comprobar sus resultados y configurar el check obligatorio de `develop` tras verificar éxito real. La identidad Git aportada por el responsable se configura solo en este repositorio. La política de integración autorizada exige el check de GitHub Actions y rama actualizada, también para administradores, sin cambiar permisos de personas, visibilidad, reglas ajenas o funcionalidades. La autorización no permite commits o pushes futuros fuera de este encargo ni iniciar tareas de las US.
+
+La solicitud y aprobación explícitas del responsable del 2026-10-19 autorizan la compatibilidad con Claude Code: un `CLAUDE.md` que importa `AGENTS.md`, permisos de proyecto conservadores y puentes en `.claude/` hacia los seis perfiles, las skills locales y los controles existentes de `.opencode/`, que siguen siendo la fuente única y no se modifican. No son subagentes ni skills adicionales, no recrean la skill `testing` y no añaden hooks, dependencias, plugins, cambios de Git, funcionalidades ni estados del tracker. Las limitaciones de traducción de permisos están en [arquitectura](architecture.md#compatibilidad-con-claude-code).
+
+La aprobación explícita «Apruebo el contrato del Dashboard, las dos excepciones y tus recomendaciones de la tabla» del responsable del 2026-10-19 autoriza implementar, en el orden TASK-009 → TASK-013 y TASK-015 → TASK-011, únicamente las tareas frontend del Dashboard contra el [contrato aprobado](../specs/us-003-consultar-resumen-ventas.md#contrato-de-lectura-y-actualización) y datos simulados. Los fixtures se sirven detrás de una capa de acceso a la API del propio módulo, sustituible sin cambiar los componentes. Se permiten componentes, estilos y pruebas de componentes con las herramientas ya instaladas, y la secuencia Impeccable → Emil → React Best Practices sobre la página. No permite modificar el contrato, calcular métricas, agregaciones u ordenaciones en frontend, implementar backend, persistencia ni SSE real (la actualización se construye contra un emisor de avisos simulado), integrar acceso ni hacer pushes; los commits siguen el ciclo Git de Frontend y Backend. Las tareas frontend citadas se retiraron el 2026-10-19 al asignar la integración a backend; esta autorización se conserva como trabajo de interfaz del Dashboard sin tareas. CA-07, CA-08 y las DoD de US-003 a US-005 se acreditan en TASK-008, TASK-010, TASK-012 y TASK-014 integradas con el acceso de US-001.
+
+Para ello, la misma aprobación autoriza crear el módulo `frontend/src/dashboard/`, con su capa de acceso y sus fixtures, y montar provisionalmente el Dashboard como página del arranque técnico en lugar del contenido de humo. Las restricciones de dependencias, enrutado y carpetas compartidas de esta excepción quedan sustituidas por la ampliación siguiente.
+
+La autorización posterior «hazlo» del responsable del 2026-10-19 amplía el trabajo frontend a todos los módulos del MVP: se autoriza diseñar e implementar las páginas de Acceso, Dashboard, Administración del menú y Gestión de ventas en `frontend/src/<módulo>/` (`auth`, `dashboard`, `menu`, `sales`), sin esperar contratos aprobados, contra datos simulados y contratos provisionales. Esta autorización permanente cubre al subagente Frontend y a desarrolladores del equipo sin pedir permiso por módulo o tarea, y sirve como aprobación de alcance para `/kofi-start`. Las especificaciones y contratos son contexto para el diseño. Límites:
+
+- Por la aprobación «si aplica todos los cambios» del responsable del 2026-10-19, las decisiones de diseño son libres dentro del alcance funcional de las historias y el [producto](product.md): pantallas, composición, densidad, componentes, imágenes funcionales y movimiento, con el lenguaje visual de P. Se autorizan `frontend/src/shared/` para tokens, componentes base y estructura común sin reglas de negocio, React Router, las fuentes de P servidas localmente con su licencia y dependencias de interfaz justificadas con versión exacta en el workspace frontend, registradas en el CHANGELOG. Bibliotecas de gráficos o de componentes que sustituyan el sistema de P siguen requiriendo justificación ante el principal.
+- Frontend usa sin restricciones de uso Impeccable (todos sus comandos y su lanzador, incluida la descarga única de su binario), Emil Design Engineering y React Best Practices, y puede ejecutar el servidor de desarrollo y las comprobaciones del workspace según los permisos de su perfil. La secuencia Impeccable → Emil → React Best Practices es el cierre mínimo de cada página. Siguen excluidos `init` y `document` de Impeccable, que reescribirían los puentes `PRODUCT.md` y `DESIGN.md`; `live` y `generate` requieren una herramienta de navegador no instalada, cuya incorporación necesita autorización aparte. Taste Skill sigue fuera del POS.
+- Los componentes solo consumen la capa de acceso de su módulo, que sirve fixtures para cada estado pertinente. Los tipos provisionales de petición, respuesta y error de cada módulo están en un único archivo `frontend/src/<módulo>/api/contract.provisional.ts`, justificados por criterios de aceptación, y se entregan como supuestos para definir el contrato; no equivalen a contratos aprobados. Donde exista un contrato aprobado, como el del Dashboard, se usa ese contrato.
+- Sin reglas de negocio autoritativas en el frontend: importes, totales, métricas, validación final, conflictos y resultados inciertos se simulan, no se deciden. Las decisiones abiertas de las especificaciones se representan como alternativas o supuestos, no se resuelven en código.
+- Las funcionalidades no previstas en las historias se proponen, no se construyen. No incluye backend, persistencia, SSE real, integración de acceso, cambios de configuración de Vite o CI, ni pushes; los commits de agentes siguen el ciclo Git de Frontend y Backend.
+- Frontend no recibe tareas ni cambia el tracker. Al entregar la interfaz de un módulo o página, el principal la registra en la especificación de cada historia afectada (rama, commit, supuestos de `contract.provisional.ts`, estados cubiertos y cierre Impeccable → Emil → React Best Practices) y puede pasar la historia a `En desarrollo`. La entrega no acredita contrato, integración, criterios de aceptación ni DoD: los acreditan las tareas de backend con su verificación integrada.
+
+La autorización «hazlo sigue tus recomendaciones pero no hagas nada de desarrollo aun de ninguna tarea y tampoco de frontend» del responsable del 2026-10-19 permite una única entrega de preparación del backend: instalar `mongodb` y `zod` con versión exacta, definir MongoDB local con replica set de un nodo mediante Docker Compose, validar la configuración de entorno, conectar a MongoDB al arrancar exigiendo replica set y añadir pruebas técnicas de configuración y de transacciones contra MongoDB local, fuera de `npm test` y de la CI. Detalle en [arquitectura](architecture.md#11-preparación-del-backend-autorizada). No implementa ni inicia ninguna TASK, no crea `backend/src/shared/http/`, rutas, modelos o colecciones de negocio, no toca frontend ni CI, no ejecuta la validación de identidad de pestaña ni resuelve los pendientes técnicos, y no cambia el tracker. Implementar cualquier TASK sigue requiriendo autorización separada.
+
+La autorización posterior «autorizar la implementacion de tasks», con el alcance «Todas las tareas» elegido por el responsable el 2026-10-19, permite implementar las 22 TASK vigentes del [tracker](../progress/tracker.md), todas de backend, en el orden de sus dependencias. Cubre al agente principal, al subagente Backend y a desarrolladores del equipo, sin pedir permiso por tarea. Condiciones:
+
+- Cada TASK sigue el [ciclo Git de Backend](conventions.md#ciclo-git-de-frontend-y-backend): rama propia desde `origin/develop` recién obtenido y commit local acotado. Push, PR e integración requieren autorización aparte.
+- Cada TASK propone su contrato (rutas, DTO y códigos) a partir de `contract.provisional.ts` y lo presenta para aprobación antes de conectar la interfaz; donde exista contrato aprobado, como el del Dashboard, lo aplica. Se respetan las [convenciones del contrato HTTP](architecture.md#convenciones-comunes-del-contrato-http).
+- Las decisiones técnicas pendientes de [arquitectura §8](architecture.md#8-decisiones-y-validaciones-técnicas-pendientes) se resuelven con aprobación antes del tramo afectado, no en código: contrato de credenciales, hash y almacenamiento de la autorización antes de TASK-001 a TASK-003; autorización del stream y agrupación de avisos antes de TASK-010; flujo de imágenes antes de TASK-016. La validación de identidad de pestaña en Chrome y Edge, incluida en TASK-005, queda autorizada como parte de esa tarea.
+- Se pueden instalar en `@kofi/backend`, o en la raíz para las pruebas, las dependencias ya elegidas en la arquitectura (incluido Playwright y sus navegadores) y otras justificadas por la TASK, con versión exacta y registradas en el CHANGELOG.
+- La integración solo sustituye la capa `frontend/src/<módulo>/api/`; componentes y estilos siguen siendo de Frontend, y la tarea se bloquea si el contrato exige ajustes de interfaz. TASK-033 a TASK-036 pueden implementar su backend, pero no cerrarse mientras la interfaz de Historial no esté autorizada.
+- No incluye cambios de CI, infraestructura, Atlas, datos reales ni despliegues. El tracker solo se actualiza tras comprobar la DoD.
+
+La autorización «si, free, develop» del responsable del 2026-10-20 permite preparar el despliegue en Render: escucha configurable en `0.0.0.0`, `trust proxy`, servir la SPA compilada desde Express en el mismo origen, un Blueprint `render.yaml` de plan free que despliega `develop` y la documentación correspondiente, en la rama `chore/render-deployment` con commit local. El responsable crea por sí mismo el cluster MongoDB Atlas M0, la cuenta de Render, la conexión con GitHub y los secretos; `MONGODB_URI` nunca se versiona. El plan free no tiene disco persistente: las imágenes de producto se pierden al redesplegar o reiniciar, por lo que no admite uso operativo con imágenes reales ni sustituye respaldos y restauración probada. No incluye push, PR, integración, creación del servicio, datos reales, cambios funcionales ni estados del tracker.
+
+La solicitud del responsable del 2026-10-20 incorpora al producto el módulo Bienvenida, descrito en [product.md](product.md#36-bienvenida) como una pantalla simple que muestra «Hello world», con propósito y contenido aún sin definir. Se nombra Bienvenida para no confundirlo con los productos del catálogo de Administración del menú. Queda fuera del MVP de cinco módulos. Su historia [US-018](../specs/us-018-ver-pantalla-bienvenida.md) se aprobó el mismo día sin tareas técnicas, con sus criterios acreditados en la entrega de interfaz. Ni el registro del módulo ni la aprobación de la historia autorizan crear su página, carpeta `frontend/src/<módulo>/`, ruta ni backend; implementarlo requiere autorización separada.
+
+Fuera de las excepciones autorizadas, no desarrollar código de aplicación, crear carpetas de frontend o backend, instalar dependencias de aplicación, generar pruebas de aplicación, crear más subagentes, instalar otras skills, configurar automatizaciones o CI, ni realizar commits o pushes en esta etapa.
