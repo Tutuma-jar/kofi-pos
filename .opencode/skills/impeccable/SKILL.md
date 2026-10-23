@@ -5,16 +5,7 @@ version: 4.6.0
 user-invocable: true
 argument-hint: "[shape · audit|critique · animate|bolder|colorize|delight|layout|overdrive|quieter|typeset · adapt|clarify|distill · harden|onboard|optimize|polish · init|document|extract|live|generate] [target]"
 license: Apache 2.0
-allowed-tools:
-  - Bash(npx impeccable *)
-  - Bash(.opencode/skills/impeccable/scripts/impeccable *)
 ---
-
-## Kofi local adaptation — 2026-10-18
-
-This section was added locally; the upstream instructions below are preserved. Before Setup, consult the [Kofi design integration contract](../../../docs/ai-context/design-system.md#3-integración-de-impeccable), reusing current session context. It governs this skill even when it is loaded directly by a subagent, without the slash command. Kofi's constitution and approved decisions take precedence over all recommendations in this skill.
-
-Root `PRODUCT.md` and `DESIGN.md` are pointers, not editable context records: follow their links to the authoritative AI Context. Do not replace them, run initialization, repair context schemas, activate hooks, generate application code or launch additional agents as an installation or setup side effect. Only perform work explicitly authorized for the current task.
 
 ## Upstream Impeccable instructions
 

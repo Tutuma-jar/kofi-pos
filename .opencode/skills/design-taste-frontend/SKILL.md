@@ -1,22 +1,7 @@
 ---
 name: design-taste-frontend
-metadata:
-  opencode/autoinvoke: false
 description: tasteskill v2, the anti-slop frontend skill. Art direction for websites, distilled from a study of 247 curated gallery sites (One Page Love, Awwwards Sites of the Day). Deals researched directions (idea, composition, type, palette, photographs, section blueprints) from a library, enforces a strict no-slop house style with a real-browser inspector, and runs a look-and-fix loop on screenshots. Use this whenever you build, design, redesign, restyle, polish or review a landing page, marketing site, portfolio, product page, one-pager, hero or any public-facing web page, in any stack (HTML/CSS, React, Next.js, Vue, Svelte, Astro, Tailwind) — also when the user says a page looks generic, templated, "AI-made", sloppy, or asks to make it look designed, premium, award-level or less like every other site. Not for dashboards or app screens.
 ---
-
-## Adaptación local de Kofi — 2026-10-18
-
-Esta sección local tiene prioridad sobre las recomendaciones externas que siguen. La instalación permite cargar la skill explícitamente; no autoriza ejecutar su flujo, scripts o revisiones al instalarla o al cargarla.
-
-- Mantener la sesión, el agente y el modelo actuales. No delegar, crear agentes, activar hooks ni instalar paquetes, fuentes, plugins o herramientas como efecto secundario.
-- La constitución, el alcance aprobado y el [contrato de diseño de Kofi](../../../docs/ai-context/design-system.md#6-taste-skill-complementaria-y-de-uso-explícito) prevalecen. Reutilizar contexto vigente. Los archivos raíz `PRODUCT.md` y `DESIGN.md` son puentes; no regenerarlos ni sustituir sus destinos.
-- Esta skill está orientada a webs públicas, landing pages y portfolios. El original excluye dashboards y pantallas de aplicación: no aplicar sus bibliotecas, prohibiciones estéticas, tamaños, fotografías o animaciones obligatorias al POS ni al laboratorio de dashboards. No sustituye Impeccable ni aprueba una identidad definitiva.
-- Conservar las decisiones y restricciones explícitas del encargo. No reemplazar paletas, tipografías, navegación, contenido o funcionalidad aprobados porque contradigan una dirección sorteada o un aviso del inspector. Ante un conflicto real, consultar antes de continuar.
-- Ejecutar scripts solo cuando sean pertinentes al trabajo autorizado. La instalación no autoriza generar interfaces de la aplicación, añadir interacciones nuevas, descargar imágenes, abrir servidores ni modificar archivos del proyecto por iniciativa propia.
-- `draw.mjs` utiliza un historial de usuario por defecto. Si se autoriza usarlo, fijar `TASTE_SKILL_HISTORY` al archivo `.taste-skill/history.json` del proyecto únicamente para ese proceso; no crear un historial global ni modificar variables persistentes. Revisar igualmente las rutas de salida de los demás scripts antes de ejecutarlos.
-- Respetar las verificaciones proporcionadas al cambio y los límites de intentos de Kofi; las rondas sugeridas por el original no los amplían. Registrar únicamente resultados reales y no confundir un inspector sin avisos con accesibilidad certificada.
-- No hacer commits, pushes o publicaciones sin autorización. Instalar esta skill no modifica la interfaz existente.
 
 ## Instrucciones originales de tasteskill
 

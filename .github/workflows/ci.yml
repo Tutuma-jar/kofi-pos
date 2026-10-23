@@ -1,11 +1,7 @@
 name: CI
 
-# Sin filtros de rutas: el check requerido debe existir también en PR documentales.
+# Ejecución manual; sin controles automáticos por push o PR.
 on:
-  pull_request:
-    branches: [develop]
-  push:
-    branches: [develop]
   workflow_dispatch:
 
 permissions:
