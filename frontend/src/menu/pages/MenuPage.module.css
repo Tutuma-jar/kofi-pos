@@ -39,11 +39,10 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
-  min-height: 40px;
   flex-wrap: wrap;
 }
 .summary {
-  margin: 0 0 8px;
+  margin: 0;
   font-weight: 600;
 }
 @media (max-width: 650px) {
@@ -53,16 +52,24 @@
   .actions button {
     flex: 1 1 auto;
   }
-  .update > span {
-    flex-basis: 100%;
-  }
 }
-.update span {
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.feedback span {
   color: var(--muted);
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.update button {
+.feedback span:not(:empty),
+.feedback button {
+  margin-bottom: 12px;
+}
+.update button,
+.feedback button {
   max-width: 100%;
   overflow-wrap: anywhere;
 }
